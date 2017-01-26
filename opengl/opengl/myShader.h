@@ -8,13 +8,21 @@ public:
 	MyShader();
 	MyShader(const char* src_vert, const char* src_frag);
 
-	GLuint build_program(const char* src_vert, const char* src_frag);
+	//Shader ºôµå
+	GLuint build_program(const char* src_vert, const char* src_frag,
+		const char* src_tesc = NULL, const char* src_tese = NULL,
+		const char* src_geom = NULL);
+
+	GLuint build_program_from_files(
+		const char* file_vert, const char* file_frag,
+		const char* file_tesc = NULL, const char* file_tese = NULL,
+		const char* file_geom = NULL);
+
 	bool check_compile_status(GLuint handle);
 	GLuint compile_shader(GLenum type, const char* source);
 	bool check_link_status(GLuint handle);
 
 	std::string get_file_contents(const char *filename);
-	GLuint build_program_from_files(const char* file_vert, const char* file_frag);
 
 	void SetUniform4fv(const char* Var, GLfloat* value, GLuint count = 1);
 	void SetUniform3fv(const char* Var, GLfloat* value, GLuint count = 1);

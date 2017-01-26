@@ -125,7 +125,7 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_NORMALIZE);
 	//glEnable(GL_CULL_FACE);
-	MyFrameBuffers* FB = new MyFrameBuffers(4, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+	DeferredRenderBuffers* FB = new DeferredRenderBuffers(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 
 //	ModelTest = new AssimpModelNode(GoodGround, Scene, "./Model/Windmill", "/windmill02.obj");
 	ModelTest = new AssimpModelNode(GoodGround, Scene, "./Model/Medievalhouse", "/med_house_final.lwo");
@@ -277,7 +277,7 @@ int main(int argc, char** argv)
 	glutCreateWindow("Project #1 : 2009920032 Eom");
 #else
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitContextVersion(4, 3);
+	glutInitContextVersion(3, 3);
 	glutInitContextFlags(GLUT_CORE_PROFILE | GLUT_DEBUG);
 	glutInitContextProfile(GLUT_FORWARD_COMPATIBLE);
 	glutCreateWindow("Project #1 : 2009920032 Eom");
