@@ -63,34 +63,80 @@ bool MyShader::check_link_status(GLuint handle)
 	return (status == GL_TRUE);
 }
 
-GLuint MyShader::build_program(const char* src_vert, const char* src_frag)
+
+GLuint MyShader::build_program(
+	const char* src_vert,
+	const char* src_frag,
+	const char* src_tesc,
+	const char* src_tese,
+	const char* src_geom )
 {
-	GLuint	h_vert = compile_shader(GL_VERTEX_SHADER, src_vert);
+	GLuint  h_vert = compile_shader(GL_VERTEX_SHADER, src_vert);
 	if (!h_vert)
 	{
 		std::cerr << "Error while compiling the vertex shader" << std::endl;
 		return 0;
 	}
-	GLuint	h_frag = compile_shader(GL_FRAGMENT_SHADER, src_frag);
-	if (!h_frag)
+	GLuint  h_frag = 0;
+	if (src_frag)
 	{
-		std::cerr << "Error wihle compiling the fragment shader" << std::endl;
-		return 0;
+		h_frag = compile_shader(GL_FRAGMENT_SHADER, src_frag);
+		if (!h_frag)
+		{
+			std::cerr << "Error wihle compiling the fragment shader" << std::endl;
+			return 0;
+		}
+	}
+	GLuint  h_tesc = 0;
+	if (src_tesc)
+	{
+		h_tesc = compile_shader(GL_TESS_CONTROL_SHADER, src_tesc);
+		if (!h_tesc)
+		{
+			std::cerr << "Error wihle compiling the TCS (Tess Control Shader)" << std::endl;
+			return 0;
+		}
+	}
+	GLuint  h_tese = 0;
+	if (src_tese)
+	{
+		//      printf("%s\n", src_tese);
+		h_tese = compile_shader(GL_TESS_EVALUATION_SHADER, src_tese);
+		if (!h_tese)
+		{
+			std::cerr << "Error wihle compiling the TES (Tess Evaluation Shader)" << std::endl;
+			return 0;
+		}
+	}
+	GLuint  h_geom = 0;
+	if (src_geom)
+	{
+		h_geom = compile_shader(GL_GEOMETRY_SHADER, src_geom);
+		if (!h_geom)
+		{
+			std::cerr << "Error wihle compiling the geometry shader" << std::endl;
+			return 0;
+		}
 	}
 
-	mProgram = glCreateProgram();
-	if (!mProgram)
+
+	GLuint h_prog = glCreateProgram();
+	if (!h_prog)
 	{
 		std::cerr << "Program object creation failed." << std::endl;
-		return mProgram;
+		return h_prog;
 	}
-	glAttachShader(mProgram, h_vert);
-	glAttachShader(mProgram, h_frag);
-	glLinkProgram(mProgram);
-	if (!check_link_status(mProgram))	return 0;
+	glAttachShader(h_prog, h_vert);
+	glAttachShader(h_prog, h_frag);
+	if (h_tesc)  glAttachShader(h_prog, h_tesc);
+	if (h_tese)  glAttachShader(h_prog, h_tese);
+	if (h_geom)  glAttachShader(h_prog, h_geom);
+	glLinkProgram(h_prog);
+	if (!check_link_status(h_prog))  return 0;
 
-	return mProgram;
+	return h_prog;
 }
+
 
 std::string MyShader::get_file_contents(const char *filename)
 {
@@ -108,12 +154,31 @@ std::string MyShader::get_file_contents(const char *filename)
 	throw(errno);
 }
 
-GLuint MyShader::build_program_from_files(const char* file_vert, const char* file_frag)
+GLuint MyShader::build_program_from_files(
+	const char* file_vert,
+	const char* file_frag,
+	const char* file_tesc,
+	const char* file_tese,
+	const char* file_geom)
 {
 	std::string src_vert = get_file_contents(file_vert);
-	std::string src_frag = get_file_contents(file_frag);
-	return build_program(src_vert.c_str(), src_frag.c_str());
+	std::string src_frag;
+	std::string src_tesc;
+	std::string src_tese;
+	std::string src_geom;
+
+	if (file_frag)   src_frag = get_file_contents(file_frag);
+	if (file_tesc)   src_tesc = get_file_contents(file_tesc);
+	if (file_tese)   src_tese = get_file_contents(file_tese);
+	if (file_geom)   src_geom = get_file_contents(file_geom);
+	return build_program(src_vert.c_str(),
+		src_frag.size() ? src_frag.c_str() : NULL,
+		src_tesc.size() ? src_tesc.c_str() : NULL,
+		src_tese.size() ? src_tese.c_str() : NULL,
+		src_geom.size() ? src_geom.c_str() : NULL
+	);
 }
+
 
 GLuint MyShader::GetShaderProgram()
 {
