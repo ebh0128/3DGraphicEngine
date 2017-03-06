@@ -18,59 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Drone.cpp" />
-    <ClCompile Include="DroneCamera.cpp" />
-    <ClCompile Include="ProgramManager.cpp" />
-    <ClCompile Include="Geometry.cpp" />
-    <ClCompile Include="Light.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="MyFrameBuffer.cpp" />
-    <ClCompile Include="MyShader.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="PerlinNoise.cpp" />
-    <ClCompile Include="PatchedGround.cpp" />
-    <ClCompile Include="ppm.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Sampler.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SimpleGround.cpp" />
-    <ClCompile Include="SkyBox.cpp" />
-    <ClCompile Include="SpotLight.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="AssimpModelNode.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="CommonHeader.h" />
-    <ClInclude Include="Drone.h" />
-    <ClInclude Include="DroneCamera.h" />
-    <ClInclude Include="ProgramManager.h" />
-    <ClInclude Include="Geometry.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="MyFrameBuffer.h" />
-    <ClInclude Include="Object.h" />
-    <ClInclude Include="PerlinNoise.h" />
-    <ClInclude Include="PatchedGround.h" />
-    <ClInclude Include="ppm.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Sampler.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="SimpleGround.h" />
-    <ClInclude Include="myShader.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="SkyBox.h" />
-    <ClInclude Include="SpotLight.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="Timer.h" />
-    <ClInclude Include="AssimpModelNode.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{99A70DEC-E5EB-41DA-B6F4-9BC23CC83F84}</ProjectGuid>
-    <RootNamespace>opengl</RootNamespace>
+    <ProjectGuid>{998A52D0-4D8C-443B-BB00-1F5E7E124666}</ProjectGuid>
+    <RootNamespace>TestProject</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -118,11 +68,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\byeonghun\Source\Repos\3DGraphicEngine\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\byeonghun\Source\Repos\3DGraphicEngine\lib;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -136,9 +82,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
-    <Link>
-      <AdditionalDependencies>DevIL.lib;ILU.lib;assimp.lib;ILUT.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -166,6 +109,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

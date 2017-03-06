@@ -12,7 +12,7 @@ DeferredRenderBuffers::DeferredRenderBuffers(int Width, int Height)
 {
 	
 	glGenFramebuffers(1 , &fboID);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
 
 	glGenTextures(NUM_TEXTURES, m_Textures);
 	glGenTextures(1, &TexDepth);

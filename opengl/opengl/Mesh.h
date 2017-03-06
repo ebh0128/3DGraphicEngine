@@ -83,7 +83,7 @@ public:
 	Material* GetMaterial();
 	
 	void AddSampler(Sampler* pNewSamp);
-	Sampler* CreateSampler(const char* ImagePath, GLuint Channel, GLint ShaderLoc);
+	Sampler* CreateSampler(const char* ImagePath, GLuint Channel, GLint ShaderLoc , GLint DefShaderLoc = -500);
 
 	//프로그램 내부에서 만든 메쉬 로드
 	virtual void ObjectLoad(GLfloat* vertices, int VertexNum,
@@ -126,6 +126,9 @@ protected:
 
 
 	MyShader* pShader;
+
+	MyShader* pDefGeoPass;
+	MyShader* pDefLitPass;
 	
 	GLuint ubo;
 	GLint UbSize;
@@ -150,6 +153,16 @@ public:
 
 	//재질적용방식이나 쉐이더 특이한거 적용시 재정의 해야됨
 	virtual void Render();
+
+	//디퍼드 랜더링
+//	virtual void DeferredRender();
+
+	virtual void RenderGeoPass();
+	virtual void RenderLitPass();
+
+	virtual void ShaderParamInit();
+	virtual void GeoPassInit();
+	virtual void LitPassInit();
 
 	void AddMesh(Mesh* pmesh);
 	void AddChild(Node* pNode);

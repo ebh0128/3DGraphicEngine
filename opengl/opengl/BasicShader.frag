@@ -66,7 +66,6 @@ vec4 GetSpotLightColor()
 	return vec4(0,0,0,0);
 }
 
-
 void main()
 {
 	//vec3
@@ -157,6 +156,7 @@ for(int i = 0 ; i < Count ; i++)
 	//fColor =  n ;
 	
 	//fColor = TexCol ;
+	
 	
 }
 

@@ -6,6 +6,7 @@
 #include "Sampler.h"
 #include "Scene.h"
 #include "PerlinNoise.h"
+#include "ProgramManager.h"
 #include "PatchedGround.h"
 
 
@@ -23,6 +24,11 @@ PatchedGround::PatchedGround(Node* Parent, SceneGL *Scene, int seed, GLfloat Max
 
 	pShader = new MyShader();
 	pShader->build_program_from_files("BasicShader.vert", "BasicShader.frag");
+//	pShader->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
+
+	pDefGeoPass = new MyShader();
+	pDefGeoPass->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
+	//pDefLitPass->build_program_from_files("BasicShader.vert", "BasicShader.frag");
 
 }
 
@@ -177,13 +183,19 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 									(GLfloat*)pTexcoords, VertexCount*2);
 	GroundMesh->AddTexcoordAttibute((GLfloat*)pTexcoordForNoiseMap , VertexCount * 2);
 	
-	Sampler* MainSampler = GroundMesh->CreateSampler("./Texture/Ground.jpg", ShaderManager::GetInstance()->GetChannelID(), glGetUniformLocation(pShader->GetShaderProgram(), "TextureGround"));
+	Sampler* MainSampler = GroundMesh->CreateSampler("./Texture/Ground.jpg", ProgramManager::GetInstance()->GetChannelID(), 
+		glGetUniformLocation(pShader->GetShaderProgram(), "TextureGround") , glGetUniformLocation(pDefGeoPass->GetShaderProgram(),"TextureGround"));
 	
-	MainSampler->CreateTexture("./Texture/Snow.jpg", ShaderManager::GetInstance()->GetChannelID(), glGetUniformLocation(pShader->GetShaderProgram(), "TextureSnow"));
-	MainSampler->CreateTexture("./Texture/Stone.jpg", ShaderManager::GetInstance()->GetChannelID(), glGetUniformLocation(pShader->GetShaderProgram(), "TextureStone"));
+	MainSampler->CreateTexture("./Texture/Snow.jpg", ProgramManager::GetInstance()->GetChannelID(),
+		glGetUniformLocation(pShader->GetShaderProgram(), "TextureSnow"), glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "TextureSnow"));
+	MainSampler->CreateTexture("./Texture/Stone.jpg", ProgramManager::GetInstance()->GetChannelID(),
+		glGetUniformLocation(pShader->GetShaderProgram(), "TextureStone"), glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "TextureStone"));
+
+
 	//Noise 텍스쳐 만들기
 	Sampler* NoiseSampler = new Sampler();
-	NoiseSampler->CreateTextureByData(pNoiseData, VertexCountX, VertexCountZ, ShaderManager::GetInstance()->GetChannelID(), glGetUniformLocation(pShader->GetShaderProgram(), "SamplerNoise"));
+	NoiseSampler->CreateTextureByData(pNoiseData, VertexCountX, VertexCountZ, ProgramManager::GetInstance()->GetChannelID(),
+		glGetUniformLocation(pShader->GetShaderProgram(), "SamplerNoise"), glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "SamplerNoise") );
 	
 	GroundMesh->AddSampler(NoiseSampler);
 	AddMesh(GroundMesh);
@@ -330,4 +342,20 @@ void PatchedGround::Render()
 		Children[i]->Render();
 	}
 	*/
+}
+
+void PatchedGround :: GeoPassInit()
+{
+	glm::mat4 V = pScene->GetVMatrix();
+	glm::mat4 VP = pScene->GetVPMatrix();
+	glm::mat4 M;
+
+	if (Parent == nullptr) M = TransformMat;
+	else  M = TransformMat*Parent->GetModelMat();
+
+	glm::mat4 MV = V*M;
+	glm::mat4 MVP = VP*M;
+
+	pDefGeoPass->SetUniformMatrix4fv("WVP", glm::value_ptr(MVP));
+	pDefGeoPass->SetUniformMatrix4fv("World", glm::value_ptr(M));
 }

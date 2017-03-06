@@ -6,9 +6,10 @@ private:
 
 public:
 	MyShader();
-	MyShader(const char* src_vert, const char* src_frag);
+	MyShader( const char* file_vert, const char* file_frag,
+		const char* file_tesc = NULL, const char* file_tese = NULL,
+		const char* file_geom = NULL);
 
-	//Shader 빌드
 	GLuint build_program(const char* src_vert, const char* src_frag,
 		const char* src_tesc = NULL, const char* src_tese = NULL,
 		const char* src_geom = NULL);
@@ -23,7 +24,7 @@ public:
 	bool check_link_status(GLuint handle);
 
 	std::string get_file_contents(const char *filename);
-
+	
 	void SetUniform4fv(const char* Var, GLfloat* value, GLuint count = 1);
 	void SetUniform3fv(const char* Var, GLfloat* value, GLuint count = 1);
 
@@ -35,31 +36,37 @@ public:
 	void ApplyShader();
 };
 
-//쉐이더의 현재 상태를 알수 있는 싱글톤 클래스 ver0.1
-//활성화된 쉐이더가 뭔지만 저장
-//추후 쉐이더가 많아지면 여기 저장후 uniform만 바꾸는식으로 변경 예정
+//싱글톤 클래스 아님 전체매니져 하나에서만 사용
 class ShaderManager
 {
 private:
 	//진입점에서 초기화해주면 좋음
-	static ShaderManager* pInstance;
-	
-	//초기화는 여기서
-	ShaderManager();
-
-
 	MyShader* CurrentShader;
 	GLuint ChannelCount;
 
+	//텍스쳐 유닛이 사용하고 있는지 여부
+	bool* m_pbUseTextrueUnit;
+	GLint MaxTexture;
 
+	//쉐이더 락(강제로 특정 쉐이더를 적용할 때 사용)
+	bool m_IsLockShader;
+	MyShader* m_pLockShader;
 public:
-	static ShaderManager* GetInstance()
-	{
-		if (pInstance == nullptr) pInstance = new ShaderManager();
-		return pInstance;
-	}
+	//초기화는 여기서
+	ShaderManager();
+
 	void SetCurrentShader(MyShader* Cur);
 	GLuint GetChannelID();
+	
+	bool CheckLock() { return m_IsLockShader; }
+	//쉐이더 잠그기
+	void LockShader(MyShader* pShader);
+
+	//잠금 해제
+	void ReleaseLock();
+
+	//텍스쳐 채널해제 현재는 플래그만 해제
+	void ReleaseChannel(int Channel);
 	MyShader* GetCurrentShader();
 	
 

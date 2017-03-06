@@ -14,6 +14,11 @@ AssimpModelNode::AssimpModelNode(Node* parent, SceneGL* Scene) :Node(parent ,Sce
 {
 	pShader = new MyShader();
 	pShader->build_program_from_files("AssimpModel.vert", "AssimpModel.frag");
+//	pShader->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+
+	pDefGeoPass = new MyShader();
+	pDefGeoPass->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+	
 	AddUBO(nullptr, 16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0);
 	IsRootNode = false;
 	IsTextured = true;
@@ -28,9 +33,13 @@ AssimpModelNode::AssimpModelNode(Node* parent, SceneGL* Scene, std::string FileP
 		aiProcess_JoinIdenticalVertices	|
 		aiProcess_GenSmoothNormals	);
 
-		pShader = new MyShader();
-	pShader->build_program_from_files("AssimpModel.vert", "AssimpModel.frag");
-	
+	pShader = new MyShader();
+		pShader->build_program_from_files("AssimpModel.vert", "AssimpModel.frag");
+//	pShader->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+
+	pDefGeoPass = new MyShader();
+	pDefGeoPass->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+
 	AddUBO(nullptr, 16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0);
 
 	InitAssimpNode(AssimpScene->mRootNode, AssimpScene, FilePath);
@@ -68,7 +77,7 @@ void AssimpModelNode::InitAssimpNode(aiNode* pNode, const aiScene* AssimpScene, 
 			char* TextureName = strrchr(TPath, '/');
 			if(TextureName == nullptr)  TextureName = strrchr(TPath, '\\');
 			std::string sDir = FilePath + TextureName;
-			Sampler* MainSampler = new Sampler(sDir.c_str(), 7, glGetUniformLocation(pShader->GetShaderProgram(), "TextureMain"));
+			Sampler* MainSampler = new Sampler(sDir.c_str(), 7, glGetUniformLocation(pShader->GetShaderProgram(), "TextureMain"), glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "TextureMain"));
 			NewMesh->AddSampler(MainSampler);
 		}
 		AddMesh(NewMesh);
@@ -92,12 +101,11 @@ void AssimpModelNode::Update(GLfloat dtime)
 }
 void AssimpModelNode::Render()
 {
+	Node::Render();
+	/*
 	if (pShader) pShader->ApplyShader();
 	pScene->ApplySpotLight(pShader);
-	if (IsRootNode)
-	{
-		int a = 0;
-	}
+
 	for (GLuint i = 0; i<meshes.size(); i++)
 	{
 
@@ -110,28 +118,6 @@ void AssimpModelNode::Render()
 		pShader->SetUniform1f("material.shininess", p->shininess);
 
 		// º¯È¯ Çà·Ä ½¦ÀÌ´õ Àü¼Û
-		glm::mat4 V = pScene->GetVMatrix();
-		glm::mat4 VP = pScene->GetVPMatrix();
-		glm::mat4 M;
-	
-		 M = TransformMat*Parent->GetModelMat();
-
-		glm::mat4 MV = V*M;
-		glm::mat4 MVP = VP*M;
-		pShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
-		pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-		pShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
-		pShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
-		pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
-		pShader->SetUniform1i("IsTextured", IsTextured ? 1 : 0);
-		// ºû Á¤º¸ UiformBlock ½¦ÀÌ´õ Àü¼Û 
-		LightList* DataforShader = pScene->GetLightSrouceArray();
-		GLuint Size = DataforShader->Count * sizeof(GLfloat) * 16;
-		//meshes[i]->UpdateUBO(DataforShader, Size+ sizeof(GLuint), 0);
-		UpdateUBO(DataforShader, sizeof(GLuint), 0);
-
-		// std140 stride 16
-		UpdateUBO(DataforShader, Size, 12);
 		if(pObj->GetInstanceNum() == 0) meshes[i]->Render();
 		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
 	}
@@ -139,5 +125,50 @@ void AssimpModelNode::Render()
 	{
 		Children[i]->Render();
 	}
+	*/
+}
+void AssimpModelNode::ShaderParamInit()
+{
+	glm::mat4 V = pScene->GetVMatrix();
+	glm::mat4 VP = pScene->GetVPMatrix();
+	glm::mat4 M;
 
+	M = TransformMat*Parent->GetModelMat();
+
+	glm::mat4 MV = V*M;
+	glm::mat4 MVP = VP*M;
+	pShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	pShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	pShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	pShader->SetUniform1i("IsTextured", IsTextured ? 1 : 0);
+	// ºû Á¤º¸ UiformBlock ½¦ÀÌ´õ Àü¼Û 
+	LightList* DataforShader = pScene->GetLightSrouceArray();
+	GLuint Size = DataforShader->Count * sizeof(GLfloat) * 16;
+	//meshes[i]->UpdateUBO(DataforShader, Size+ sizeof(GLuint), 0);
+	UpdateUBO(DataforShader, sizeof(GLuint), 0);
+
+	// std140 stride 16
+	UpdateUBO(DataforShader, Size, 12);
+
+}
+void AssimpModelNode::GeoPassInit()
+{
+
+	//ShaderParamInit();
+	
+	glm::mat4 V = pScene->GetVMatrix();
+	glm::mat4 VP = pScene->GetVPMatrix();
+	glm::mat4 M;
+
+	M = TransformMat*Parent->GetModelMat();
+
+	glm::mat4 MV = V*M;
+	glm::mat4 MVP = VP*M;
+	pDefGeoPass->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+	pDefGeoPass->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	pDefGeoPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	pDefGeoPass->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	pDefGeoPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 }

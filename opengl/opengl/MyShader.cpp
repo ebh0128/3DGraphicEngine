@@ -1,4 +1,5 @@
 #include "CommonHeader.h"
+#include "ProgramManager.h"
 #include "myShader.h"
 
 
@@ -7,9 +8,11 @@
 MyShader::MyShader()
 {
 }
-MyShader::MyShader(const char* src_vert, const char* src_frag)
+MyShader::MyShader(const char* file_vert, const char* file_frag,
+	const char* file_tesc, const char* file_tese,
+	const char* file_geom)
 {
-	build_program_from_files(src_vert, src_frag);
+	build_program_from_files(file_vert, file_frag, file_tesc, file_tese, file_geom);
 }
 
 
@@ -63,7 +66,6 @@ bool MyShader::check_link_status(GLuint handle)
 	return (status == GL_TRUE);
 }
 
-
 GLuint MyShader::build_program(
 	const char* src_vert,
 	const char* src_frag,
@@ -71,22 +73,19 @@ GLuint MyShader::build_program(
 	const char* src_tese,
 	const char* src_geom )
 {
-	GLuint  h_vert = compile_shader(GL_VERTEX_SHADER, src_vert);
+	GLuint	h_vert = compile_shader(GL_VERTEX_SHADER, src_vert);
 	if (!h_vert)
 	{
 		std::cerr << "Error while compiling the vertex shader" << std::endl;
 		return 0;
 	}
-	GLuint  h_frag = 0;
-	if (src_frag)
+	GLuint	h_frag = compile_shader(GL_FRAGMENT_SHADER, src_frag);
+	if (!h_frag)
 	{
-		h_frag = compile_shader(GL_FRAGMENT_SHADER, src_frag);
-		if (!h_frag)
-		{
-			std::cerr << "Error wihle compiling the fragment shader" << std::endl;
-			return 0;
-		}
+		std::cerr << "Error wihle compiling the fragment shader" << std::endl;
+		return 0;
 	}
+
 	GLuint  h_tesc = 0;
 	if (src_tesc)
 	{
@@ -119,24 +118,23 @@ GLuint MyShader::build_program(
 		}
 	}
 
-
-	GLuint h_prog = glCreateProgram();
-	if (!h_prog)
+	mProgram = glCreateProgram();
+	if (!mProgram)
 	{
 		std::cerr << "Program object creation failed." << std::endl;
-		return h_prog;
+		return mProgram;
 	}
-	glAttachShader(h_prog, h_vert);
-	glAttachShader(h_prog, h_frag);
-	if (h_tesc)  glAttachShader(h_prog, h_tesc);
-	if (h_tese)  glAttachShader(h_prog, h_tese);
-	if (h_geom)  glAttachShader(h_prog, h_geom);
-	glLinkProgram(h_prog);
-	if (!check_link_status(h_prog))  return 0;
+	glAttachShader(mProgram, h_vert);
+	glAttachShader(mProgram, h_frag);
+	if (h_tesc)  glAttachShader(mProgram, h_tesc);
+	if (h_tese)  glAttachShader(mProgram, h_tese);
+	if (h_geom)  glAttachShader(mProgram, h_geom);
 
-	return h_prog;
+	glLinkProgram(mProgram);
+	if (!check_link_status(mProgram))	return 0;
+
+	return mProgram;
 }
-
 
 std::string MyShader::get_file_contents(const char *filename)
 {
@@ -154,12 +152,12 @@ std::string MyShader::get_file_contents(const char *filename)
 	throw(errno);
 }
 
-GLuint MyShader::build_program_from_files(
+GLuint MyShader::build_program_from_files( 
 	const char* file_vert,
 	const char* file_frag,
 	const char* file_tesc,
 	const char* file_tese,
-	const char* file_geom)
+	const char* file_geom )
 {
 	std::string src_vert = get_file_contents(file_vert);
 	std::string src_frag;
@@ -175,10 +173,8 @@ GLuint MyShader::build_program_from_files(
 		src_frag.size() ? src_frag.c_str() : NULL,
 		src_tesc.size() ? src_tesc.c_str() : NULL,
 		src_tese.size() ? src_tese.c_str() : NULL,
-		src_geom.size() ? src_geom.c_str() : NULL
-	);
+		src_geom.size() ? src_geom.c_str() : NULL );
 }
-
 
 GLuint MyShader::GetShaderProgram()
 {
@@ -186,7 +182,8 @@ GLuint MyShader::GetShaderProgram()
 }
 void MyShader::ApplyShader()
 {
-	ShaderManager* s = ShaderManager::GetInstance();
+	
+	ProgramManager* s = ProgramManager::GetInstance();
 		s->SetCurrentShader(this);
 
 	glUseProgram(mProgram);
@@ -234,13 +231,42 @@ void MyShader::SetUniform1i(const char* Var, GLint value)
 /////////////////////쉐이더 매니져
 ShaderManager::ShaderManager()
 {
-	ChannelCount = 2;
+	//ChannelCount = 2;
+	
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MaxTexture);
+	printf("Max Texture Unit : %d\n", MaxTexture);
+	m_pbUseTextrueUnit = new bool[MaxTexture] {false,};
 }
 
 GLuint ShaderManager::GetChannelID()
 {
-	return ++ChannelCount;
+	for (int i = 0; i < MaxTexture;i++)
+	{
+		if (m_pbUseTextrueUnit[i] == false)
+		{
+			m_pbUseTextrueUnit[i] = true;
+			return i;
+		}
+	}
+
+	//비어있는 텍스쳐 유닛 없음
+	printf("비어있는 텍스쳐 유닛 없음\n");
+	return -1;
 }
+void ShaderManager::LockShader(MyShader* pShader)
+{
+	m_IsLockShader = true;
+	m_pLockShader = pShader;
+}
+void ShaderManager::ReleaseLock()
+{
+	m_IsLockShader = false;
+}
+void ShaderManager::ReleaseChannel(int Channel)
+{
+	m_pbUseTextrueUnit[Channel] = true;
+}
+
 void ShaderManager::SetCurrentShader(MyShader* Cur)
 {
 	CurrentShader = Cur;

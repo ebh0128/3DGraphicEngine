@@ -1,6 +1,7 @@
 #pragma once
 
 class Light;
+class DeferredRenderBuffers;
 
 struct PaddingLight
 {
@@ -91,7 +92,12 @@ public:
 	LightList* GetLightSrouceArray();
 
 	void ChangeTime(TimeForLight time);
+
 	void Update(GLfloat dTime);
 	void Render();
 
+	void DeferredRender(DeferredRenderBuffers* gBuffer);
+	//디퍼드 랜더링 Geometry pass
+	void RenderGeoPass();
+	void RenderLitPass(DeferredRenderBuffers* gBuffer);
 };

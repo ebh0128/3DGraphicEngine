@@ -20,4 +20,9 @@ public:
 	void Update(GLfloat dtime);
 	void Render();
 
+
+	void ShaderParamInit();
+	void GeoPassInit();
+	//void LitPassInit();
+
 };

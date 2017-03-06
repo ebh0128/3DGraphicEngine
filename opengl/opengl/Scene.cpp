@@ -9,6 +9,7 @@
 #include "Object.h"
 #include "DroneCamera.h"
 #include "SpotLight.h"
+#include "MyFrameBuffer.h"
 #include "Scene.h"
 
 
@@ -225,4 +226,53 @@ void SceneGL::ApplySpotLight(MyShader* pshader)
 void SceneGL::SetSpotLight(SpotLight* pSpot)
 {
 	pSpotLight = pSpot;
+}
+
+void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer)
+{
+	//프레임버퍼 바인딩 후 초기화
+	gBuffer->BindForWriting();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	RenderGeoPass();
+
+	//원래 프레임버퍼 바인딩후 초기화
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	//읽기위해 버퍼 바인딩
+	gBuffer->BindForReading();
+	RenderLitPass(gBuffer);
+}
+//디퍼드 랜더링 Geometry pass
+void SceneGL::RenderGeoPass()
+{
+//	Root->Render();
+	Root->RenderGeoPass();
+}
+void SceneGL::RenderLitPass(DeferredRenderBuffers* gBuffer)
+{
+	//Root->RenderLitPass();
+	
+	//Test Code
+	GLsizei W = glutGet(GLUT_WINDOW_WIDTH);
+	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
+	GLsizei HalfWidth = (GLsizei)( W / 2.0f);
+	GLsizei HalfHeight = (GLsizei)(H / 2.0f);
+	
+	gBuffer->SetReadBuffer(DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+	glBlitFramebuffer(0, 0, W, H,
+		0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	gBuffer->SetReadBuffer(DeferredRenderBuffers::TEXTURE_TYPE_DIFFUSE);
+	glBlitFramebuffer(0, 0, W, H,
+		0, HalfHeight, HalfWidth, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	gBuffer->SetReadBuffer(DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
+	glBlitFramebuffer(0, 0, W, H,
+		HalfWidth, HalfHeight, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	gBuffer->SetReadBuffer(DeferredRenderBuffers::TEXTURE_TYPE_TEXCOORD);
+	glBlitFramebuffer(0, 0, W, H,
+		HalfWidth, 0, W, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
 }

@@ -8,37 +8,40 @@
 Sampler::Sampler()
 {
 	glGenSamplers(1, &SamplerID);
-	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glSamplerParameteri(SamplerID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glSamplerParameteri(SamplerID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	m_iWrapS = GL_REPEAT;
+	m_iWrapT = GL_REPEAT;
+	m_iMag = GL_LINEAR;
+	m_iMin = GL_LINEAR;
 }
-Sampler::Sampler(const char* ImagePath, GLuint Channel, GLint ShaderLoc) :Sampler()
+Sampler::Sampler(const char* ImagePath, GLuint Channel, GLint ShaderLoc, GLint DefShaderLoc) :Sampler()
 {
 
-	CreateTexture(ImagePath, Channel, ShaderLoc);
+	CreateTexture(ImagePath, Channel, ShaderLoc, DefShaderLoc);
 }
 
-void Sampler::CreateTexture(const char* ImagePath, GLuint Channel , GLint ShaderLoc)
+void Sampler::CreateTexture(const char* ImagePath, GLuint Channel , GLint ShaderLoc, GLint DefShaderLoc)
 {
 	
 	Texture* pNew = new Texture(ImagePath, Channel);
 	pNew->SetShaderValue(ShaderLoc);
+	if (DefShaderLoc >= 0) pNew->SetShaderValue(DefShaderLoc, 1);
 	AddTexture(pNew);
 	glBindSampler(Channel, SamplerID);
 }
-void Sampler::CreateTextureByData(GLfloat* Data, int Width, int Height, GLuint Channel, GLint ShaderLoc)
+
+void Sampler::CreateTextureByData(GLfloat* Data, int Width, int Height, GLuint Channel, GLint ShaderLoc, GLint DefShaderLoc)
 {
 
-	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	m_iWrapS = GL_CLAMP_TO_BORDER;
+	m_iWrapT = GL_CLAMP_TO_BORDER;
+	m_iMag = GL_NEAREST;
+	m_iMin = GL_NEAREST;
 
-	glSamplerParameteri(SamplerID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glSamplerParameteri(SamplerID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	
 	Texture* pNew = new Texture();
 	pNew->CreateTextureByData(Data, Width, Height, Channel);
 	pNew->SetShaderValue(ShaderLoc);
+	if (DefShaderLoc >= 0) pNew->SetShaderValue(DefShaderLoc, 1);
 	AddTexture(pNew);
 	glBindSampler(Channel, SamplerID);
 }
@@ -46,8 +49,11 @@ void Sampler::CreateTextureByData(GLfloat* Data, int Width, int Height, GLuint C
 
 void Sampler::CreateCubeMapTexture(CubeMapTexturePathInfo* ImagePath, GLuint Channel, GLint ShaderLoc)
 {
-	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	
+	//m_iWrapS = GL_CLAMP_TO_EDGE;
+	//m_iWrapT = GL_CLAMP_TO_EDGE;
 
 	Texture* pNew = new Texture();
 	pNew->CreateCubeMapTexture(ImagePath, Channel);
@@ -61,8 +67,14 @@ void Sampler::AddTexture(Texture* pNewtex)
 {
 	TextureList.push_back(pNewtex);
 }
+
 void Sampler::ApplySampler()
 {
+	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_S, m_iWrapS);
+	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_T, m_iWrapT);
+	glSamplerParameteri(SamplerID, GL_TEXTURE_MAG_FILTER, m_iMag);
+	glSamplerParameteri(SamplerID, GL_TEXTURE_MIN_FILTER, m_iMin);
+
 	for (int i = 0; i < TextureList.size(); i++)
 	{
 		TextureList[i]->ApplyTexture();

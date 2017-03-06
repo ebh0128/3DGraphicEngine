@@ -19,7 +19,7 @@ protected:
 	GLuint tbo;
 	// 몇번 텍스쳐로 보낼건지 GL_TEXTUREn
 	GLuint TextureChannel;
-	GLuint ShaderLocation;
+	GLuint ShaderLocation[2];
 	GLuint TextureKind;
 	GLuint TextureFormat;
 
@@ -29,11 +29,11 @@ public:
 	
 	GLuint GetTexture();
 	GLuint GetTextureChannel();
-	GLuint GetShaderValue();
+	GLuint GetShaderValue(int i);
 	GLuint GetTextureKind();
 
 	//glGetUniformLocation 결과값 주기
-	void SetShaderValue(GLuint ShaderLoc);
+	void SetShaderValue(GLuint ShaderLoc, int IsDeferred = 0);
 	void ApplyTexture();
 
 	//일반 텍스쳐 2의 지수승 텍스쳐로 준비할것

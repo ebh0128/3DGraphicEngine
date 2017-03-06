@@ -5,6 +5,7 @@
 #include "Sampler.h"
 #include "Scene.h"
 #include "Texture.h"
+#include "ProgramManager.h"
 #include "SkyBox.h"
 
 
@@ -43,7 +44,9 @@ SkyBox::SkyBox(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 	pCubeMapPath->Path[POS_Y] = "./Texture/top.jpg"; pCubeMapPath->Path[NEG_Y] = "./Texture/bottom.jpg";
 	pCubeMapPath->Path[POS_Z] = "./Texture/back.jpg"; pCubeMapPath->Path[NEG_Z] = "./Texture/front.jpg";
 
-	pSampler->CreateCubeMapTexture(pCubeMapPath, ShaderManager::GetInstance()->GetChannelID(), glGetUniformLocation(pShader->GetShaderProgram(),"SkyBoxTexture"));
+	//pSampler->CreateCubeMapTexture(pCubeMapPath, ProgramManager::GetInstance()->GetChannelID(), glGetUniformLocation(pShader->GetShaderProgram(),"SkyBoxTexture"));
+	pSampler->CreateCubeMapTexture(pCubeMapPath, 0, glGetUniformLocation(pShader->GetShaderProgram(), "SkyBoxTexture"));
+
 	SkyBoxMesh->AddSampler(pSampler);
 	Diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1);
 }

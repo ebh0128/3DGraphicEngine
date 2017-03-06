@@ -22,6 +22,10 @@ public:
 	void AddInstance(TransSet* TsetInfo);
 	virtual void Update(GLfloat dtime);
 	virtual void Render();
+
+	virtual void RenderGeoPass();
+	virtual void RenderLitPass();
+
 	void AddChild(Object* pChild);
 	Node* GetRoot();
 	int GetInstanceNum();

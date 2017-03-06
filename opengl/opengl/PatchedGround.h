@@ -60,4 +60,6 @@ public:
 	GLfloat GetXSize();
 	GLfloat GetZSize();
 	void Render();
+
+	void  GeoPassInit();
 };

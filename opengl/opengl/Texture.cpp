@@ -1,12 +1,14 @@
 #include "CommonHeader.h"
 #include "MyShader.h"
 #include "Texture.h"
+#include "ProgramManager.h"
 #include "ppm.h"
 
 Texture::Texture()
 {
 	TextureKind = GL_TEXTURE_2D;
 	tbo = -1234;
+	ShaderLocation[1] = -1000;
 }
 Texture::Texture(const char* ImagePath, GLuint Channel) :Texture()
 {
@@ -111,7 +113,7 @@ void Texture::CreateTextureBuffer(GLfloat* Data, GLuint Size , GLuint VAO, GLuin
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
 	glBufferData(GL_TEXTURE_BUFFER, Size * sizeof(GLfloat), Data, GL_DYNAMIC_DRAW);
 
-	TextureChannel = ShaderManager::GetInstance()->GetChannelID();
+	TextureChannel = ProgramManager::GetInstance()->GetChannelID();
 	glGenTextures(1, &TexID);
 	glBindTexture(GL_TEXTURE_BUFFER, TexID);
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
@@ -124,27 +126,34 @@ GLuint Texture::GetTextureChannel()
 {
 	return TextureChannel;
 }
-GLuint Texture::GetShaderValue()
+GLuint Texture::GetShaderValue(int i)
 {
-	return ShaderLocation;
+	return ShaderLocation[i];
 }
 GLuint  Texture::GetTextureKind()
 {
 	return TextureKind;
 }
 
-void Texture::SetShaderValue(GLuint ShaderLoc)
+// IsDeffered = 1 / 0
+void Texture::SetShaderValue(GLuint ShaderLoc, int IsDeferred)
 {
-	ShaderLocation = ShaderLoc;
+	if (IsDeferred > 1) IsDeferred = 1;
+	ShaderLocation[IsDeferred] = ShaderLoc;
 }
 void Texture::ApplyTexture()
 {
-	//쉐이더에 몇번 채널 쓰는지 전해줌
-	glUniform1i(ShaderLocation, TextureChannel);
-	//몇번 채널로 텍스쳐 보낼건지
-	glActiveTexture(GL_TEXTURE0 + TextureChannel);
-	//무슨 텍스쳐 인지
-	glBindTexture(TextureKind, TexID);
+	for (int i = 0; i < 2; i++)
+	{
+		if (ShaderLocation[i] < 0) break;
+		//쉐이더에 몇번 채널 쓰는지 전해줌
+		glUniform1i(ShaderLocation[i], TextureChannel);
+		//몇번 채널로 텍스쳐 보낼건지
+		glActiveTexture(GL_TEXTURE0 + TextureChannel);
+		//무슨 텍스쳐 인지
+		glBindTexture(TextureKind, TexID);
+
+	}
 }
 void Texture::UpdateTextureBuffer(GLfloat* Data)
 {
