@@ -1,7 +1,7 @@
 #pragma once
 //빛 클래스
 // Draw는 구 or Sprite 예정
-
+//빛 노드
 
 
 class Light :public Node
@@ -23,10 +23,19 @@ public:
 	void SetDiffuse(glm::vec3 dif);
 	void SetSpec(glm::vec3 dif);
 	void SetRespawHeigt(GLfloat Height);
-	
+
 	void Update(GLfloat dtime);
 	void Render();
 
-	//쉐이더에 빛 속성값들을 넘겨준다(매개 변수는 빛 적용할 오브젝트의 쉐이더)
+
+	//지오메트리 패스에서는 아무것도 안해야됨
+	void RenderGeoPass() {}
+	void GeoPassInit() {}
+
+	//빛 패스에서 실제로 작동
+	void RenderLitPass() {}
+	void LitPassInit() {}
+
+	void ShaderParamInit();
 	
 };

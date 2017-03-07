@@ -24,6 +24,9 @@ Light::Light(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 
 	delete Spheremesh;
 	pShader = new MyShader("PointLight.vert", "PointLight.frag");
+	//Light 패스를 위한 쉐이더 정의
+	//pDefLitPass = new MyShader("PointLight.vert", "PointLight.frag");
+	
 	Diffuse = glm::vec3(1, 0, 0);
 	Ambient = glm::vec3(1, 1, 1);
 	Specular = glm::vec3(1, 1, 1);
@@ -62,25 +65,17 @@ void Light::SetRespawHeigt(GLfloat Height)
 	RespawnHeight = Height;
 }
 
-// 빛 안받는 객체로 그릴예정이므로 완전히 재정의
+// 노드 메소드 그대로 사용 >> 디버그를 위해 일단 재정의
 void Light::Render()
 {
-	int i = 0;
-	int max = meshes.size();
-	for (i = 0; i<meshes.size(); i++)
-	{
-		//빛 안받는 객체이므로 재질 필요없음
-		//Diffuse 칼라로 색 드로우
-		pShader->SetUniform4fv("DiffuseCol",glm::value_ptr(Diffuse));
+	Node::Render();
+}
+void Light::ShaderParamInit()
+{
+	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 
-		glm::mat4 VP = pScene->GetVPMatrix();
-		glm::mat4 MVP = VP*TransformMat;
-		pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	glm::mat4 VP = pScene->GetVPMatrix();
+	glm::mat4 MVP = VP*TransformMat;
+	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
 
-		meshes[i]->Render();
-	}
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		Children[i]->Render();
-	}
 }
