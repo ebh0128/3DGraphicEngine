@@ -33,8 +33,8 @@ public:
 	void GeoPassInit() {}
 
 	//빛 패스에서 실제로 작동
-	void RenderLitPass() {}
-	void LitPassInit() {}
+	void RenderLitPass();
+	void LitPassInit();
 
 	void ShaderParamInit();
 	

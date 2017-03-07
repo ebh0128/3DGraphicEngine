@@ -20,6 +20,7 @@ Light::Light(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 	Mesh* mesh = new Mesh(&Spheremesh->vertices[0], Spheremesh->vertices.size()
 		, &Spheremesh->indices[0], Spheremesh->indices.size(), &Spheremesh->normals[0]);
 
+	mesh->MakeInstancingBuffer();
 	AddMesh(mesh);
 
 	delete Spheremesh;
@@ -52,11 +53,6 @@ void  Light::SetSpec(glm::vec3 dif)
 }
 void Light::Update(GLfloat dtime)
 {
-	//빛 움직임 코드는 여기에
-	//속도(DirectionalLight 이면 이동속도 0)
-	float moveSpeed = vPos.w * dtime *DropSpeed;
-	if (vPos.y < 0) vPos.y = RespawnHeight;
-	vPos.y -= moveSpeed;
 
 	Node::Update(dtime);
 }
@@ -77,5 +73,17 @@ void Light::ShaderParamInit()
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 MVP = VP*TransformMat;
 	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	pShader->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
+	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 
+
+}
+
+void Light::RenderLitPass()
+{
+	// 여기 라이트 패스
+}
+void Light::LitPassInit()
+{
+	
 }

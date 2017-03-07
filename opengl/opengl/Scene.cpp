@@ -10,6 +10,8 @@
 #include "DroneCamera.h"
 #include "SpotLight.h"
 #include "MyFrameBuffer.h"
+#include "ObjectInstance.h"
+#include "LightSystem.h"
 #include "Scene.h"
 
 
@@ -75,6 +77,18 @@ void SceneGL::AddLight(Light* plight)
 	}
 
 }
+
+void SceneGL::AddLight(LightInstance* pins)
+{
+	for (int i = 0; i < LIGHT_MAX; i++)
+	{
+		if (pLightBuffer[i] != NULL) continue;
+		pLightBuffer[i] = pins;
+		LightCnt++;
+		break;
+	}
+}
+
 glm::mat4 SceneGL::GetVPMatrix()
 {
 	//glm::mat4 View = pCamera->GetViewMat();
@@ -106,18 +120,27 @@ LightList* SceneGL::GetLightSrouceArray()
 	
 
 	//int LightCnt = 0;
-	for (i = 0; i < LIGHT_MAX; i++)
+	for (i = 0; i < LightCnt; i++)
 	{
-		if (pLightList[i] == NULL) continue;
+		if (pLightBuffer[i] == NULL) continue;
 		
-		memcpy(ShaderLightInfoList.Lights[i].Pos, glm::value_ptr(pLightList[i]->vPos), 4 * sizeof(GLfloat));
-		memcpy(ShaderLightInfoList.Lights[i].Diffuse, glm::value_ptr(pLightList[i]->Diffuse), 3 * sizeof(GLfloat));
-		memcpy(ShaderLightInfoList.Lights[i].Ambient, glm::value_ptr(pLightList[i]->Ambient), 3 * sizeof(GLfloat));
-		memcpy(ShaderLightInfoList.Lights[i].Specular, glm::value_ptr(pLightList[i]->Specular), 3 * sizeof(GLfloat));
+		//memcpy(ShaderLightInfoList.Lights[i].Pos, glm::value_ptr(pLightList[i]->vPos), 4 * sizeof(GLfloat));
+		//memcpy(ShaderLightInfoList.Lights[i].Diffuse, glm::value_ptr(pLightList[i]->Diffuse), 3 * sizeof(GLfloat));
+		//memcpy(ShaderLightInfoList.Lights[i].Ambient, glm::value_ptr(pLightList[i]->Ambient), 3 * sizeof(GLfloat));
+		//memcpy(ShaderLightInfoList.Lights[i].Specular, glm::value_ptr(pLightList[i]->Specular), 3 * sizeof(GLfloat));
+		glm::vec3 SourcePos = pLightBuffer[i]->GetPos();
+		glm::vec3 SourceDif = pLightBuffer[i]->GetDif();
+		glm::vec3 SourceAmb = pLightBuffer[i]->GetAmbi();
+		glm::vec3 SourceSpec = pLightBuffer[i]->GetSpec();
+
+		memcpy(ShaderLightInfoList.Lights[i].Pos, glm::value_ptr(SourcePos), 3 * sizeof(GLfloat));
+		memcpy(ShaderLightInfoList.Lights[i].Diffuse, glm::value_ptr(SourceDif), 3 * sizeof(GLfloat));
+		memcpy(ShaderLightInfoList.Lights[i].Ambient, glm::value_ptr(SourceAmb), 3 * sizeof(GLfloat));
+		memcpy(ShaderLightInfoList.Lights[i].Specular, glm::value_ptr(SourceSpec), 3 * sizeof(GLfloat));
 
 		//행렬로 쓰기위해 추가한 더미값
 		ShaderLightInfoList.Lights[i].Diffuse[3] = 0.f; ShaderLightInfoList.Lights[i].Ambient[3] = 0.f; ShaderLightInfoList.Lights[i].Specular[3] = 0.f;
-
+		ShaderLightInfoList.Lights[i].Pos[3] = 0.f;
 		//LightCnt++;
 	}
 	ShaderLightInfoList.Count = LightCnt;

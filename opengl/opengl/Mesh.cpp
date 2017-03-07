@@ -500,7 +500,7 @@ void Node::Render()
 		//GeoPassInit();
 		// 변환 행렬 쉐이더 전송
 		//meshes[i]->Render();
-		if (pObj->GetInstanceNum() == 0) meshes[i]->Render();
+		if (pObj == nullptr || pObj->GetInstanceNum() == 0) meshes[i]->Render();
 		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
 
 	}

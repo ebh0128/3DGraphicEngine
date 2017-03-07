@@ -17,6 +17,8 @@
 #include "Drone.h"
 #include "ProgramManager.h"
 #include "Renderer.h"
+#include "ObjectInstance.h"
+#include "LightSystem.h"
 //60프레임 에서의 1프레임당 밀리초 16
 #define TIME_PER_ONE_FRAME 10
 
@@ -60,6 +62,7 @@ Object* GroundObject;
 Object* ModelObject;
 Drone* againDrone;
 Renderer* SceneRenderer;
+LightSystem *LightSys;
 
 
 void init(void)
@@ -98,6 +101,7 @@ void init(void)
 	std::uniform_real_distribution<> dis(0, 1);
 
 	//태양광
+	/*
 	Light* pDirLight = Scene->CreateLight(GoodGround, glm::vec4(10.f, 30.0f, 20.f, 0), glm::vec3(0.8f, 0.8f, 0.8f));
 	Scene->SetDirectionalLight(pDirLight);
 	pDirLight->SetSpec(glm::vec3(0, 0, 0));
@@ -121,6 +125,40 @@ void init(void)
 		Light* newLight =Scene->CreateLight(GoodGround, glm::vec4(x, y, z, 1), glm::vec3(r, g, b));
 		if (newLight != nullptr) newLight->SetRespawHeigt(y);
 	}
+	*/
+	//인스턴스버젼 빛
+
+	//빛 생 성!(랜덤하게)
+	Light* newLight = new Light(nullptr,Scene);
+	LightSys = new LightSystem(newLight, GroundObject, Scene);
+
+	for (int i = 0; i < LIGHT_MAX - 1; i++)
+	{
+		//X Z : 맵 크기 내에서 랜덤하게 생성
+		float x = (float)(dis(gen) - 0.5f) * GoodGround->GetXSize();
+		float z = (float)(dis(gen) - 0.5f) *GoodGround->GetZSize();
+
+		//Y 최대높이 +5~8
+		float y = GoodGround->GetMaxHeight() + 5.0f + (float)(3 * dis(gen));
+		//float y = 10 * (float)dis(gen);
+
+		//색 rgb 1~0.5
+		float r = 1.f - 0.5f*(float)dis(gen);
+		float g = 1.f - 0.5f*(float)dis(gen);
+		float b = 1.f - 0.5f*(float)dis(gen);
+
+		LightInstance* newLight = new LightInstance(LightSys);
+		newLight->SetDiff(glm::vec3(r, g, b));
+		newLight->SetPos(glm::vec3(x, y, z));
+		float ScaleFactor = newLight->CalcLightArea();
+		newLight->SetScale(glm::vec3(ScaleFactor, ScaleFactor, ScaleFactor));
+		newLight->RespawnHeight = y;
+		newLight->DropSpeed = 5 * (float)dis(gen);
+		LightSys->AddLight(newLight);
+
+		//Light* newLight = Scene->CreateLight(GoodGround, glm::vec4(x, y, z, 1), glm::vec3(r, g, b));
+		//if (newLight != nullptr) newLight->SetRespawHeigt(y);
+	}
 	//델타타임을 관리하는 타이머
 	TickTimer = new Timer();
 	TickTimer->Init();
@@ -131,10 +169,10 @@ void init(void)
 	//glEnable(GL_CULL_FACE);
 	//MyFrameBuffers* FB = new MyFrameBuffers(4, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 
-//	ModelTest = new AssimpModelNode(GoodGround, Scene, "./Model/Windmill", "/windmill02.obj");
-	ModelTest = new AssimpModelNode(GoodGround, Scene, "./Model/Medievalhouse", "/med_house_final.lwo");
-//	ModelTest = new AssimpModelNode(GoodGround, Scene, "./Model/Monkey", "/monkey_high.obj");
-//	ModelTest = new AssimpModelNode(GoodGround, Scene, "./Model/Monkey", "/box.obj");
+//	ModelTest = new AssimpModelNode(nullptr, Scene, "./Model/Windmill", "/windmill02.obj");
+	ModelTest = new AssimpModelNode(nullptr, Scene, "./Model/Medievalhouse", "/med_house_final.lwo");
+//	ModelTest = new AssimpModelNode(nullptr, Scene, "./Model/Monkey", "/monkey_high.obj");
+//	ModelTest = new AssimpModelNode(nullptr, Scene, "./Model/Monkey", "/box.obj");
 	
 	//모델 트랜스폼 조절
 	ModelTest->SetScale(glm::vec3(0.1, 0.1, 0.1));
@@ -145,12 +183,18 @@ void init(void)
 		float x = (float)(dis(gen) - 0.5f) * GoodGround->GetXSize();
 		float z = (float)(dis(gen) - 0.5f) *GoodGround->GetZSize();
 		float y = GoodGround->GetHeightByNoise(x,z);
-
+		/*
 		TransSet* WorldTransform = new TransSet();
 		WorldTransform->vPos = glm::vec4(x, y, z, 1);
 		WorldTransform->vRot = glm::vec3(0, 0, 0);
 		WorldTransform->vScale = glm::vec3(1, 1, 1);
-		ModelObject->AddInstance(WorldTransform);
+		*/
+		ObjectInstance* NewInstance = new ObjectInstance(ModelObject);
+		NewInstance->SetPos(glm::vec3(x, y, z));
+		NewInstance->SetRot(glm::vec3(0, 0, 0));
+		NewInstance->SetScale(glm::vec3(1, 1, 1));
+
+		ModelObject->AddInstance(NewInstance);
 	}
 	AssimpModelNode* DroneRoot = new AssimpModelNode(NULL, Scene, "./Model/Monkey", "/monkey_high.obj");
 	DroneRoot->SetNoTexture();

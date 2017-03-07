@@ -1,6 +1,7 @@
 #pragma once
 
 class Light;
+class LightInstance;
 class DeferredRenderBuffers;
 
 struct PaddingLight
@@ -44,7 +45,9 @@ protected:
 	// 빛을 씬에서 관리(우선 정적 개수를 목표로)
 	//사이즈가 작고 한번 생성되면 삭제 안함 -> 소멸시 다시 하늘로 이동
 	int LightCnt;
+	//구버젼
 	Light* pLightList[LIGHT_MAX];
+	LightInstance* pLightBuffer[LIGHT_MAX];
 
 	Light* pDirectionalLight;
 	
@@ -70,7 +73,11 @@ public:
 
 	Light* CreateLight(Node* parent, glm::vec4 Pos);
 	Light* CreateLight(Node* parent, glm::vec4 Pos , glm::vec3 Diffuse);
+	
+	//구버젼
 	void AddLight(Light* plight);
+
+	void AddLight(LightInstance* pins);
 
 	void SetSpotLight(SpotLight* pSpot);
 	void ApplySpotLight(MyShader* pshader);

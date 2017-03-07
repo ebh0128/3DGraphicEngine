@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Sampler.h"
 #include "Scene.h"
+#include "ObjectInstance.h"
 #include "Object.h"
 
 
@@ -16,11 +17,12 @@ Object::Object(Node* Root, Object* Parent, SceneGL* Sce)
 	if(Parent != nullptr) Parent->AddChild(this);
 	pScene = Sce;
 }
-void Object::AddInstance(TransSet* TsetInfo)
+void Object::AddInstance(ObjectInstance* TsetInfo)
 {
 	if (TsetInfo == nullptr) return;
 
 	InstanceList.push_back(TsetInfo);
+	//행렬 버퍼 크기 증가
 	MatrixList.push_back(glm::mat4());
 }
 void Object::Update(GLfloat dtime)
@@ -28,24 +30,13 @@ void Object::Update(GLfloat dtime)
 	//인스턴스들 업데이트
 	for (int i = 0; i < InstanceList.size(); i++)
 	{
-		glm::mat4  mTrans = glm::translate(glm::vec3(InstanceList[i]->vPos));
-
-		//회전의 경우 짐벌락등 여러 문제 발생가능
-		//나중에 쿼터니언이나 Local 축 기준 회전 이용 고려
-		glm::mat4  mRotate = glm::rotate(glm::mat4(), InstanceList[i]->vRot.x, glm::vec3(1.f, 0.f, 0.f));
-		mRotate = glm::rotate(mRotate, InstanceList[i]->vRot.y, glm::vec3(0.f, 1.f, 0.f));
-		mRotate = glm::rotate(mRotate, InstanceList[i]->vRot.z, glm::vec3(0.f, 0.f, 1.f));
-
-		glm::mat4  mScale = glm::scale(InstanceList[i]->vScale);
-
-		//S > R > T OpenGL에서는 뒤에서부터 읽음
-		MatrixList[i] = mTrans * mRotate * mScale;
-		MatrixList[i] = MatrixList[i];
-		// 부모 * 자식
-
+		InstanceList[i]->Update(dtime);
 	}
+
+	//리소스 (모델공간) 업데이트
 	pRoot->Update(dtime);
 
+	//자식 오브젝트 업데이트
 	for (int i = 0; i < ChildList.size(); i++)
 	{
 		ChildList[i]->Update(dtime);
@@ -92,5 +83,11 @@ int Object::GetInstanceNum()
 }
 glm::mat4* Object::GetInstanceMatrixData()
 {
+	if (MatrixList.size() != InstanceList.size()) printf("오류 :인스턴스와 행렬버퍼의 크기가 다름\n");
+	//값만 복사해놓고 넘겨줌
+	for (int i = 0; i < MatrixList.size(); i++)
+	{
+		MatrixList[i] = InstanceList[i]->GetMat();
+	}
 	return MatrixList.data();
 }

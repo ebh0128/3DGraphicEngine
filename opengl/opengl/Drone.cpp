@@ -8,6 +8,7 @@
 #include "AssimpModelNode.h"
 #include "DroneCamera.h"
 #include "SpotLight.h"
+#include "ObjectInstance.h"
 #include "Drone.h"
 
 
@@ -18,11 +19,17 @@ Drone::Drone(Node* Root, Object* Parent, SceneGL* Sce) : Object(Root,Parent ,Sce
 
 	MoveSpeed = 15;
 	RotSpeed = 90;
-	TransSet* WorldTransform = new TransSet();
-	WorldTransform->vPos = glm::vec4(0, 50, 0, 1);
-	WorldTransform->vRot = glm::vec3(0, 0, 0);
-	WorldTransform->vScale = glm::vec3(10, 10, 10);
-	AddInstance(WorldTransform);
+//	TransSet* WorldTransform = new TransSet();
+//	WorldTransform->vPos = glm::vec4(0, 50, 0, 1);
+//	WorldTransform->vRot = glm::vec3(0, 0, 0);
+//	WorldTransform->vScale = glm::vec3(10, 10, 10);
+	
+	ObjectInstance* NewInstance = new ObjectInstance(this);
+	NewInstance->SetPos(glm::vec3(0, 50, 0));
+	NewInstance->SetRot(glm::vec3(0, 0, 0));
+	NewInstance->SetScale(glm::vec3(10, 10, 10));
+	AddInstance(NewInstance);
+
 
 	vFront = glm::vec3(0, 0, 1);
 	vRight = glm::vec3(1, 0, 0);
@@ -110,7 +117,11 @@ void Drone::RotatebyUp(float Angle)
 {
 	vFront = glm::rotate(vFront, glm::radians(Angle), vUp);
 	vRight = glm::rotate(vRight, glm::radians(Angle), vUp);
-	InstanceList[0]->vRot.y += glm::radians(Angle);
+	//InstanceList[0]->vRot.y += glm::radians(Angle);
+	glm::vec3 TempRot = InstanceList[0]->GetRot();
+	TempRot.y += glm::radians(Angle);
+	InstanceList[0]->SetRot(TempRot);
+
 	//월드 회전
 	pDroneCamera->RotatebyWorldY( Angle);
 	pSpotLight->RotatebyWorldY(Angle);
@@ -118,7 +129,8 @@ void Drone::RotatebyUp(float Angle)
 
 void Drone::MoveFront(float dist)
 {
-	InstanceList[0]->vPos += glm::vec4(vFront*dist,0);
+	InstanceList[0]->SetPos(InstanceList[0]->GetPos() + glm::vec3(vFront*dist));
+	//InstanceList[0]->vPos += glm::vec4(vFront*dist,0);
 	pDroneCamera->MovePosition(vFront, dist);
 	pSpotLight->MovePosition(vFront, dist);
 }

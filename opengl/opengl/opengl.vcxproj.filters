@@ -34,28 +34,43 @@
     <Filter Include="소스 파일\Test">
       <UniqueIdentifier>{fdc33682-1348-4ea3-bc1b-77c80381300e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Object\Map">
+      <UniqueIdentifier>{61b4312d-164d-4d92-8145-c233f74930c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object\Light">
+      <UniqueIdentifier>{bde217c0-0912-4f72-827d-3065f534b67a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object\AssmipObj">
+      <UniqueIdentifier>{ca4b1408-9b90-4fcc-b696-2dab71836b53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\OpenGLCore">
+      <UniqueIdentifier>{7bf9f696-ccf2-431e-b266-fffa8fbaabb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Camera">
+      <UniqueIdentifier>{dc0d0cda-cb9e-4446-a485-44369c65d800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Object\Map">
+      <UniqueIdentifier>{c20de34d-0ca5-4181-8397-56e30de67eb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Object\AssimpObj">
+      <UniqueIdentifier>{476e6d5a-206a-4808-bc7e-2ee488ed142c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Object\Light">
+      <UniqueIdentifier>{73f03727-fd7b-45a7-b253-04b7d79ba1b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\OpenGLCore">
+      <UniqueIdentifier>{04b0de42-5a11-4cb4-a56d-aabfb958911d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Camera">
+      <UniqueIdentifier>{cbe262a4-4cf9-4c6f-9d48-782cf9650320}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MyShader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleGround.cpp">
-      <Filter>소스 파일\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>소스 파일\Object</Filter>
     </ClCompile>
     <ClCompile Include="Geometry.cpp">
       <Filter>소스 파일\Object\Geometry</Filter>
@@ -66,37 +81,13 @@
     <ClCompile Include="PerlinNoise.cpp">
       <Filter>소스 파일\Perlin</Filter>
     </ClCompile>
-    <ClCompile Include="PatchedGround.cpp">
-      <Filter>소스 파일\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Sampler.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="ppm.cpp">
       <Filter>소스 파일\Test</Filter>
     </ClCompile>
     <ClCompile Include="SkyBox.cpp">
       <Filter>소스 파일\Object</Filter>
     </ClCompile>
-    <ClCompile Include="MyFrameBuffer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="AssimpModelNode.cpp">
-      <Filter>소스 파일\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Object.cpp">
-      <Filter>소스 파일\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Drone.cpp">
-      <Filter>소스 파일\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="DroneCamera.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SpotLight.cpp">
       <Filter>소스 파일\Object</Filter>
     </ClCompile>
     <ClCompile Include="ProgramManager.cpp">
@@ -105,49 +96,64 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="DeferredLight.cpp">
+    <ClCompile Include="ObjectInstance.cpp">
       <Filter>소스 파일\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="PatchedGround.cpp">
+      <Filter>소스 파일\Object\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleGround.cpp">
+      <Filter>소스 파일\Object\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotLight.cpp">
+      <Filter>소스 파일\Object\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>소스 파일\Object\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="LightSystem.cpp">
+      <Filter>소스 파일\Object\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="AssimpModelNode.cpp">
+      <Filter>소스 파일\Object\AssmipObj</Filter>
+    </ClCompile>
+    <ClCompile Include="Drone.cpp">
+      <Filter>소스 파일\Object\AssmipObj</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\OpenGLCore</Filter>
+    </ClCompile>
+    <ClCompile Include="MyShader.cpp">
+      <Filter>소스 파일\OpenGLCore</Filter>
+    </ClCompile>
+    <ClCompile Include="MyFrameBuffer.cpp">
+      <Filter>소스 파일\OpenGLCore</Filter>
+    </ClCompile>
+    <ClCompile Include="Sampler.cpp">
+      <Filter>소스 파일\OpenGLCore</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>소스 파일\OpenGLCore</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>소스 파일\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="DroneCamera.cpp">
+      <Filter>소스 파일\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonHeader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="myShader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleGround.h">
-      <Filter>헤더 파일\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>헤더 파일\Object</Filter>
     </ClInclude>
     <ClInclude Include="Geometry.h">
       <Filter>헤더 파일\Object\Geomytry</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="PerlinNoise.h">
       <Filter>헤더 파일\Perlin</Filter>
-    </ClInclude>
-    <ClInclude Include="PatchedGround.h">
-      <Filter>헤더 파일\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Sampler.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ppm.h">
       <Filter>소스 파일\Test</Filter>
@@ -155,22 +161,7 @@
     <ClInclude Include="SkyBox.h">
       <Filter>헤더 파일\Object</Filter>
     </ClInclude>
-    <ClInclude Include="MyFrameBuffer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="AssimpModelNode.h">
-      <Filter>헤더 파일\Object</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
-      <Filter>헤더 파일\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Drone.h">
-      <Filter>헤더 파일\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="DroneCamera.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="SpotLight.h">
       <Filter>헤더 파일\Object</Filter>
     </ClInclude>
     <ClInclude Include="ProgramManager.h">
@@ -179,8 +170,53 @@
     <ClInclude Include="Renderer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="DeferredLight.h">
+    <ClInclude Include="ObjectInstance.h">
       <Filter>헤더 파일\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="AssimpModelNode.h">
+      <Filter>헤더 파일\Object\AssimpObj</Filter>
+    </ClInclude>
+    <ClInclude Include="LightSystem.h">
+      <Filter>헤더 파일\Object\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Drone.h">
+      <Filter>헤더 파일\Object\AssimpObj</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>헤더 파일\Object\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="PatchedGround.h">
+      <Filter>헤더 파일\Object\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleGround.h">
+      <Filter>헤더 파일\Object\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotLight.h">
+      <Filter>헤더 파일\Object\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>헤더 파일\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="DroneCamera.h">
+      <Filter>헤더 파일\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+    <ClInclude Include="MyFrameBuffer.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+    <ClInclude Include="myShader.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

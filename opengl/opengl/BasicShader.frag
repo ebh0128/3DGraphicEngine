@@ -151,6 +151,7 @@ for(int i = 0 ; i < Count ; i++)
 	TexCol = noisecol*HightCol + (1-noisecol)* LowCol ;
 	fColor = LightColor * TexCol;
 	
+	//fColor = List[0].LDiff;
 	//fColor = GetSpotLightColor();
 	//fColor =  List[1].LPos/10 ;
 	//fColor =  n ;

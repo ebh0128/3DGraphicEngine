@@ -3,7 +3,7 @@
 
 class SceneGL;
 class Node;
-
+class ObjectInstance;
 //실제 사용시엔 프로토타입 패턴으로 만들어사용
 class Object
 {
@@ -12,14 +12,17 @@ protected:
 	SceneGL* pScene;
 	Object* mParent;
 
-	std::vector<TransSet*> InstanceList;
+	//std::vector<TransSet*> InstanceList;
+	std::vector<ObjectInstance*> InstanceList;
+
+	//Render 할때 사용하는 인스턴스 행렬 버퍼
 	std::vector<glm::mat4> MatrixList;
 
 	std::vector<Object*> ChildList;
 public:
 	//루트 노드를 지정하고 생성
 	Object(Node* Root,Object* Parent , SceneGL* Sce);
-	void AddInstance(TransSet* TsetInfo);
+	void AddInstance(ObjectInstance* TsetInfo);
 	virtual void Update(GLfloat dtime);
 	virtual void Render();
 
