@@ -183,7 +183,7 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 									(GLfloat*)pTexcoords, VertexCount*2);
 	GroundMesh->AddTexcoordAttibute((GLfloat*)pTexcoordForNoiseMap , VertexCount * 2);
 	
-	Sampler* MainSampler = GroundMesh->CreateSampler("./Texture/Ground.jpg", ProgramManager::GetInstance()->GetChannelID(), 
+	Sampler* MainSampler = GroundMesh->CreateSampler("./Texture/Ground.jpg", ProgramManager::GetInstance()->GetChannelID(),
 		glGetUniformLocation(pShader->GetShaderProgram(), "TextureGround") , glGetUniformLocation(pDefGeoPass->GetShaderProgram(),"TextureGround"));
 	
 	MainSampler->CreateTexture("./Texture/Snow.jpg", ProgramManager::GetInstance()->GetChannelID(),

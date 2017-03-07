@@ -68,7 +68,7 @@ void Sampler::AddTexture(Texture* pNewtex)
 	TextureList.push_back(pNewtex);
 }
 
-void Sampler::ApplySampler()
+void Sampler::ApplySampler(int isDeferred)
 {
 	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_S, m_iWrapS);
 	glSamplerParameteri(SamplerID, GL_TEXTURE_WRAP_T, m_iWrapT);
@@ -77,7 +77,7 @@ void Sampler::ApplySampler()
 
 	for (int i = 0; i < TextureList.size(); i++)
 	{
-		TextureList[i]->ApplyTexture();
+		TextureList[i]->ApplyTexture(isDeferred);
 
 
 	}

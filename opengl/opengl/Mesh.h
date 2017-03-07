@@ -95,8 +95,8 @@ public:
 	virtual void ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh);
 
 	void MakeInstancingBuffer();
-	void Render();
-	void Render(glm::mat4 * MVPmats, unsigned int InstanceNum);
+	void Render(int isDeferred = 0);
+	void Render(glm::mat4 * MVPmats, unsigned int InstanceNum, int isDeferred = 0);
 
 };
 

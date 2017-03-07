@@ -35,7 +35,7 @@ public:
 	
 	//Path ¼ø¼­´Â +x -x +y -y +z -z
 	void CreateCubeMapTexture(CubeMapTexturePathInfo* ImagePath , GLuint Channel, GLint ShaderLoc);
-	void ApplySampler();
+	void ApplySampler(int isDeferred = 0);
 	void UpdateTexture(int index,GLuint Width, GLuint Height, GLuint Format, GLuint DataType, GLfloat*Data);
 
 };

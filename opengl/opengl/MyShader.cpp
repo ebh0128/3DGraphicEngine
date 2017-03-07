@@ -236,6 +236,7 @@ ShaderManager::ShaderManager()
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MaxTexture);
 	printf("Max Texture Unit : %d\n", MaxTexture);
 	m_pbUseTextrueUnit = new bool[MaxTexture] {false,};
+	m_pbUseTextrueUnit[0] = true;
 }
 
 GLuint ShaderManager::GetChannelID()

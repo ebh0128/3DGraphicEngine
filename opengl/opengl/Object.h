@@ -4,7 +4,7 @@
 class SceneGL;
 class Node;
 
-
+//실제 사용시엔 프로토타입 패턴으로 만들어사용
 class Object
 {
 protected:

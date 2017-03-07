@@ -4,6 +4,7 @@
 #include "ProgramManager.h"
 #include "ppm.h"
 
+
 Texture::Texture()
 {
 	TextureKind = GL_TEXTURE_2D;
@@ -141,19 +142,14 @@ void Texture::SetShaderValue(GLuint ShaderLoc, int IsDeferred)
 	if (IsDeferred > 1) IsDeferred = 1;
 	ShaderLocation[IsDeferred] = ShaderLoc;
 }
-void Texture::ApplyTexture()
+void Texture::ApplyTexture(int isDeferred)
 {
-	for (int i = 0; i < 2; i++)
-	{
-		if (ShaderLocation[i] < 0) break;
-		//쉐이더에 몇번 채널 쓰는지 전해줌
-		glUniform1i(ShaderLocation[i], TextureChannel);
+	if (isDeferred > 1) isDeferred = 1;
+	glUniform1i(ShaderLocation[isDeferred], TextureChannel);
 		//몇번 채널로 텍스쳐 보낼건지
-		glActiveTexture(GL_TEXTURE0 + TextureChannel);
+	glActiveTexture(GL_TEXTURE0 + TextureChannel);
 		//무슨 텍스쳐 인지
-		glBindTexture(TextureKind, TexID);
-
-	}
+	glBindTexture(TextureKind, TexID);
 }
 void Texture::UpdateTextureBuffer(GLfloat* Data)
 {

@@ -277,7 +277,7 @@ void Mesh::AddSampler(Sampler* pNewSamp)
 	pMeshSamplerList.push_back(pNewSamp);
 }
 
-void Mesh::Render()
+void Mesh::Render(int IsDeferred)
 {
 	
 	glBindVertexArray(vao);
@@ -288,7 +288,7 @@ void Mesh::Render()
 	for (int i = 0; i < pMeshSamplerList.size(); i++)
 	{
 		if (IsHaveTexcoord)glEnableVertexAttribArray(attrib_Texcoord+i);
-		pMeshSamplerList[i]->ApplySampler();
+		pMeshSamplerList[i]->ApplySampler(IsDeferred);
 
 	}
 	
@@ -296,7 +296,7 @@ void Mesh::Render()
 
 	glDrawElements(GL_TRIANGLES, PrimCount, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 }
-void Mesh::Render(glm::mat4 * MVPmats, unsigned int InstanceNum)
+void Mesh::Render(glm::mat4 * MVPmats, unsigned int InstanceNum , int IsDeferred)
 {
 
 	
@@ -311,7 +311,7 @@ void Mesh::Render(glm::mat4 * MVPmats, unsigned int InstanceNum)
 	for (int i = 0; i < pMeshSamplerList.size(); i++)
 	{
 		if (IsHaveTexcoord)glEnableVertexAttribArray(attrib_Texcoord + i);
-		pMeshSamplerList[i]->ApplySampler();
+		pMeshSamplerList[i]->ApplySampler(IsDeferred);
 
 	}
 	GLuint StartIndex= 0;
@@ -570,8 +570,8 @@ void Node::RenderGeoPass()
 
 		// 변환 행렬 쉐이더 전송
 		GeoPassInit();
-		if (pObj->GetInstanceNum() == 0) meshes[i]->Render();
-		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
+		if (pObj->GetInstanceNum() == 0) meshes[i]->Render(1);
+		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(),1);
 
 	}
 	for (GLuint i = 0; i<Children.size(); i++)

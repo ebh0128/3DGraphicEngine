@@ -34,7 +34,7 @@ public:
 
 	//glGetUniformLocation 결과값 주기
 	void SetShaderValue(GLuint ShaderLoc, int IsDeferred = 0);
-	void ApplyTexture();
+	void ApplyTexture(int isDeferred = 0);
 
 	//일반 텍스쳐 2의 지수승 텍스쳐로 준비할것
 	void CreateTexture(const char* ImagePath, GLuint Channel);
