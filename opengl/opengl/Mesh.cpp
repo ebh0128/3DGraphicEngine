@@ -404,10 +404,10 @@ void Node::Update(GLfloat dtime)
 
 
 
-void Node::AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset)
+void Node::AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset, MyShader* pshad)
 {
 	GLuint BlockIndex, BindingPoint = 1;
-	GLuint ShaderID = pShader->GetShaderProgram();
+	GLuint ShaderID = pshad->GetShaderProgram();
 	BlockIndex = glGetUniformBlockIndex(ShaderID, BlockName);
 	glUniformBlockBinding(ShaderID, BlockIndex, BindingPoint);
 
@@ -418,16 +418,17 @@ void Node::AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset
 
 
 	//Uniform Block Äõ¸® 
-	GLchar* name[2] = { "Count" , "List[0].LPos" };
-	GLuint Index[2];
-	GLint offset[2];
-	GLint size[2];
-	GLint type[2];
+	GLchar* name[6] = { "Count" , "List[0].LPos" , "List[0].LDiff" ,
+		"List[0].LAmbi" , "List[0].LSpec" , "List[1].LPos" };
+	GLuint Index[6];
+	GLint offset[6];
+	GLint size[6];
+	GLint type[6];
 
-	glGetUniformIndices(ShaderID, 2, name, Index);
-	glGetActiveUniformsiv(ShaderID, 2, Index, GL_UNIFORM_OFFSET, offset);
-	glGetActiveUniformsiv(ShaderID, 2, Index, GL_UNIFORM_SIZE, size);
-	glGetActiveUniformsiv(ShaderID, 2, Index, GL_UNIFORM_TYPE, type);
+	glGetUniformIndices(ShaderID, 6, name, Index);
+	glGetActiveUniformsiv(ShaderID, 6, Index, GL_UNIFORM_OFFSET, offset);
+	glGetActiveUniformsiv(ShaderID, 6, Index, GL_UNIFORM_SIZE, size);
+	glGetActiveUniformsiv(ShaderID, 6, Index, GL_UNIFORM_TYPE, type);
 
 
 	glBufferData(GL_UNIFORM_BUFFER, UbSize, Data, GL_DYNAMIC_DRAW);
@@ -555,10 +556,7 @@ void Node::GeoPassInit()
 	
 
 }
-void Node::LitPassInit()
-{
 
-}
 
 void Node::RenderGeoPass()
 {
@@ -579,10 +577,5 @@ void Node::RenderGeoPass()
 		Children[i]->RenderGeoPass();
 		//Children[i]->Render();
 	}
-
-}
-void Node::RenderLitPass()
-{
-	//TestCode
 
 }

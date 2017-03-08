@@ -27,9 +27,13 @@ public:
 	
 	void SetUniform4fv(const char* Var, GLfloat* value, GLuint count = 1);
 	void SetUniform3fv(const char* Var, GLfloat* value, GLuint count = 1);
+	void SetUniform2fv(const char* Var, GLfloat* value, GLuint count = 1);
+
 
 	void SetUniformMatrix4fv(const char* Var, GLfloat* value , GLuint count=1);
 	void SetUniformMatrix3fv(const char* Var, GLfloat* value, GLuint count = 1);
+	void SetUniformMatrix2fv(const char* Var, GLfloat* value, GLuint count = 1);
+
 	void SetUniform1f(const char* Var, GLfloat value);
 	void SetUniform1i(const char* Var, GLint value);
 	GLuint GetShaderProgram();

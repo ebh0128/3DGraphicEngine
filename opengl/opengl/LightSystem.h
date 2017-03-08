@@ -14,13 +14,19 @@ protected:
 	glm::vec3 Ambient;
 	glm::vec3 Specular;
 
-
+	
 	//빛 감쇠 정도
 	LitAttnu Attnuation;
 public:
-	//테스트용 코드
+	//로직에 크게 영향없는 게임 플레이변수(나중에 Get Set 만들수도 있음)
 	GLfloat RespawnHeight;
 	GLfloat DropSpeed;
+
+	//빛 요소들의 세기
+	float DiffuseFactor;
+	float AmbientFactor;
+	float SpecularFactor;
+	//////////////////////////
 
 	LightInstance(Object* Ori, ObjectInstance* _Parents = nullptr);
 	
@@ -49,11 +55,13 @@ protected:
 public:
 	LightSystem(Node* Root, Object* Parent, SceneGL* Sce);
 
-
-	
 	void AddLight(LightInstance* pnew);
 	void Update(GLfloat dtime);
+	
 	void Render();
 
+	//빛
+	void RenderPointLitPass();
+	void RenderDirLitPass();
 
 };

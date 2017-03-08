@@ -128,7 +128,12 @@ protected:
 	MyShader* pShader;
 
 	MyShader* pDefGeoPass;
-	MyShader* pDefLitPass;
+	
+	//포인트 라이트
+	MyShader* pDefPtLitPass;
+	
+	//디렉션 라이트
+	MyShader* pDefDirLitPass;
 	
 	GLuint ubo;
 	GLint UbSize;
@@ -158,16 +163,22 @@ public:
 //	virtual void DeferredRender();
 
 	virtual void RenderGeoPass();
-	virtual void RenderLitPass();
+	virtual void RenderPointLitPass() {}
+	virtual void RenderDirLitPass() {}
+
 
 	virtual void ShaderParamInit();
 	virtual void GeoPassInit();
-	virtual void LitPassInit();
+	virtual void DirLitPassInit() {}
+	virtual void PointLitPassInit() {}
 
 	void AddMesh(Mesh* pmesh);
 	void AddChild(Node* pNode);
 	void SetPosition(float x, float y, float z );
-	void AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset);
+
+	//빛 정보를 받아보기위한 유니폼 블록
+	//빛 정보가 필요하면 써야됨
+	void AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset, MyShader* pshad );
 	void UpdateUBO(void* Data, GLuint Size, GLuint Offset);
 
 	void SetObject(Object* Obj);

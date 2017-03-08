@@ -147,8 +147,11 @@ void init(void)
 		float g = 1.f - 0.5f*(float)dis(gen);
 		float b = 1.f - 0.5f*(float)dis(gen);
 
+
+		
 		LightInstance* newLight = new LightInstance(LightSys);
 		newLight->SetDiff(glm::vec3(r, g, b));
+	//	newLight->SetDiff(glm::vec3(0.7, 0.5, 0.3));
 		newLight->SetPos(glm::vec3(x, y, z));
 		float ScaleFactor = newLight->CalcLightArea();
 		newLight->SetScale(glm::vec3(ScaleFactor, ScaleFactor, ScaleFactor));

@@ -19,7 +19,7 @@ AssimpModelNode::AssimpModelNode(Node* parent, SceneGL* Scene) :Node(parent ,Sce
 	pDefGeoPass = new MyShader();
 	pDefGeoPass->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
 	
-	AddUBO(nullptr, 16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0);
+	AddUBO(nullptr, 16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 ,pShader);
 	IsRootNode = false;
 	IsTextured = true;
 
@@ -40,7 +40,7 @@ AssimpModelNode::AssimpModelNode(Node* parent, SceneGL* Scene, std::string FileP
 	pDefGeoPass = new MyShader();
 	pDefGeoPass->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
 
-	AddUBO(nullptr, 16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0);
+	AddUBO(nullptr, 16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , pShader);
 
 	InitAssimpNode(AssimpScene->mRootNode, AssimpScene, FilePath);
 	IsRootNode = true;

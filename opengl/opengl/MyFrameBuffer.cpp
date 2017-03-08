@@ -21,6 +21,9 @@ DeferredRenderBuffers::DeferredRenderBuffers(int Width, int Height)
 	{
 		glBindTexture(GL_TEXTURE_2D, m_Textures[i]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_Textures[i], 0);
 	}
 
@@ -59,7 +62,12 @@ void DeferredRenderBuffers::BindForWriting()
 }
 void DeferredRenderBuffers::BindForReading()
 {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, m_Textures[i]);
+	}
 }
 void DeferredRenderBuffers::SetReadBuffer(TEXTURE_TYPE TextureType)
 {

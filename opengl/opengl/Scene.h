@@ -1,6 +1,7 @@
 #pragma once
 
 class Light;
+class LightSystem;
 class LightInstance;
 class DeferredRenderBuffers;
 
@@ -42,11 +43,13 @@ protected:
 
 	//스카이박스는 따로 등록
 	Node* pSkyBox;
-	// 빛을 씬에서 관리(우선 정적 개수를 목표로)
-	//사이즈가 작고 한번 생성되면 삭제 안함 -> 소멸시 다시 하늘로 이동
+
+
+	
+	//Deferred Lighting 에서 계층 탐색없이 바로 찾아가기위해 사용
+	LightSystem* m_pPointLightSys;
 	int LightCnt;
 	//구버젼
-	Light* pLightList[LIGHT_MAX];
 	LightInstance* pLightBuffer[LIGHT_MAX];
 
 	Light* pDirectionalLight;
@@ -69,23 +72,20 @@ public:
 	Camera* CreateCamera(glm::vec3 Pos, glm::vec3 Lookat, glm::vec3 Up);
 	void ChangeCamera(int index);
 	void RatioUpdate();
+	glm::vec4 GetCurrentCamPos();
 
-
-	Light* CreateLight(Node* parent, glm::vec4 Pos);
-	Light* CreateLight(Node* parent, glm::vec4 Pos , glm::vec3 Diffuse);
 	
-	//구버젼
-	void AddLight(Light* plight);
-
 	void AddLight(LightInstance* pins);
 
 	void SetSpotLight(SpotLight* pSpot);
 	void ApplySpotLight(MyShader* pshader);
 
 	void AddCam(Camera* cam);
+
 	void SetRoot(Object* root);
 	void SetSkyBox(Node* Skybox);
 
+	void SetLightSystem(LightSystem* lsys) { m_pPointLightSys = lsys; }
 
 	void SetDirectionalLight(Light* pLight);
 	Light* GetDirectionalLight();
@@ -104,7 +104,18 @@ public:
 	void Render();
 
 	void DeferredRender(DeferredRenderBuffers* gBuffer);
+	
+protected:
+	
 	//디퍼드 랜더링 Geometry pass
 	void RenderGeoPass();
+	
+	//Lightt Pass
+	void InitLightPass(DeferredRenderBuffers* gBuffer);
 	void RenderLitPass(DeferredRenderBuffers* gBuffer);
+
+	void RenderPointLitPass(DeferredRenderBuffers* gBuffer);
+	void RenderDirLitPass(DeferredRenderBuffers* gBuffer);
+	//디버그용 함수
+	void DrawGBuffer(DeferredRenderBuffers* gBuffer);
 };

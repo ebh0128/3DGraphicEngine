@@ -201,7 +201,7 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	AddMesh(GroundMesh);
 	
 	//최대 빛 수치만큼 UBO 사이즈 잡아놓기 (빛 정보-> float 16개 + int 1개(빛의 개수) )
-	AddUBO(nullptr,16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint),"LightInfoList", 0);
+	AddUBO(nullptr,16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint),"LightInfoList", 0 , pShader);
 
 	delete[] pVertice;
 	delete[] pIndices;

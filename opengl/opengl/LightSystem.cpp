@@ -11,6 +11,12 @@
 LightInstance::LightInstance(Object* Ori, ObjectInstance* _Parents) :ObjectInstance(Ori,_Parents)
 {
 	Ambient = Specular = Diffuse = glm::vec3(0.3f, 0.3f, 0.3f);
+	//Ambient = Specular = Diffuse = glm::vec3(0.0f, 0.0f, 0.0f);
+	
+	DiffuseFactor = 1;
+	AmbientFactor = 1;
+	SpecularFactor = 1;
+
 	Attnuation.Constant = 0.3f;
 	Attnuation.exp = 0.05f;
 	Attnuation.Linear = 0.05f;
@@ -38,7 +44,7 @@ float LightInstance::CalcLightArea()
 
 LightSystem::LightSystem(Node* Root, Object* Parent, SceneGL* Sce) : Object(Root, Parent, Sce)
 {
-	
+	Sce->SetLightSystem(this);
 }
 void LightSystem::Update(GLfloat dtime)
 {
@@ -58,3 +64,11 @@ void  LightSystem::AddLight(LightInstance* pnew)
 	AddInstance(pnew);
 }
 
+void LightSystem::RenderPointLitPass()
+{
+	pRoot->RenderPointLitPass();
+}
+void LightSystem::RenderDirLitPass()
+{
+	pRoot->RenderDirLitPass();
+}

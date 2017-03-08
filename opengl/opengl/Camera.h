@@ -101,6 +101,7 @@ public:
 	int AddCamera(Camera* pcam);
 
 	glm::mat4 GetViewMat();
+	glm::vec4 GetCurrentCamPos();
 
 	//원근 투영
 	glm::mat4 GetPerspectiveLense();

@@ -6,11 +6,12 @@ class DeferredRenderBuffers
 public:
 	enum TEXTURE_TYPE
 	{
+		TEXTURE_TYPE_TEXCOORD,
 		TEXTURE_TYPE_POSITION,
 		TEXTURE_TYPE_DIFFUSE,
 		TEXTURE_TYPE_NORMAL,
-		TEXTURE_TYPE_TEXCOORD,
-		NUM_TEXTURES
+		NUM_TEXTURES 
+
 	};
 
 	DeferredRenderBuffers();

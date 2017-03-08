@@ -21,8 +21,9 @@ SceneGL::SceneGL()
 	//pCamera = nullptr;
 	pCamManager = new CameraManager();
 	LightCnt = 0;
-	memset(pLightList, 0, sizeof(Light*)*LIGHT_MAX);
 	pSkyBox = nullptr;
+	m_pPointLightSys = nullptr;
+
 	TickTimerCounter = 0;
 	CurruntState = DAY;
 }
@@ -34,8 +35,9 @@ SceneGL::SceneGL(Object* root, Camera* cam)
 	pCamManager->ChangeCamera(pCamManager->AddCamera(cam));
 
 	LightCnt = 0;
-	memset(pLightList, 0, sizeof(Light*)*LIGHT_MAX);
 	pSkyBox = nullptr;
+	m_pPointLightSys = nullptr;
+
 	TickTimerCounter = 0;
 	CurruntState = DAY;
 
@@ -44,37 +46,6 @@ SceneGL::SceneGL(Object* root, Camera* cam)
 //루트부터 순회하며 삭제
 SceneGL::~SceneGL()
 {
-
-}
-
-Light* SceneGL::CreateLight(Node* parent, glm::vec4 Pos)
-{
-	if (LightCnt > LIGHT_MAX) return nullptr;
-	Light* NewLight = new Light(parent,this);
-	NewLight->SetPos(Pos);
-	AddLight(NewLight);
-
-	return NewLight;
-}
-Light* SceneGL::CreateLight(Node* parent, glm::vec4 Pos , glm::vec3 Diffuse)
-{
-	if (LightCnt > LIGHT_MAX) return nullptr;
-	Light* NewLight = new Light(parent, this);
-	NewLight->SetPos(Pos);
-	NewLight->SetDiffuse(Diffuse);
-	AddLight(NewLight);
-
-	return NewLight;
-}
-void SceneGL::AddLight(Light* plight)
-{
-	for (int i = 0; i < LIGHT_MAX; i++)
-	{
-		if (pLightList[i] != NULL) continue;
-		pLightList[i] = plight;
-		LightCnt++;
-		break;
-	}
 
 }
 
@@ -138,8 +109,12 @@ LightList* SceneGL::GetLightSrouceArray()
 		memcpy(ShaderLightInfoList.Lights[i].Ambient, glm::value_ptr(SourceAmb), 3 * sizeof(GLfloat));
 		memcpy(ShaderLightInfoList.Lights[i].Specular, glm::value_ptr(SourceSpec), 3 * sizeof(GLfloat));
 
+		
+		ShaderLightInfoList.Lights[i].Diffuse[3] = pLightBuffer[i]->DiffuseFactor; 
+		ShaderLightInfoList.Lights[i].Ambient[3] = pLightBuffer[i]->AmbientFactor;
+		ShaderLightInfoList.Lights[i].Specular[3] = pLightBuffer[i]->SpecularFactor;
+		
 		//행렬로 쓰기위해 추가한 더미값
-		ShaderLightInfoList.Lights[i].Diffuse[3] = 0.f; ShaderLightInfoList.Lights[i].Ambient[3] = 0.f; ShaderLightInfoList.Lights[i].Specular[3] = 0.f;
 		ShaderLightInfoList.Lights[i].Pos[3] = 0.f;
 		//LightCnt++;
 	}
@@ -172,6 +147,10 @@ void SceneGL::SmoothTimeChange(GLfloat dTime)
 	}
 	*/
 	
+}
+glm::vec4 SceneGL::GetCurrentCamPos()
+{
+	return pCamManager->GetCurrentCamPos();
 }
 void SceneGL::AddCam(Camera* cam)
 {
@@ -255,33 +234,80 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer)
 {
 	//프레임버퍼 바인딩 후 초기화
 	gBuffer->BindForWriting();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	RenderGeoPass();
-
-	//원래 프레임버퍼 바인딩후 초기화
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	
+	//깊이 버퍼는 지오메트리 에서만
+	glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	glEnable(GL_DEPTH_TEST);
+	//지오메트리에서 플랜드 필요없음
+	glDisable(GL_BLEND);
+
+	RenderGeoPass();
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+
+	/////////Light 패스 시작
+
+	//원래 프레임버퍼 바인딩후 초기화
+	
 	//읽기위해 버퍼 바인딩
-	gBuffer->BindForReading();
+	InitLightPass(gBuffer);
 	RenderLitPass(gBuffer);
+	
+	//디버그용 테스트 코드
+	//gBuffer->BindForReading();
+	//	DrawGBuffer(gBuffer);
+
 }
 //디퍼드 랜더링 Geometry pass
 void SceneGL::RenderGeoPass()
 {
 //	Root->Render();
+	
 	Root->RenderGeoPass();
 }
 void SceneGL::RenderLitPass(DeferredRenderBuffers* gBuffer)
 {
 	//Root->RenderLitPass();
+	RenderPointLitPass(gBuffer);
+	RenderDirLitPass(gBuffer);
+
 	
+}
+void SceneGL::InitLightPass(DeferredRenderBuffers* gBuffer)
+{
+	//빛의 결과는 순수하게 더해져야됨
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	gBuffer->BindForReading();
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void  SceneGL::RenderPointLitPass(DeferredRenderBuffers* gBuffer)
+{
+	m_pPointLightSys->RenderPointLitPass();
+}
+void  SceneGL::RenderDirLitPass(DeferredRenderBuffers* gBuffer)
+{
+
+}
+
+void SceneGL::DrawGBuffer(DeferredRenderBuffers* gBuffer)
+{
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	//Test Code
 	GLsizei W = glutGet(GLUT_WINDOW_WIDTH);
 	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
-	GLsizei HalfWidth = (GLsizei)( W / 2.0f);
+	GLsizei HalfWidth = (GLsizei)(W / 2.0f);
 	GLsizei HalfHeight = (GLsizei)(H / 2.0f);
-	
+
 	gBuffer->SetReadBuffer(DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
 	glBlitFramebuffer(0, 0, W, H,
 		0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
@@ -297,5 +323,4 @@ void SceneGL::RenderLitPass(DeferredRenderBuffers* gBuffer)
 	gBuffer->SetReadBuffer(DeferredRenderBuffers::TEXTURE_TYPE_TEXCOORD);
 	glBlitFramebuffer(0, 0, W, H,
 		HalfWidth, 0, W, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
 }

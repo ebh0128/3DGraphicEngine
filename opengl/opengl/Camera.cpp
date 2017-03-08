@@ -224,6 +224,10 @@ glm::mat4 CameraManager::GetViewMat()
 {
 	return CameraList[CurrentCamIndex]->GetViewMat();
 }
+glm::vec4 CameraManager::GetCurrentCamPos()
+{
+	return glm::vec4 (CameraList[CurrentCamIndex]->GetPos() , 1);
+}
 
 //원근 투영
 glm::mat4 CameraManager::GetPerspectiveLense()

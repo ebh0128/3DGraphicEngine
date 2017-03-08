@@ -203,6 +203,12 @@ void MyShader::SetUniform3fv(const char* Var, GLfloat* value, GLuint count)
 	glUniform3fv(glGetUniformLocation(mProgram, Var), count, value);
 
 }
+void MyShader::SetUniform2fv(const char* Var, GLfloat* value, GLuint count)
+{
+	glUseProgram(mProgram);
+	glUniform2fv(glGetUniformLocation(mProgram, Var), count, value);
+
+}
 
 void MyShader::SetUniformMatrix4fv(const char* Var, GLfloat* value,  GLuint count)
 {
@@ -213,6 +219,12 @@ void MyShader::SetUniformMatrix3fv(const char* Var, GLfloat* value, GLuint count
 {
 	glUseProgram(mProgram);
 	glUniformMatrix3fv(glGetUniformLocation(mProgram, Var), count, GL_FALSE, value);
+}
+
+void MyShader::SetUniformMatrix2fv(const char* Var, GLfloat* value, GLuint count)
+{
+	glUseProgram(mProgram);
+	glUniformMatrix2fv(glGetUniformLocation(mProgram, Var), count, GL_FALSE, value);
 }
 
 void MyShader::SetUniform1f(const char* Var, GLfloat value)
@@ -237,6 +249,7 @@ ShaderManager::ShaderManager()
 	printf("Max Texture Unit : %d\n", MaxTexture);
 	m_pbUseTextrueUnit = new bool[MaxTexture] {false,};
 	m_pbUseTextrueUnit[0] = true;
+	m_pbUseTextrueUnit[1] = m_pbUseTextrueUnit[2] = m_pbUseTextrueUnit[3] =  true;
 }
 
 GLuint ShaderManager::GetChannelID()

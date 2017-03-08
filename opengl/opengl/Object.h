@@ -27,8 +27,9 @@ public:
 	virtual void Render();
 
 	virtual void RenderGeoPass();
-	virtual void RenderLitPass();
-
+	//라이트 패스
+	virtual void RenderPointLitPass() {}
+	virtual void RenderDirLitPass() {}
 	void AddChild(Object* pChild);
 	Node* GetRoot();
 	int GetInstanceNum();
