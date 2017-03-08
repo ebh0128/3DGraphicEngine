@@ -419,7 +419,7 @@ void Node::AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset
 
 	//Uniform Block Äõ¸® 
 	GLchar* name[6] = { "Count" , "List[0].LPos" , "List[0].LDiff" ,
-		"List[0].LAmbi" , "List[0].LSpec" , "List[1].LPos" };
+		"List[0].LAmbi" , "List[0].LSpec" , "List[0].LAttnuation" };
 	GLuint Index[6];
 	GLint offset[6];
 	GLint size[6];
@@ -529,7 +529,7 @@ void Node::ShaderParamInit()
 	pShader->SetUniformMatrix4fv("World", glm::value_ptr(M));
 	// ºû Á¤º¸ UiformBlock ½¦ÀÌ´õ Àü¼Û 
 	LightList* DataforShader = pScene->GetLightSrouceArray();
-	GLuint Size = DataforShader->Count * sizeof(GLfloat) * 16;
+	GLuint Size = DataforShader->Count  * sizeof(PaddingLight);
 	//meshes[i]->UpdateUBO(DataforShader, Size+ sizeof(GLuint), 0);
 	UpdateUBO(DataforShader, sizeof(GLuint), 0);
 

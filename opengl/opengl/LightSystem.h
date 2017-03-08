@@ -1,12 +1,8 @@
 #pragma once
 //빛ㅊ 인스턴스를 관리
 
-typedef struct LightAttnuation
-{
-	float Constant;
-	float Linear;
-	float exp;
-}LitAttnu;
+class ObjectInstance;
+
 class LightInstance : public ObjectInstance
 {
 protected:
@@ -17,6 +13,7 @@ protected:
 	
 	//빛 감쇠 정도
 	LitAttnu Attnuation;
+
 public:
 	//로직에 크게 영향없는 게임 플레이변수(나중에 Get Set 만들수도 있음)
 	GLfloat RespawnHeight;
@@ -40,7 +37,7 @@ public:
 	void SetSpec(glm::vec3 Spec) { Specular = Spec; }
 
 	void SetAttnuation(LitAttnu atn) {Attnuation = atn;}
-
+	
 	glm::vec3 GetDif() { return Diffuse; }
 	glm::vec3 GetAmbi() { return Ambient; }
 	glm::vec3 GetSpec() { return Specular; }
@@ -48,6 +45,7 @@ public:
 	LitAttnu GetAttnuation() { return Attnuation; }
 };
 
+//
 class LightSystem : public Object
 {
 protected:
@@ -65,3 +63,4 @@ public:
 	void RenderDirLitPass();
 
 };
+

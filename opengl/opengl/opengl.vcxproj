@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="LightSystem.cpp" />
     <ClCompile Include="Drone.cpp" />
     <ClCompile Include="DroneCamera.cpp" />
@@ -48,6 +49,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonHeader.h" />
+    <ClInclude Include="DirLight.h" />
     <ClInclude Include="LightSystem.h" />
     <ClInclude Include="Drone.h" />
     <ClInclude Include="DroneCamera.h" />

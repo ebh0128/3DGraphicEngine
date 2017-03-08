@@ -31,6 +31,7 @@ struct LightInfo
 	vec4 LDiff;
 	vec4 LAmbi;
 	vec4 LSpec;
+	vec4 LAttnuation;
 };
 
 layout( std140, binding = 1) uniform LightInfoList

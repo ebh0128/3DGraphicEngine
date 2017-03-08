@@ -1,15 +1,6 @@
 #version 430 core
 in vec4 vColor;
 
-struct sMaterial
-{
-	vec3	diffuse;
-	vec3	ambient;
-	vec3	specular;
-	float 	shininess;
-};
-
-uniform sMaterial material;
 
 uniform sampler2D gPositionMap;
 uniform sampler2D gColorMap;
@@ -19,6 +10,7 @@ uniform vec2 gScreenSize;
 uniform vec3 gEyeWorldPos;
 
 //각 빛 성분의 4번째값은 factor
+//DirLight 에서는 LPos 가 방향
 struct LightInfo
 {
 	vec4 LPos;
@@ -28,11 +20,7 @@ struct LightInfo
 	vec4 LAttnuation;
 };
 
-layout( std140, binding = 1) uniform LightInfoList
-{
-	int Count;
-	LightInfo List[100];
-};
+uniform LightInfo gDirLight;
 
 vec4 CalcLight(LightInfo Lit,
 				vec3 LightDirection,
@@ -68,26 +56,13 @@ vec4 CalcLight(LightInfo Lit,
 	return (AmbientCol + DiffuseColor + SpecularColor);
 }
 
-vec4 CalcPointLight(LightInfo Lit,
+vec4 CalcDirLight(LightInfo Lit,
 					vec3 WorldPos,
 					vec3 Normal)
 {
-	vec3 LightDirection = WorldPos - Lit.LPos.xyz;
-	float Distance = length(LightDirection);
-	LightDirection = normalize(LightDirection);
-	
-	vec4 retColor = CalcLight(Lit , LightDirection , WorldPos , Normal);
-	
-	//Attnuation Hard Coding
-	//float Attnuation = 0.3 + Distance* 0.05 + Distance*Distance*0.05;
-	
-	float Attnuation = Lit.LAttnuation.x + Distance* Lit.LAttnuation.y + Distance*Distance*Lit.LAttnuation.z;
-	
-	
-	Attnuation = max(1.0 , Attnuation);
-	
-	
-	return retColor/ Attnuation;
+	vec3 LightDir = normalize(Lit.LPos.xyz);
+	vec4 retColor = CalcLight(Lit , LightDir , WorldPos , Normal);
+	return retColor;
 
 }
 
@@ -107,13 +82,10 @@ void main()
 	Normal = normalize(Normal);
 	
 	vec4 LightResult = vec4(0,0,0,0);
-	for(int i = 0 ; i < Count ; i++)
-	{
-		LightResult += CalcPointLight(List[i] , WorldPos , Normal);
-		//LightResult = List[i].LDiff;
-	}
+	LightResult = CalcDirLight(gDirLight , WorldPos , Normal);
 	
-	fColor = vec4(Color , 1.0) * LightResult;
+	//fColor = vec4(1,1,1,1);
+	fColor = vec4(Color , 1.0)* LightResult;
 	//fColor = vec4(Normal, 1.0) ;
 	//fColor = LightResult; //*CalcPointLight(List[5] , WorldPos , Normal);
 	//fColor = vec4(1,1,1,1)*(Count-8.9);

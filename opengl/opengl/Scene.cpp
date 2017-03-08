@@ -12,6 +12,7 @@
 #include "MyFrameBuffer.h"
 #include "ObjectInstance.h"
 #include "LightSystem.h"
+#include "DirLight.h"
 #include "Scene.h"
 
 
@@ -23,6 +24,7 @@ SceneGL::SceneGL()
 	LightCnt = 0;
 	pSkyBox = nullptr;
 	m_pPointLightSys = nullptr;
+	m_pDirLight = nullptr;
 
 	TickTimerCounter = 0;
 	CurruntState = DAY;
@@ -37,7 +39,7 @@ SceneGL::SceneGL(Object* root, Camera* cam)
 	LightCnt = 0;
 	pSkyBox = nullptr;
 	m_pPointLightSys = nullptr;
-
+	m_pDirLight = nullptr;
 	TickTimerCounter = 0;
 	CurruntState = DAY;
 
@@ -114,40 +116,20 @@ LightList* SceneGL::GetLightSrouceArray()
 		ShaderLightInfoList.Lights[i].Ambient[3] = pLightBuffer[i]->AmbientFactor;
 		ShaderLightInfoList.Lights[i].Specular[3] = pLightBuffer[i]->SpecularFactor;
 		
+		LitAttnu Atn = pLightBuffer[i]->GetAttnuation();
+		ShaderLightInfoList.Lights[i].Attnuation[0] = Atn.Constant;
+		ShaderLightInfoList.Lights[i].Attnuation[1] = Atn.Linear;
+		ShaderLightInfoList.Lights[i].Attnuation[2] = Atn.exp;
+
 		//행렬로 쓰기위해 추가한 더미값
 		ShaderLightInfoList.Lights[i].Pos[3] = 0.f;
+		ShaderLightInfoList.Lights[i].Attnuation[3] = 0.f;
 		//LightCnt++;
 	}
 	ShaderLightInfoList.Count = LightCnt;
 	return &ShaderLightInfoList;
 }
-void SceneGL::SmoothTimeChange(GLfloat dTime)
-{
-	TickTimerCounter += dTime;
-	/*
-	if (TickTimerCounter > DAY_CHANGE_TIMEMAX)
-	{
-		TickTimerCounter = 0;
-		//MaxState
-		CurruntState = (TimeForLight)((CurruntState + 1) % 2);
-	}
-	float InterConst = TickTimerCounter / DAY_CHANGE_TIMEMAX;
 
-	if (CurruntState == NIGHT)
-	{
-		glm::vec3 col = (1 - InterConst)*NightDiffuse + InterConst*DayDiffuse;
-		GetDirectionalLight()->SetDiffuse(col);
-		((SkyBox*)pSkyBox)->SetDiffuse(glm::vec4(col, 1.0f));
-	}
-	else
-	{
-		glm::vec3 col = (1 - InterConst)*DayDiffuse + InterConst*NightDiffuse;
-		GetDirectionalLight()->SetDiffuse(col);
-		((SkyBox*)pSkyBox)->SetDiffuse(glm::vec4(col, 1.0f));
-	}
-	*/
-	
-}
 glm::vec4 SceneGL::GetCurrentCamPos()
 {
 	return pCamManager->GetCurrentCamPos();
@@ -167,16 +149,16 @@ void SceneGL::SetSkyBox(Node* Skybox)
 }
 void SceneGL::Update(GLfloat dTime)
 {
-	SmoothTimeChange(dTime);
+	if (m_pDirLight != nullptr) m_pDirLight->Update(dTime);
 	Root->Update(dTime);
 }
-void SceneGL::SetDirectionalLight(Light* pLight)
+void SceneGL::SetDirectionalLight(DirLight* pLight)
 {
-	pDirectionalLight = pLight;
+	m_pDirLight = pLight;
 }
-Light* SceneGL::GetDirectionalLight()
+DirLight* SceneGL::GetDirectionalLight()
 {
-	return pDirectionalLight;
+	return m_pDirLight;
 }
 
 Camera* SceneGL::CreateCamera(glm::vec3 Pos, glm::vec3 Lookat, glm::vec3 Up)
@@ -207,6 +189,9 @@ void SceneGL::Render()
 	
 	if(pSkyBox != nullptr)pSkyBox->Render();
 	Root->Render();
+
+	//디버그용 코드
+	//if(m_pDirLight != nullptr) m_pDirLight->Render();
 }
 
 void  SceneGL::RatioUpdate()
@@ -256,6 +241,9 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer)
 	InitLightPass(gBuffer);
 	RenderLitPass(gBuffer);
 	
+	//Dir 패스 시작
+	//RenderDirLitPass(gBuffer);
+	
 	//디버그용 테스트 코드
 	//gBuffer->BindForReading();
 	//	DrawGBuffer(gBuffer);
@@ -293,7 +281,7 @@ void  SceneGL::RenderPointLitPass(DeferredRenderBuffers* gBuffer)
 }
 void  SceneGL::RenderDirLitPass(DeferredRenderBuffers* gBuffer)
 {
-
+	m_pDirLight->RenderDirLitPass();
 }
 
 void SceneGL::DrawGBuffer(DeferredRenderBuffers* gBuffer)

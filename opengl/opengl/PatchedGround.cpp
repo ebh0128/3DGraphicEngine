@@ -201,7 +201,8 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	AddMesh(GroundMesh);
 	
 	//최대 빛 수치만큼 UBO 사이즈 잡아놓기 (빛 정보-> float 16개 + int 1개(빛의 개수) )
-	AddUBO(nullptr,16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint),"LightInfoList", 0 , pShader);
+	int strSize = sizeof(PaddingLight);
+	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint),"LightInfoList", 0 , pShader);
 
 	delete[] pVertice;
 	delete[] pIndices;
@@ -304,44 +305,6 @@ GLfloat PatchedGround::GetMaxHeight()
 void PatchedGround::Render()
 {
 	Node::Render();
-	/*
-	if (pShader) pShader->ApplyShader();
-
-	
-	//땅의 경우는 고정이기에 World 트랜스폼 없음
-
-	for (GLuint i = 0; i<meshes.size(); i++)
-	{
-
-		//메쉬별 쉐이더 재질 적용 
-		Material* p = meshes[i]->GetMaterial();
-
-		pShader->SetUniform3fv("material.diffuse", glm::value_ptr(p->diffuse));
-		pShader->SetUniform3fv("material.amdient", glm::value_ptr(p->ambient));
-		pShader->SetUniform3fv("material.specular", glm::value_ptr(p->specular));
-		pShader->SetUniform1f("material.shininess", p->shininess);
-
-		// 변환 행렬 쉐이더 전송
-		glm::mat4 V = pScene->GetVMatrix();
-		glm::mat4 VP = pScene->GetVPMatrix();
-		glm::mat4 MV = V*TransformMat;
-		glm::mat4 MVP = VP*TransformMat;
-		pShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
-		pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-		pShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
-		// 빛 정보 UiformBlock 쉐이더 전송 
-		LightList* DataforShader = pScene->GetLightSrouceArray();
-		GLuint Size = DataforShader->Count * sizeof(GLfloat) * 16;
-		UpdateUBO(DataforShader, sizeof(GLuint), 0);
-		// std140 stride 16
-		UpdateUBO(DataforShader, Size, 12);
-		meshes[i]->Render();
-	}
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		Children[i]->Render();
-	}
-	*/
 }
 
 void PatchedGround :: GeoPassInit()

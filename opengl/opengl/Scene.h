@@ -3,6 +3,7 @@
 class Light;
 class LightSystem;
 class LightInstance;
+class DirLight;
 class DeferredRenderBuffers;
 
 struct PaddingLight
@@ -11,7 +12,7 @@ struct PaddingLight
 	GLfloat Diffuse[4];
 	GLfloat Ambient[4];
 	GLfloat Specular[4];
-
+	GLfloat Attnuation[4];
 };
 
 struct LightList
@@ -52,7 +53,7 @@ protected:
 	//±¸¹öÁ¯
 	LightInstance* pLightBuffer[LIGHT_MAX];
 
-	Light* pDirectionalLight;
+	DirLight* m_pDirLight;
 	
 	SpotLight* pSpotLight;
 
@@ -87,10 +88,8 @@ public:
 
 	void SetLightSystem(LightSystem* lsys) { m_pPointLightSys = lsys; }
 
-	void SetDirectionalLight(Light* pLight);
-	Light* GetDirectionalLight();
-
-	void SmoothTimeChange(GLfloat dTime);
+	void SetDirectionalLight(DirLight* pLight);
+	DirLight* GetDirectionalLight();
 
 	glm::mat4 GetVPMatrix();
 	glm::mat4 GetVMatrix();

@@ -141,6 +141,9 @@
     <ClCompile Include="DroneCamera.cpp">
       <Filter>소스 파일\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="DirLight.cpp">
+      <Filter>소스 파일\Object\Light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonHeader.h">
@@ -217,6 +220,9 @@
     </ClInclude>
     <ClInclude Include="myShader.h">
       <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+    <ClInclude Include="DirLight.h">
+      <Filter>헤더 파일\Object\Light</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

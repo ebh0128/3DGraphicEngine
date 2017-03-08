@@ -11,6 +11,7 @@
 
 
 
+
 Light::Light()
 {
 	
@@ -38,8 +39,8 @@ Light::Light(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 	RespawnHeight = 20.f;
 //	vScale = glm::vec3(0.1f, 0.1f, 0.1f);
 	//씬에 라이트 추가하는 코드 넣기(씬에서 관리)
-	
-	AddUBO(nullptr, 16 * sizeof(GLfloat)*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , pDefPtLitPass);
+	int strSize = sizeof(PaddingLight);
+	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , pDefPtLitPass);
 
 }
 void Light::SetPos(glm::vec4 Lightpos)
@@ -122,7 +123,7 @@ void Light::PointLitPassInit()
 	pDefPtLitPass->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
 
 	LightList* DataforShader = pScene->GetLightSrouceArray();
-	GLuint Size = DataforShader->Count * sizeof(GLfloat) * 16;
+	GLuint Size = DataforShader->Count * sizeof(PaddingLight);
 	//meshes[i]->UpdateUBO(DataforShader, Size+ sizeof(GLuint), 0);
 	UpdateUBO(DataforShader, sizeof(GLuint), 0);
 

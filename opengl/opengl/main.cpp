@@ -19,6 +19,8 @@
 #include "Renderer.h"
 #include "ObjectInstance.h"
 #include "LightSystem.h"
+#include "DirLight.h"
+
 //60프레임 에서의 1프레임당 밀리초 16
 #define TIME_PER_ONE_FRAME 10
 
@@ -63,6 +65,7 @@ Object* ModelObject;
 Drone* againDrone;
 Renderer* SceneRenderer;
 LightSystem *LightSys;
+DirLight* MainDirLight;
 
 
 void init(void)
@@ -99,36 +102,18 @@ void init(void)
 	std::random_device rd;
 	std::mt19937_64 gen(rd());
 	std::uniform_real_distribution<> dis(0, 1);
-
-	//태양광
-	/*
-	Light* pDirLight = Scene->CreateLight(GoodGround, glm::vec4(10.f, 30.0f, 20.f, 0), glm::vec3(0.8f, 0.8f, 0.8f));
-	Scene->SetDirectionalLight(pDirLight);
-	pDirLight->SetSpec(glm::vec3(0, 0, 0));
-	//빛 생 성!(랜덤하게)
-	for (int i = 0; i < LIGHT_MAX - 1; i++)
-	{
-		//X Z : 맵 크기 내에서 랜덤하게 생성
-		float x = (float)(dis(gen)-0.5f) * GoodGround->GetXSize();
-		float z = (float)(dis(gen)-0.5f) *GoodGround->GetZSize() ;
-		
-		//Y 최대높이 +5~8
-		float y = GoodGround->GetMaxHeight() +5.0f + (float)(3 * dis(gen));
-		//float y = 10 * (float)dis(gen);
-
-		//색 rgb 1~0.5
-		float r = 1.f - 0.5f*(float)dis(gen);
-		float g = 1.f - 0.5f*(float)dis(gen);
-		float b = 1.f - 0.5f*(float)dis(gen);
-		
-	
-		Light* newLight =Scene->CreateLight(GoodGround, glm::vec4(x, y, z, 1), glm::vec3(r, g, b));
-		if (newLight != nullptr) newLight->SetRespawHeigt(y);
-	}
-	*/
 	//인스턴스버젼 빛
 
+	
 	//빛 생 성!(랜덤하게)
+	
+	//Dir부터
+	MainDirLight = new DirLight(nullptr, Scene);
+	MainDirLight->SetPos(glm::vec4(10, -15, -15 ,1));
+	Scene->SetDirectionalLight(MainDirLight);
+
+
+	//Point Light
 	Light* newLight = new Light(nullptr,Scene);
 	LightSys = new LightSystem(newLight, GroundObject, Scene);
 

@@ -45,3 +45,10 @@ typedef struct TransformationSet
 	glm::vec3 vScale;
 
 }TransSet;
+
+typedef struct LightAttnuation
+{
+	float Constant;
+	float Linear;
+	float exp;
+}LitAttnu;
