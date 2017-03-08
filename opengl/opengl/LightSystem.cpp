@@ -7,6 +7,7 @@
 #include "LightSystem.h"
 #include "Geometry.h"
 #include "Scene.h"
+#include "Light.h"
 
 LightInstance::LightInstance(Object* Ori, ObjectInstance* _Parents) :ObjectInstance(Ori,_Parents)
 {
@@ -71,4 +72,8 @@ void LightSystem::RenderPointLitPass()
 void LightSystem::RenderDirLitPass()
 {
 	pRoot->RenderDirLitPass();
+}
+void LightSystem::RenderStencilPass()
+{
+	((Light*)pRoot)->RenderStencilPass();
 }

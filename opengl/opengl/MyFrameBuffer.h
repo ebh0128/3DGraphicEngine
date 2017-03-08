@@ -17,12 +17,16 @@ public:
 	DeferredRenderBuffers();
 	DeferredRenderBuffers(int Width, int Height);
 
-	void BindForWriting();
-	void BindForReading();
+	void StartDeferredRender();
+	void BindForGeomPass();
+	void BindForStencilPass();
+	void BindForLightPass();
+	void BindForFinalPass();
 	void SetReadBuffer(TEXTURE_TYPE TextureType);
 
 protected:
 	GLuint		m_Textures[NUM_TEXTURES];
 	GLuint		TexDepth;
+	GLuint		m_FinalTexture;
 	GLuint		fboID;
 };

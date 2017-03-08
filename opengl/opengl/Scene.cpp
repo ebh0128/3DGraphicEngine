@@ -218,70 +218,114 @@ void SceneGL::SetSpotLight(SpotLight* pSpot)
 void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer)
 {
 	//프레임버퍼 바인딩 후 초기화
-	gBuffer->BindForWriting();
+
+
+	gBuffer->StartDeferredRender();
+
 	
+	RenderGeoPass(gBuffer);
+
+
+	/////////스탠실 만들기
+	glEnable(GL_STENCIL_TEST);
+
+	RenderStencilPass(gBuffer);
+	
+	/////////Light 패스 시작
+	RenderPointLitPass(gBuffer);
+	
+	glDisable(GL_STENCIL_TEST);
+
+
+	//Dir 패스 시작
+	RenderDirLitPass(gBuffer);
+	
+	//결과 출력
+	GLsizei W = glutGet(GLUT_WINDOW_WIDTH);
+	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
+
+	gBuffer->BindForFinalPass();
+	glBlitFramebuffer(0, 0, W, H,
+		0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+
+}
+//디퍼드 랜더링 Geometry pass
+void SceneGL::RenderGeoPass(DeferredRenderBuffers* gBuffer)
+{
+	gBuffer->BindForGeomPass();
+
 	//깊이 버퍼는 지오메트리 에서만
 	glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	glEnable(GL_DEPTH_TEST);
 	//지오메트리에서 플랜드 필요없음
 	glDisable(GL_BLEND);
 
-	RenderGeoPass();
+	Root->RenderGeoPass();
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 
-	/////////Light 패스 시작
-
-	//원래 프레임버퍼 바인딩후 초기화
-	
-	//읽기위해 버퍼 바인딩
-	InitLightPass(gBuffer);
-	RenderLitPass(gBuffer);
-	
-	//Dir 패스 시작
-	//RenderDirLitPass(gBuffer);
-	
-	//디버그용 테스트 코드
-	//gBuffer->BindForReading();
-	//	DrawGBuffer(gBuffer);
-
 }
-//디퍼드 랜더링 Geometry pass
-void SceneGL::RenderGeoPass()
+
+void SceneGL::RenderStencilPass(DeferredRenderBuffers* gBuffer)
 {
-//	Root->Render();
-	
-	Root->RenderGeoPass();
-}
-void SceneGL::RenderLitPass(DeferredRenderBuffers* gBuffer)
-{
-	//Root->RenderLitPass();
-	RenderPointLitPass(gBuffer);
-	RenderDirLitPass(gBuffer);
 
+	//ColorBuffer 끄기
+	gBuffer->BindForStencilPass();
+
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	glClear(GL_STENCIL_BUFFER_BIT);
+
+	glStencilFunc(GL_ALWAYS, 0, 0);
 	
+	glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
+	glStencilOpSeparate(GL_BACK, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
+
+	m_pPointLightSys->RenderStencilPass();
 }
-void SceneGL::InitLightPass(DeferredRenderBuffers* gBuffer)
+
+
+
+
+void  SceneGL::RenderPointLitPass(DeferredRenderBuffers* gBuffer)
 {
 	//빛의 결과는 순수하게 더해져야됨
+
+	glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+
+	glDisable(GL_DEPTH_TEST);
+
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);
 
-	gBuffer->BindForReading();
-	glClear(GL_COLOR_BUFFER_BIT);
-}
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 
-void  SceneGL::RenderPointLitPass(DeferredRenderBuffers* gBuffer)
-{
+	gBuffer->BindForLightPass();
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	m_pPointLightSys->RenderPointLitPass();
+
+	glCullFace(GL_BACK);
+	glDisable(GL_BLEND);
+
 }
 void  SceneGL::RenderDirLitPass(DeferredRenderBuffers* gBuffer)
 {
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE);
+
 	m_pDirLight->RenderDirLitPass();
+
+	glDisable(GL_BLEND);
 }
 
 void SceneGL::DrawGBuffer(DeferredRenderBuffers* gBuffer)

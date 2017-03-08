@@ -15,6 +15,7 @@ protected:
 	GLfloat RespawnHeight;
 	GLfloat DropSpeed;
 
+	MyShader* nullShader;
 public:
 	Light();
 	Light(Node* parent, SceneGL* Scene);
@@ -35,6 +36,8 @@ public:
 	//빛 패스에서 실제로 작동
 	void RenderPointLitPass();
 	void RenderDirLitPass();
+	
+	void RenderStencilPass();
 
 	void DirLitPassInit();
 	void PointLitPassInit();

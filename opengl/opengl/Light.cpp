@@ -30,7 +30,9 @@ Light::Light(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 	pShader = new MyShader("PointLight.vert", "PointLight.frag");
 	//Light 패스를 위한 쉐이더 정의
 	pDefPtLitPass = new MyShader("./Shader/Deferred_PointLight.vert", "./Shader/Deferred_PointLight.frag");
-	
+	nullShader = new MyShader("./Shader/Deferred_PointLight.vert", "./Shader/Deferred_PointLight.frag");
+
+
 	Diffuse = glm::vec3(1, 1, 1);
 	Ambient = glm::vec3(1, 1, 1);
 	Specular = glm::vec3(1, 1, 1);
@@ -141,3 +143,26 @@ void Light::DirLitPassInit()
 {
 
 }
+void Light::RenderStencilPass()
+{
+	if (!nullShader)  return;
+	nullShader->ApplyShader();
+
+	for (GLuint i = 0; i<meshes.size(); i++)
+	{
+		// 변환 행렬 쉐이더 전송
+		glm::mat4 VP = pScene->GetVPMatrix();
+		glm::mat4 MVP = VP*TransformMat;
+		pDefPtLitPass->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
+		pDefPtLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+
+		if (pObj->GetInstanceNum() == 0) meshes[i]->Render(1);
+		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(), 1);
+
+	}
+	for (GLuint i = 0; i<Children.size(); i++)
+	{
+		Children[i]->RenderPointLitPass();
+	}
+}
+

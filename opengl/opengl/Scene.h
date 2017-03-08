@@ -107,12 +107,11 @@ public:
 protected:
 	
 	//디퍼드 랜더링 Geometry pass
-	void RenderGeoPass();
+	void RenderGeoPass(DeferredRenderBuffers* gBuffer);
 	
-	//Lightt Pass
-	void InitLightPass(DeferredRenderBuffers* gBuffer);
-	void RenderLitPass(DeferredRenderBuffers* gBuffer);
+	void RenderStencilPass(DeferredRenderBuffers* gBuffer);
 
+	//Lightt Pass	
 	void RenderPointLitPass(DeferredRenderBuffers* gBuffer);
 	void RenderDirLitPass(DeferredRenderBuffers* gBuffer);
 	//디버그용 함수

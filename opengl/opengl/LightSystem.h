@@ -61,6 +61,7 @@ public:
 	//ºû
 	void RenderPointLitPass();
 	void RenderDirLitPass();
+	void RenderStencilPass();
 
 };
 
