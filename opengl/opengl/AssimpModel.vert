@@ -21,7 +21,7 @@ flat out int InstanceID;
 void main()
 {
 	gl_Position = VP*World*M*aPosition;
-	vNormal = normalize(MV*vec4(aNormal.xyz,0));
+	vNormal = normalize(World*M*vec4(aNormal.xyz,0));
 	vPosEye = V*World*M*aPosition;
 	vTexCoord = texcoord;
 	InstanceID = gl_InstanceID;

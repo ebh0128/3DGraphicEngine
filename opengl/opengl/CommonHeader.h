@@ -34,7 +34,7 @@
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 #endif
 
-#define LIGHT_MAX 10
+#define LIGHT_MAX 50
 #define TEXCOORD_MAX 3
 
 

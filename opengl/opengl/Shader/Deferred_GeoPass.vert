@@ -16,10 +16,12 @@ out vec2 oTexcoord;
 out vec3 oNormal;
 out vec3 oWorldPos;
 
+
 void main()
 {
 	gl_Position = VP*World*M*Position;
 	oTexcoord = texCoord;
 	oNormal = normalize((World * M * vec4(Normal.xyz,0)).xyz);
 	oWorldPos = (World * M *Position).xyz;
+	
 }

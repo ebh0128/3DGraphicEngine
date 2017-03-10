@@ -44,7 +44,7 @@ DirLight::DirLight(Node* parent, SceneGL* Scene) :Node(parent, Scene)
 	Ambient = Specular = glm::vec3(0.3, 0.3, 0.3);
 	
 	pDefDirLitPass = new MyShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
-
+	m_pDepthCopy = new MyShader("./Shader/DepthCopy.vert", "./Shader/DepthCopy.frag");
 }
 void DirLight::SetPos(glm::vec4 Lightpos)
 {
@@ -99,6 +99,30 @@ void DirLight::RenderDirLitPass()
 		Children[i]->RenderPointLitPass();
 	}
 }
+
+void DirLight::CopyDepthPass()
+{
+	if (!m_pDepthCopy)  return;
+	m_pDepthCopy->ApplyShader();
+
+	for (GLuint i = 0; i<meshes.size(); i++)
+	{
+		// 변환 행렬 쉐이더 전송
+		glm::vec2 ScreenSize = glm::vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+		pDefDirLitPass->SetUniform2fv("gScreenSize", glm::value_ptr(ScreenSize));
+
+		pDefDirLitPass->SetUniform1i("gDepthTexture", DeferredRenderBuffers::TEXTURE_TYPE_TEXCOORD);
+
+
+		meshes[i]->Render(1);
+
+	}
+	for (GLuint i = 0; i<Children.size(); i++)
+	{
+		Children[i]->RenderPointLitPass();
+	}
+}
+
 
 void DirLight::DirLitPassInit()
 {

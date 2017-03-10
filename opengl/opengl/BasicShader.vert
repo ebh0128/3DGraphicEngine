@@ -6,6 +6,7 @@ layout(location = 3) in vec2 texcoord2;
 
 uniform mat4x4 MVP;
 uniform mat4 MV;
+uniform mat4 M;
 
 //View Dimension Position
 out vec4 vPosEye;
@@ -17,9 +18,9 @@ out vec4 vPosWorld;
 void main()
 {
 	gl_Position = MVP*aPosition;
-	vNormal = normalize(MV*vec4(aNormal.xyz,0));
+	vNormal = normalize(M*vec4(aNormal.xyz,0));
 	vPosEye = MV*aPosition;
 	vTexCoord = texcoord;
 	vTexCoordNoise = texcoord2;
-	vPosWorld = aPosition;
+	vPosWorld = M*aPosition;
 }

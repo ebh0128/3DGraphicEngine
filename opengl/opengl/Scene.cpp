@@ -219,14 +219,21 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer)
 {
 	//프레임버퍼 바인딩 후 초기화
 
+	//if (pSkyBox != nullptr)pSkyBox->Render();
 
-	gBuffer->StartDeferredRender();
-
+	RenderGEODepth(gBuffer);
 	
+	gBuffer->StartDeferredRender();
+	glClearColor(0, 0, 0, 0);
+	
+
 	RenderGeoPass(gBuffer);
 
+	
+	//Dir 패스 시작
 
 	/////////스탠실 만들기
+	
 	glEnable(GL_STENCIL_TEST);
 
 	RenderStencilPass(gBuffer);
@@ -235,25 +242,25 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer)
 	RenderPointLitPass(gBuffer);
 	
 	glDisable(GL_STENCIL_TEST);
-
-
-	//Dir 패스 시작
+	
 	RenderDirLitPass(gBuffer);
 	
+	
 	//결과 출력
-	GLsizei W = glutGet(GLUT_WINDOW_WIDTH);
-	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
+	RenderFinalPass(gBuffer);
+	
+	//gBuffer->CopyDepthForForwardRendering();
+	//Forward Render 시작
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
 
-	gBuffer->BindForFinalPass();
-	glBlitFramebuffer(0, 0, W, H,
-		0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
+	m_pPointLightSys->Render();
 
 }
-//디퍼드 랜더링 Geometry pass
-void SceneGL::RenderGeoPass(DeferredRenderBuffers* gBuffer)
+void SceneGL::RenderGEODepth(DeferredRenderBuffers* gBuffer)
 {
-	gBuffer->BindForGeomPass();
+
+	gBuffer->BindForGeoDepth();
 
 	//깊이 버퍼는 지오메트리 에서만
 	glDepthMask(GL_TRUE);
@@ -267,11 +274,36 @@ void SceneGL::RenderGeoPass(DeferredRenderBuffers* gBuffer)
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+}
+
+//디퍼드 랜더링 Geometry pass
+void SceneGL::RenderGeoPass(DeferredRenderBuffers* gBuffer)
+{
+	gBuffer->BindForGeomPass();
+
+	//깊이 버퍼는 지오메트리 에서만
+	glDepthMask(GL_TRUE);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_DEPTH_TEST);
+	//지오메트리에서 플랜드 필요없음
+	glDisable(GL_BLEND);
+
+	//Skybox Diffuse만 넣음
+	if (pSkyBox != nullptr)pSkyBox->RenderGeoPass();
+
+	Root->RenderGeoPass();
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
 
 }
 
 void SceneGL::RenderStencilPass(DeferredRenderBuffers* gBuffer)
 {
+
 
 	//ColorBuffer 끄기
 	gBuffer->BindForStencilPass();
@@ -288,8 +320,6 @@ void SceneGL::RenderStencilPass(DeferredRenderBuffers* gBuffer)
 
 	m_pPointLightSys->RenderStencilPass();
 }
-
-
 
 
 void  SceneGL::RenderPointLitPass(DeferredRenderBuffers* gBuffer)
@@ -323,9 +353,29 @@ void  SceneGL::RenderDirLitPass(DeferredRenderBuffers* gBuffer)
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);
 
+	gBuffer->BindForLightPass();
+
 	m_pDirLight->RenderDirLitPass();
 
 	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
+}
+
+void SceneGL::RenderFinalPass(DeferredRenderBuffers* gBuffer)
+{
+	GLsizei W = glutGet(GLUT_WINDOW_WIDTH);
+	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
+
+	gBuffer->BindForFinalPass();
+
+	glBlitFramebuffer(0, 0, W, H, 0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	
+	
+	
+	//이 다음부터 Forward 해야되므로 초기화
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
 }
 
 void SceneGL::DrawGBuffer(DeferredRenderBuffers* gBuffer)

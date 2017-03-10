@@ -1,5 +1,6 @@
 #version 430 core
 in vec4 vColor;
+flat in int InstanceID;
 
 struct sMaterial
 {
@@ -31,7 +32,7 @@ struct LightInfo
 layout( std140, binding = 1) uniform LightInfoList
 {
 	int Count;
-	LightInfo List[100];
+	LightInfo List[256];
 };
 
 vec4 CalcLight(LightInfo Lit,
@@ -107,11 +108,11 @@ void main()
 	Normal = normalize(Normal);
 	
 	vec4 LightResult = vec4(0,0,0,0);
-	for(int i = 0 ; i < Count ; i++)
-	{
-		LightResult += CalcPointLight(List[i] , WorldPos , Normal);
+	//for(int i = 0 ; i < Count ; i++)
+	//{
+		LightResult = CalcPointLight(List[InstanceID % Count] , WorldPos , Normal);
 		//LightResult = List[i].LDiff;
-	}
+	//}
 	
 	fColor = vec4(Color , 1.0) * LightResult;
 	//fColor = vec4(Normal, 1.0) ;

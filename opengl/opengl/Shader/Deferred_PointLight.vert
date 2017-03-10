@@ -8,6 +8,7 @@ uniform mat4x4 MVP;
 uniform mat4	MV;
 uniform mat4 M;
 uniform mat4 VP;
+flat out int InstanceID;
 
 out vec4 vColor;
 void main()
@@ -16,4 +17,6 @@ void main()
 	
 	
 	vColor = vec4(DiffuseCol.xyz,1);
+	InstanceID =  gl_InstanceID;
+	
 }

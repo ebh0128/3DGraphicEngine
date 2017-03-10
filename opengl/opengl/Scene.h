@@ -26,6 +26,10 @@ enum TimeForLight
 	DAY,NIGHT 
 };
 
+enum DeferredState
+{
+	DEFERRED, FORWARD
+};
 //낮밤 변화시간
 #define DAY_CHANGE_TIMEMAX 30
 class Object;
@@ -46,7 +50,7 @@ protected:
 	Node* pSkyBox;
 
 
-	
+	DeferredState m_RenderState;
 	//Deferred Lighting 에서 계층 탐색없이 바로 찾아가기위해 사용
 	LightSystem* m_pPointLightSys;
 	int LightCnt;
@@ -114,6 +118,11 @@ protected:
 	//Lightt Pass	
 	void RenderPointLitPass(DeferredRenderBuffers* gBuffer);
 	void RenderDirLitPass(DeferredRenderBuffers* gBuffer);
+	void RenderFinalPass(DeferredRenderBuffers* gBuffer);
+	
 	//디버그용 함수
 	void DrawGBuffer(DeferredRenderBuffers* gBuffer);
+
+	void RenderGEODepth(DeferredRenderBuffers* gBuffer);
+	
 };

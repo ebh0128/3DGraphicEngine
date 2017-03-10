@@ -8,6 +8,7 @@
 
 #include "Scene.h"
 #include "ProgramManager.h"
+#include "DirLight.h"
 
 
 
@@ -518,6 +519,27 @@ void Node::ShaderParamInit()
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
 
+
+	//Dir Light 정보 보내기
+
+	DirLight* pDirLit = pScene->GetDirectionalLight();
+	glm::vec4 DirLightPos = pDirLit->GetPos();
+	//glm::vec4 DirLightPos = glm::vec4(0,-15,0,1);
+	pShader->SetUniform4fv("gDirLight.LPos", glm::value_ptr(DirLightPos));
+
+	glm::vec4 paramDiff = glm::vec4(pDirLit->GetDif(), 1);
+	glm::vec4 paramAmbi = glm::vec4(pDirLit->GetAmb(), 1);
+	glm::vec4 paramSpec = glm::vec4(pDirLit->GetSpec(), 1);
+
+	
+	pShader->SetUniform4fv("gDirLight.LDiff", glm::value_ptr(paramDiff));
+	pShader->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
+	pShader->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
+
+	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
+	pShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
+
+
 	if (Parent == nullptr) M = TransformMat;
 	else  M = TransformMat*Parent->GetModelMat();
 
@@ -526,7 +548,7 @@ void Node::ShaderParamInit()
 	pShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
 	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
 	pShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
-	pShader->SetUniformMatrix4fv("World", glm::value_ptr(M));
+	pShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
 	// 빛 정보 UiformBlock 쉐이더 전송 
 	LightList* DataforShader = pScene->GetLightSrouceArray();
 	GLuint Size = DataforShader->Count  * sizeof(PaddingLight);

@@ -14,6 +14,7 @@ out vec3 oNormal;
 out vec3 oWorldPos;
 out vec2 oTexCoordNoise;
 
+
 void main()
 {
 	gl_Position = WVP * Position;
@@ -21,4 +22,5 @@ void main()
 	oTexCoordNoise = texcoord2;
 	oNormal = (World * Normal).xyz;
 	oWorldPos = (World * Position).xyz;
+	
 }

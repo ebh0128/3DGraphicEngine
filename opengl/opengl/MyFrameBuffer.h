@@ -22,6 +22,8 @@ public:
 	void BindForStencilPass();
 	void BindForLightPass();
 	void BindForFinalPass();
+	void BindForGeoDepth();
+	void CopyDepthForForwardRendering();
 	void SetReadBuffer(TEXTURE_TYPE TextureType);
 
 protected:

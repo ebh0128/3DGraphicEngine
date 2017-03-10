@@ -23,6 +23,8 @@ protected:
 
 	LitAttnu Attnu;
 
+	MyShader* m_pDepthCopy;
+
 public:
 	DirLight();
 	DirLight(Node* parent, SceneGL* Scene);
@@ -30,6 +32,12 @@ public:
 	void SetPos(glm::vec4 Lightpos);
 	void SetDiffuse(glm::vec3 dif);
 	void SetSpec(glm::vec3 dif);
+
+	//dir 에선 방향임
+	glm::vec4 GetPos() { return vPos; }
+	glm::vec3 GetDif() { return Diffuse; }
+	glm::vec3 GetAmb() { return Ambient; }
+	glm::vec3 GetSpec() { return Specular; }
 
 	void Update(GLfloat dtime);
 	void Render();
@@ -42,8 +50,11 @@ public:
 	void RenderPointLitPass() {}
 	void RenderDirLitPass();
 
+	void CopyDepthPass();
+
 	void DirLitPassInit();
 	void PointLitPassInit() {}
 	void ShaderParamInit();
+
 
 };

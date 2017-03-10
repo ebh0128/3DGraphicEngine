@@ -19,6 +19,8 @@ uniform sampler2D SamplerNoise;
 void main()
 {
 	
+ 
+	
 	// Apply Texture by Noise(디퓨즈 계산)
 	
 	float noisecol = texture(SamplerNoise, oTexCoordNoise).r;
@@ -40,6 +42,7 @@ void main()
 	
 	WorldPosOut = oWorldPos;
 	NormalOut = normalize(oNormal);
-	TexCoordOut = vec3(oTexcoord , 0.0);
+	//TexCoordOut = vec3(oTexcoord , 0.0);
+	TexCoordOut = vec3(gl_FragCoord.zzz);
 	
 }

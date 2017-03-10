@@ -110,6 +110,7 @@ void init(void)
 	//Dir부터
 	MainDirLight = new DirLight(nullptr, Scene);
 	MainDirLight->SetPos(glm::vec4(10, -15, -15 ,1));
+	MainDirLight->SetDiffuse(glm::vec3(0.8, 0.5, 0.4));
 	Scene->SetDirectionalLight(MainDirLight);
 
 
@@ -120,11 +121,17 @@ void init(void)
 	for (int i = 0; i < LIGHT_MAX - 1; i++)
 	{
 		//X Z : 맵 크기 내에서 랜덤하게 생성
-		float x = (float)(dis(gen) - 0.5f) * GoodGround->GetXSize();
-		float z = (float)(dis(gen) - 0.5f) *GoodGround->GetZSize();
+	//	float x = (float)(dis(gen) - 0.5f) * GoodGround->GetXSize();
+	//	float z = (float)(dis(gen) - 0.5f) *GoodGround->GetZSize();
+
+		float x = -0.5 * GoodGround->GetXSize()+ 0.1* GoodGround->GetXSize()*(i % 10);
+		float z = -0.25* GoodGround->GetZSize() + 0.1* GoodGround->GetZSize()*(i / 10);
+
+	//	float x =  0.1* GoodGround->GetXSize()*(i % 10);;
+	//	float z =  0.1* GoodGround->GetZSize()*(i / 10);
 
 		//Y 최대높이 +5~8
-		float y = GoodGround->GetMaxHeight() + 5.0f + (float)(3 * dis(gen));
+		float y = GoodGround->GetHeightByNoise(x ,z) ;
 		//float y = 10 * (float)dis(gen);
 
 		//색 rgb 1~0.5

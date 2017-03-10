@@ -1,4 +1,4 @@
-#include "CommonHeader.h"
+ #include "CommonHeader.h"
 #include "MyShader.h"
 #include "MyFrameBuffer.h"
 
@@ -79,6 +79,23 @@ void DeferredRenderBuffers::BindForFinalPass()
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID);
 	glReadBuffer(GL_COLOR_ATTACHMENT4);
+	//SetReadBuffer(TEXTURE_TYPE_TEXCOORD);
+
+}
+
+void DeferredRenderBuffers::CopyDepthForForwardRendering()
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	
+	GLsizei W = glutGet(GLUT_WINDOW_WIDTH);
+	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
+	
+	//깊이 텍스쳐 사용
+	
+	glBlitFramebuffer(0, 0, W, H, 0, 0, W, H, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 void DeferredRenderBuffers::BindForGeomPass()
 {
@@ -94,7 +111,11 @@ void DeferredRenderBuffers::BindForGeomPass()
 	//프레그먼트에 열어줄 채널들 지정
 	glDrawBuffers(NUM_TEXTURES, DrawBuffers);
 
+}
 
+void DeferredRenderBuffers::BindForGeoDepth()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 }
 void DeferredRenderBuffers::BindForLightPass()
@@ -106,6 +127,9 @@ void DeferredRenderBuffers::BindForLightPass()
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, m_Textures[i]);
 	}
+
+	
+
 }
 void DeferredRenderBuffers::SetReadBuffer(TEXTURE_TYPE TextureType)
 {

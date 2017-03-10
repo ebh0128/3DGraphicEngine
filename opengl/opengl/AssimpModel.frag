@@ -10,6 +10,8 @@ in vec4 vWorldPosition;
 uniform mat4 MV;
 uniform mat4 V;
 
+uniform vec3 gEyeWorldPos;
+
 uniform sampler2D TextureMain;
 
 
@@ -36,103 +38,93 @@ struct LightInfo
 layout( std140, binding = 1) uniform LightInfoList
 {
 	int Count;
-	LightInfo List[100];
+	LightInfo List[256];
 };
 
-struct SpotLight
-{
-	vec4 Diffuse;
-	vec4 vPosition;
-	vec4 vDirection;
-	float fConeCosine;
-	float fLinearAttnuation;
-};
+uniform LightInfo gDirLight;
 
-uniform SpotLight sLight;
-
-vec4 GetSpotLightColor()
+vec4 CalcLight(LightInfo Lit,
+				vec3 LightDirection,
+				vec3 WorldPos,
+				vec3 Normal)
 {
-	//위치 벡터
-	vec3 vDir = (vWorldPosition - sLight.vPosition).xyz;
-	float fDistance = length(vDir);
-	vDir = normalize(vDir);
+	vec4 AmbientCol = Lit.LDiff * Lit.LAmbi * Lit.LAmbi.w;
+	AmbientCol.w = 1;
 	
-	//위치와 빛 방향 내적
-	float fCosine = dot(sLight.vDirection.xyz , vDir);
-	float fDif = 1.0 - sLight.fConeCosine;
-	float fFactor = clamp((fCosine - sLight.fConeCosine)/ fDif , 0.0 , 1.0);
+	float DiffuseFactor = dot(Normal, -LightDirection);
 	
-	if(fCosine > sLight.fConeCosine) return sLight.Diffuse*fFactor/(fDistance*sLight.fLinearAttnuation);
-	return vec4(0,0,0,0);
+	vec4 DiffuseColor = vec4(0,0,0,0);
+	vec4 SpecularColor = vec4(0,0,0,0);
+	
+	if(DiffuseFactor > 0.0)
+	{
+		DiffuseColor = Lit.LDiff * DiffuseFactor * Lit.LDiff.w;
+		DiffuseColor.w =1;
+		
+		vec3 VertexToEye = normalize(gEyeWorldPos - WorldPos);
+		vec3 LightReflect = normalize(reflect(LightDirection , Normal));
+		float SpecularFactor = dot(VertexToEye , LightReflect);
+		
+		if(SpecularFactor > 0.0)
+		{
+			// Hard Coding
+			SpecularFactor = pow(SpecularFactor , 1);
+			SpecularColor = Lit.LDiff * Lit.LSpec * SpecularFactor;
+			SpecularColor.w = 1;
+		}
+	}
+	
+	return (AmbientCol + DiffuseColor + SpecularColor);
 }
+
+vec4 CalcDirLight(LightInfo Lit,
+					vec3 WorldPos,
+					vec3 Normal)
+{
+	vec3 LightDir = normalize(Lit.LPos.xyz);
+	vec4 retColor = CalcLight(Lit , LightDir , WorldPos , Normal);
+	return retColor;
+
+}
+vec4 CalcPointLight(LightInfo Lit,
+					vec3 WorldPos,
+					vec3 Normal)
+{
+	vec3 LightDirection = WorldPos - Lit.LPos.xyz;
+	float Distance = length(LightDirection);
+	LightDirection = normalize(LightDirection);
+	
+	vec4 retColor = CalcLight(Lit , LightDirection , WorldPos , Normal);
+	
+	//Attnuation Hard Coding
+	//float Attnuation = 0.3 + Distance* 0.05 + Distance*Distance*0.05;
+	
+	float Attnuation = Lit.LAttnuation.x + Distance* Lit.LAttnuation.y + Distance*Distance*Lit.LAttnuation.z;
+	
+	
+	Attnuation = max(1.0 , Attnuation);
+	
+	
+	return retColor/ Attnuation;
+
+}
+
 
 
 void main()
 {
 	//vec3
-	vec3 n = normalize(vNormal.xyz);
-	vec3 l;
-	vec3 v = normalize(-vPosEye.xyz);
 	vec4 LightColor = vec4(0.0);
-		
-for(int i = 0 ; i < Count ; i++)
+	
+	//Point
+	for(int i = 0 ; i < Count ; i++)
 	{
-		
-	
-		vec3 diffuse = vec3(0.0);
-		vec3 specular = vec3(0.0);
-		vec3 ambient = vec3(0.0);
-	
-		//point light?
-		if(List[i].LPos.w == 1.0)
-		{
-			l = normalize((V*List[i].LPos - vPosEye).xyz);
-			
-			//half vector
-			vec3 h = normalize(l+v);
-			float l_dot_n = max(dot(l,n) , 0.0);
-			
-			//point Light Attnuation
-			float dist = length((V*List[i].LPos - vPosEye).xyz);
-			
-			if(dist < 20)
-			{
-				float attnu = 1/ (0.3+0.05f*dist + 0.05f*pow(dist, 2));
-				
-				diffuse = List[i].LDiff.rgb * material.diffuse * l_dot_n;
-				diffuse = diffuse*attnu;
-				ambient = List[i].LAmbi.rgb * material.ambient;
-				
-				if(l_dot_n > 0.0)
-				{
-					specular = List[i].LSpec.xyz *material.specular * pow(max(dot(h,n) , 0.0), material.shininess);
-				}
-			}
-			
-		}
-		
-		else//directional light
-		{
-			l = normalize((V*List[i].LPos).xyz);
-			//half vector
-			vec3 h = normalize(l+v);
-			float l_dot_n = max(dot(l,n) , 0.0);
-			
-			diffuse = List[i].LDiff.rgb * material.diffuse * l_dot_n;
-			//diffuse = vec3(1.0 ,0 ,0);
-			ambient = List[i].LAmbi.rgb * material.ambient;
-			
-			if(l_dot_n > 0.0)
-			{
-				specular = List[i].LSpec.xyz *material.specular * pow(max(dot(h,n) , 0.0), material.shininess);
-			}
-		
-		}
-		
-		LightColor += vec4(ambient + diffuse + specular,1);
+		LightColor += CalcPointLight(List[i] ,vWorldPosition.xyz , vNormal.xyz);
 	}
-	// Apply Texture by Noise
-	LightColor +=GetSpotLightColor();
+	//Dir Light
+	LightColor += CalcDirLight(gDirLight , vWorldPosition.xyz , vNormal.xyz);
+
+	
 	vec4 TexCol= vec4(0.6,0.6,0.6,1);
 	if(IsTextured == 1)
 	{

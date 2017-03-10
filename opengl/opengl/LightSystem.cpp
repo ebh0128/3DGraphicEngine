@@ -19,16 +19,21 @@ LightInstance::LightInstance(Object* Ori, ObjectInstance* _Parents) :ObjectInsta
 	SpecularFactor = 1;
 
 	Attnuation.Constant = 0.3f;
-	Attnuation.exp = 0.05f;
+	Attnuation.exp = 0.02f;
 	Attnuation.Linear = 0.05f;
 }
 void LightInstance::Update(float dtime)
 {
 	//포인트만 해당
-	float moveSpeed =  dtime *DropSpeed;
-	if (vPos.y < 0) vPos.y = RespawnHeight;
+	/*float moveSpeed =  dtime *DropSpeed;
+	if (vPos.y < RespawnHeight - 30)
+	{
+		vPos.y = RespawnHeight;
+		DropSpeed = 0;
+	}
 	vPos.y -= moveSpeed;
 
+	*/
 
 	ObjectInstance::Update(dtime);
 }

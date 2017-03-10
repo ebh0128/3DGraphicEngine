@@ -18,7 +18,7 @@ Light::Light()
 }
 Light::Light(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 {
-	Sphere* Spheremesh = new Sphere(0.5f, 16, 16);
+	Sphere* Spheremesh = new Sphere(1.0, 16, 16);
 
 	Mesh* mesh = new Mesh(&Spheremesh->vertices[0], Spheremesh->vertices.size()
 		, &Spheremesh->indices[0], Spheremesh->indices.size(), &Spheremesh->normals[0]);
@@ -59,8 +59,7 @@ void  Light::SetSpec(glm::vec3 dif)
 }
 void Light::Update(GLfloat dtime)
 {
-
-	Node::Update(dtime);
+//	Node::Update(dtime);
 }
 void Light::SetRespawHeigt(GLfloat Height)
 {
@@ -70,10 +69,11 @@ void Light::SetRespawHeigt(GLfloat Height)
 // 노드 메소드 그대로 사용 >> 디버그를 위해 일단 재정의
 void Light::Render()
 {
-	Node::Render();
+	//Node::Render();
 }
 void Light::ShaderParamInit()
 {
+	
 	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 
 	glm::mat4 VP = pScene->GetVPMatrix();
@@ -105,6 +105,7 @@ void Light::RenderPointLitPass()
 }
 void Light::PointLitPassInit()
 {
+
 	pDefPtLitPass->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 
 	glm::mat4 VP = pScene->GetVPMatrix();
