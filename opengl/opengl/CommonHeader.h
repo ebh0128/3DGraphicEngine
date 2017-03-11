@@ -35,6 +35,7 @@
 #endif
 
 #define LIGHT_MAX 50
+#define KERNEL_SIZE 64
 #define TEXCOORD_MAX 3
 
 

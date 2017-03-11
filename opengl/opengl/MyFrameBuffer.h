@@ -24,6 +24,9 @@ public:
 	void BindForFinalPass();
 	void BindForGeoDepth();
 	void CopyDepthForForwardRendering();
+	
+	void BindForReading(TEXTURE_TYPE TextureType);
+	
 	void SetReadBuffer(TEXTURE_TYPE TextureType);
 
 protected:

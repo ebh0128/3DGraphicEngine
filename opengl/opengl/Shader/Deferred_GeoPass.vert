@@ -14,14 +14,14 @@ uniform mat4 V;
 
 out vec2 oTexcoord;
 out vec3 oNormal;
-out vec3 oWorldPos;
+out vec3 oViewPos;
 
 
 void main()
 {
 	gl_Position = VP*World*M*Position;
 	oTexcoord = texCoord;
-	oNormal = normalize((World * M * vec4(Normal.xyz,0)).xyz);
-	oWorldPos = (World * M *Position).xyz;
+	oNormal = normalize((V*World * M * vec4(Normal.xyz,0)).xyz);
+	oViewPos = (V*World * M *Position).xyz;
 	
 }

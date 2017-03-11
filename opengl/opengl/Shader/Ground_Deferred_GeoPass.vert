@@ -7,11 +7,12 @@ layout(location = 3) in vec2 texcoord2;
 uniform mat4x4 WVP;
 uniform mat4x4 MVP;
 uniform mat4 World;
-
+uniform mat4 MV;
+uniform mat4 V;
 
 out vec2 oTexcoord;
 out vec3 oNormal;
-out vec3 oWorldPos;
+out vec3 oViewPos;
 out vec2 oTexCoordNoise;
 
 
@@ -20,7 +21,7 @@ void main()
 	gl_Position = WVP * Position;
 	oTexcoord = texcoord;
 	oTexCoordNoise = texcoord2;
-	oNormal = (World * Normal).xyz;
-	oWorldPos = (World * Position).xyz;
+	oNormal = normalize((V *World * vec4(Normal.xyz,0)).xyz);
+	oViewPos = (MV * Position).xyz;
 	
 }

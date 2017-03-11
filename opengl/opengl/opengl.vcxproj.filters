@@ -64,6 +64,9 @@
     <Filter Include="헤더 파일\Camera">
       <UniqueIdentifier>{cbe262a4-4cf9-4c6f-9d48-782cf9650320}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{90ff9468-417b-4184-9a01-37a88df7ad13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -143,6 +146,9 @@
     </ClCompile>
     <ClCompile Include="DirLight.cpp">
       <Filter>소스 파일\Object\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="IOBuffer.cpp">
+      <Filter>소스 파일\OpenGLCore</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -224,5 +230,64 @@
     <ClInclude Include="DirLight.h">
       <Filter>헤더 파일\Object\Light</Filter>
     </ClInclude>
+    <ClInclude Include="IOBuffer.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Blur.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Blur.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_DirLight.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_DirLight.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_GeoPass.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_GeoPass.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_PointLight.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_PointLight.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_SkyBox.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_SkyBox.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\DepthCopy.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\DepthCopy.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Ground_Deferred_GeoPass.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Ground_Deferred_GeoPass.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\nullShader.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\nullShader.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\SSAO.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\SSAO.vert">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

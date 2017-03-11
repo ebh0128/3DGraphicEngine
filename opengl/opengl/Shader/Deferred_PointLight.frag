@@ -19,6 +19,8 @@ uniform sampler2D gNormalMap;
 uniform vec2 gScreenSize;
 uniform vec3 gEyeWorldPos;
 
+uniform mat4 V;
+uniform mat4 M;
 //각 빛 성분의 4번째값은 factor
 struct LightInfo
 {
@@ -37,7 +39,7 @@ layout( std140, binding = 1) uniform LightInfoList
 
 vec4 CalcLight(LightInfo Lit,
 				vec3 LightDirection,
-				vec3 WorldPos,
+				vec3 ViewPos,
 				vec3 Normal)
 {
 	vec4 AmbientCol = Lit.LDiff * Lit.LAmbi * Lit.LAmbi.w;
@@ -53,7 +55,7 @@ vec4 CalcLight(LightInfo Lit,
 		DiffuseColor = Lit.LDiff * DiffuseFactor * Lit.LDiff.w;
 		DiffuseColor.w =1;
 		
-		vec3 VertexToEye = normalize(gEyeWorldPos - WorldPos);
+		vec3 VertexToEye = normalize( - ViewPos);
 		vec3 LightReflect = normalize(reflect(LightDirection , Normal));
 		float SpecularFactor = dot(VertexToEye , LightReflect);
 		
@@ -67,17 +69,21 @@ vec4 CalcLight(LightInfo Lit,
 	}
 	
 	return (AmbientCol + DiffuseColor + SpecularColor);
+	//return  DiffuseColor ;
+	
 }
 
 vec4 CalcPointLight(LightInfo Lit,
-					vec3 WorldPos,
+					vec3 ViewPos,
 					vec3 Normal)
 {
-	vec3 LightDirection = WorldPos - Lit.LPos.xyz;
+	vec4 LightViewPos =  V*Lit.LPos*M;
+
+	vec3 LightDirection = ViewPos - LightViewPos.xyz;
 	float Distance = length(LightDirection);
 	LightDirection = normalize(LightDirection);
 	
-	vec4 retColor = CalcLight(Lit , LightDirection , WorldPos , Normal);
+	vec4 retColor = CalcLight(Lit , LightDirection , ViewPos , Normal);
 	
 	//Attnuation Hard Coding
 	//float Attnuation = 0.3 + Distance* 0.05 + Distance*Distance*0.05;
@@ -89,7 +95,7 @@ vec4 CalcPointLight(LightInfo Lit,
 	
 	
 	return retColor/ Attnuation;
-
+	
 }
 
 vec2 CalcTexCoord()
@@ -102,7 +108,7 @@ out vec4 fColor;
 void main()
 {
 	vec2 TexCoord = CalcTexCoord();
-	vec3 WorldPos = texture(gPositionMap , TexCoord).xyz;
+	vec3 ViewPos = texture(gPositionMap , TexCoord).xyz;
 	vec3 Color = texture(gColorMap , TexCoord).xyz;
 	vec3 Normal = texture(gNormalMap , TexCoord).xyz;
 	Normal = normalize(Normal);
@@ -110,13 +116,14 @@ void main()
 	vec4 LightResult = vec4(0,0,0,0);
 	//for(int i = 0 ; i < Count ; i++)
 	//{
-		LightResult = CalcPointLight(List[InstanceID % Count] , WorldPos , Normal);
+		LightResult = CalcPointLight(List[InstanceID % Count] , ViewPos , Normal);
 		//LightResult = List[i].LDiff;
 	//}
 	
 	fColor = vec4(Color , 1.0) * LightResult;
+	
 	//fColor = vec4(Normal, 1.0) ;
-	//fColor = LightResult; //*CalcPointLight(List[5] , WorldPos , Normal);
-	//fColor = vec4(1,1,1,1)*(Count-8.9);
+	//fColor = LightResult; //*CalcPointLight(List[5] , ViewPos , Normal);
+	
 }
 

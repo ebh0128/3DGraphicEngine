@@ -18,7 +18,7 @@ Light::Light()
 }
 Light::Light(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 {
-	Sphere* Spheremesh = new Sphere(1.0, 16, 16);
+	Sphere* Spheremesh = new Sphere(0.4f, 16, 16);
 
 	Mesh* mesh = new Mesh(&Spheremesh->vertices[0], Spheremesh->vertices.size()
 		, &Spheremesh->indices[0], Spheremesh->indices.size(), &Spheremesh->normals[0]);
@@ -69,7 +69,7 @@ void Light::SetRespawHeigt(GLfloat Height)
 // 노드 메소드 그대로 사용 >> 디버그를 위해 일단 재정의
 void Light::Render()
 {
-	//Node::Render();
+	Node::Render();
 }
 void Light::ShaderParamInit()
 {
@@ -108,11 +108,15 @@ void Light::PointLitPassInit()
 
 	pDefPtLitPass->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 
+	glm::mat4 V = pScene->GetVMatrix();
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 MVP = VP*TransformMat;
+
 	pDefPtLitPass->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
 	pDefPtLitPass->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
 	pDefPtLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	pDefPtLitPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
+
 
 	glm::vec2 ScreenSize = glm::vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 	pDefPtLitPass->SetUniform2fv("gScreenSize", glm::value_ptr(ScreenSize));

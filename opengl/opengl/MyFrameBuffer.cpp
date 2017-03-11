@@ -35,7 +35,7 @@ DeferredRenderBuffers::DeferredRenderBuffers(int Width, int Height)
 	//최종 결과 텍스쳐
 
 	glBindTexture(GL_TEXTURE_2D, m_FinalTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_FinalTexture, 0);
 
 
@@ -80,9 +80,16 @@ void DeferredRenderBuffers::BindForFinalPass()
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID);
 	glReadBuffer(GL_COLOR_ATTACHMENT4);
 	//SetReadBuffer(TEXTURE_TYPE_TEXCOORD);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, m_FinalTexture);
 
 }
-
+void DeferredRenderBuffers::BindForReading(TEXTURE_TYPE TextureType)
+{
+	
+	glActiveTexture(GL_TEXTURE0 + TextureType);
+	glBindTexture(GL_TEXTURE_2D, m_Textures[TextureType]);
+}
 void DeferredRenderBuffers::CopyDepthForForwardRendering()
 {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID);

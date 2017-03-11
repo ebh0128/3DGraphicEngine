@@ -2,11 +2,11 @@
 
 in vec2 oTexcoord;
 in vec3 oNormal;
-in vec3 oWorldPos;
+in vec3 oViewPos;
 in vec2 oTexCoordNoise;
 
 layout (location = 0) out vec3 TexCoordOut;
-layout (location = 1) out vec3 WorldPosOut;
+layout (location = 1) out vec3 ViewPosOut;
 layout (location = 2) out vec3 DiffuseOut;
 layout (location = 3) out vec3 NormalOut;
 
@@ -40,7 +40,7 @@ void main()
 
 	//DiffuseOut = vec3(oTexcoord , 0.0);
 	
-	WorldPosOut = oWorldPos;
+	ViewPosOut = oViewPos;
 	NormalOut = normalize(oNormal);
 	//TexCoordOut = vec3(oTexcoord , 0.0);
 	TexCoordOut = vec3(gl_FragCoord.zzz);

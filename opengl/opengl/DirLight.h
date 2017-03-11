@@ -23,7 +23,13 @@ protected:
 
 	LitAttnu Attnu;
 
-	MyShader* m_pDepthCopy;
+	MyShader* m_pShaderSSAO;
+	MyShader* m_pShaderBlur;
+	MyShader* m_pShaderHDR;
+
+	float Kernel[KERNEL_SIZE*3];
+
+	GLuint NosieTexture;
 
 public:
 	DirLight();
@@ -50,11 +56,15 @@ public:
 	void RenderPointLitPass() {}
 	void RenderDirLitPass();
 
-	void CopyDepthPass();
-
 	void DirLitPassInit();
 	void PointLitPassInit() {}
 	void ShaderParamInit();
 
+	//기타 패스
+	void SSAOPass();
+	void BlurPass();
 
+	void HDRPass();
+
+	void InitKernel();
 };

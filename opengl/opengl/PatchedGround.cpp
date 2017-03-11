@@ -321,4 +321,7 @@ void PatchedGround :: GeoPassInit()
 
 	pDefGeoPass->SetUniformMatrix4fv("WVP", glm::value_ptr(MVP));
 	pDefGeoPass->SetUniformMatrix4fv("World", glm::value_ptr(M));
+	pDefGeoPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	pDefGeoPass->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+
 }

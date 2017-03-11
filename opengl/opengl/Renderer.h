@@ -14,5 +14,6 @@ public:
 protected:
 	Render_Mode m_Mode;
 	DeferredRenderBuffers* GBuffers;
-	
+	IOBuffer* m_SSaoBuffer;
+	IOBuffer* m_BlurBuffer;
 };

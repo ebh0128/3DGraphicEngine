@@ -111,6 +111,8 @@ void init(void)
 	MainDirLight = new DirLight(nullptr, Scene);
 	MainDirLight->SetPos(glm::vec4(10, -15, -15 ,1));
 	MainDirLight->SetDiffuse(glm::vec3(0.8, 0.5, 0.4));
+	//MainDirLight->SetDiffuse(glm::vec3(80, 50, 40));
+
 	Scene->SetDirectionalLight(MainDirLight);
 
 
@@ -143,7 +145,7 @@ void init(void)
 		
 		LightInstance* newLight = new LightInstance(LightSys);
 		newLight->SetDiff(glm::vec3(r, g, b));
-	//	newLight->SetDiff(glm::vec3(0.7, 0.5, 0.3));
+	//	newLight->SetDiff(glm::vec3(1, 70, 1));
 		newLight->SetPos(glm::vec3(x, y, z));
 		float ScaleFactor = newLight->CalcLightArea();
 		newLight->SetScale(glm::vec3(ScaleFactor, ScaleFactor, ScaleFactor));

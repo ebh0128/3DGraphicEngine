@@ -13,6 +13,7 @@
 #include "ObjectInstance.h"
 #include "LightSystem.h"
 #include "DirLight.h"
+#include "IOBuffer.h"
 #include "Scene.h"
 
 
@@ -122,7 +123,7 @@ LightList* SceneGL::GetLightSrouceArray()
 		ShaderLightInfoList.Lights[i].Attnuation[2] = Atn.exp;
 
 		//행렬로 쓰기위해 추가한 더미값
-		ShaderLightInfoList.Lights[i].Pos[3] = 0.f;
+		ShaderLightInfoList.Lights[i].Pos[3] = 1.f;
 		ShaderLightInfoList.Lights[i].Attnuation[3] = 0.f;
 		//LightCnt++;
 	}
@@ -215,23 +216,30 @@ void SceneGL::SetSpotLight(SpotLight* pSpot)
 	pSpotLight = pSpot;
 }
 
-void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer)
+
+void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffer , IOBuffer *BlurBuffer)
 {
 	//프레임버퍼 바인딩 후 초기화
 
 	//if (pSkyBox != nullptr)pSkyBox->Render();
 
-	RenderGEODepth(gBuffer);
+	//RenderGEODepth(gBuffer);
 	
 	gBuffer->StartDeferredRender();
 	glClearColor(0, 0, 0, 0);
-	
+	//glClearColor(1, 1, 1, 1);
+
 
 	RenderGeoPass(gBuffer);
 
+	SSAOPass(gBuffer, SSAOBuffer);
+
+	BlurPass(BlurBuffer, SSAOBuffer);
+
+	gBuffer->BindForGeomPass();
 	
 	//Dir 패스 시작
-
+	
 	/////////스탠실 만들기
 	
 	glEnable(GL_STENCIL_TEST);
@@ -243,19 +251,22 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer)
 	
 	glDisable(GL_STENCIL_TEST);
 	
-	RenderDirLitPass(gBuffer);
+	RenderDirLitPass(gBuffer , BlurBuffer);
 	
-	
-	//결과 출력
-	RenderFinalPass(gBuffer);
-	
-	//gBuffer->CopyDepthForForwardRendering();
-	//Forward Render 시작
+	//Forward Rendering//////////////////////////
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 
-	m_pPointLightSys->Render();
+	//m_pPointLightSys->Render();
+	///////////////////////////////////////////
+	//현재 출력 버퍼 HDR임
+	//결과 출력
+	RenderFinalPass(gBuffer);
 
+
+
+	//Forward Render 시작
+	
 }
 void SceneGL::RenderGEODepth(DeferredRenderBuffers* gBuffer)
 {
@@ -346,20 +357,24 @@ void  SceneGL::RenderPointLitPass(DeferredRenderBuffers* gBuffer)
 	glDisable(GL_BLEND);
 
 }
-void  SceneGL::RenderDirLitPass(DeferredRenderBuffers* gBuffer)
+void  SceneGL::RenderDirLitPass(DeferredRenderBuffers* gBuffer, IOBuffer* BlurBuffer)
 {
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);
 
-	gBuffer->BindForLightPass();
+	//대략 잡은거
+	BlurBuffer->BindForReading(GL_TEXTURE7);
 
+	gBuffer->BindForLightPass();
+	
 	m_pDirLight->RenderDirLitPass();
 
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 
+	
 }
 
 void SceneGL::RenderFinalPass(DeferredRenderBuffers* gBuffer)
@@ -368,14 +383,39 @@ void SceneGL::RenderFinalPass(DeferredRenderBuffers* gBuffer)
 	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
 
 	gBuffer->BindForFinalPass();
-
+	//그냥 그리기
 	glBlitFramebuffer(0, 0, W, H, 0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	
-	
+	//HDR + reinhard tone mapping
+	//m_pDirLight->HDRPass();
 	
 	//이 다음부터 Forward 해야되므로 초기화
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
+}
+
+void SceneGL::SSAOPass(DeferredRenderBuffers* gBuffer, IOBuffer* SSAOBuffer)
+{
+	gBuffer->BindForReading(DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+	gBuffer->BindForReading(DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
+
+	SSAOBuffer->BindForWriting();
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	m_pDirLight->SSAOPass();
+
+}
+void SceneGL::BlurPass(IOBuffer* BlurBuffer, IOBuffer* SSAOBuffer)
+{
+	//컬러 어차피 1개임
+	SSAOBuffer->BindForReading(GL_TEXTURE0);
+	
+	
+	BlurBuffer->BindForWriting();
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	m_pDirLight->BlurPass();
 }
 
 void SceneGL::DrawGBuffer(DeferredRenderBuffers* gBuffer)

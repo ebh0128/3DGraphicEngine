@@ -5,6 +5,7 @@ class LightSystem;
 class LightInstance;
 class DirLight;
 class DeferredRenderBuffers;
+class IOBuffer;
 
 struct PaddingLight
 {
@@ -35,6 +36,8 @@ enum DeferredState
 class Object;
 class DroneCamera;
 class SpotLight;
+
+
 
 class SceneGL
 {
@@ -106,7 +109,7 @@ public:
 	void Update(GLfloat dTime);
 	void Render();
 
-	void DeferredRender(DeferredRenderBuffers* gBuffer);
+	void DeferredRender(DeferredRenderBuffers* gBuffer , IOBuffer *SSAOBuffer , IOBuffer *BlurBuffer);
 	
 protected:
 	
@@ -117,12 +120,14 @@ protected:
 
 	//Lightt Pass	
 	void RenderPointLitPass(DeferredRenderBuffers* gBuffer);
-	void RenderDirLitPass(DeferredRenderBuffers* gBuffer);
+	void RenderDirLitPass(DeferredRenderBuffers* gBuffe , IOBuffer* BlurBuffer);
 	void RenderFinalPass(DeferredRenderBuffers* gBuffer);
 	
 	//디버그용 함수
 	void DrawGBuffer(DeferredRenderBuffers* gBuffer);
 
 	void RenderGEODepth(DeferredRenderBuffers* gBuffer);
+	void SSAOPass(DeferredRenderBuffers* gBuffer, IOBuffer* SSAOBuffer);
+	void BlurPass(IOBuffer* BlurBuffer, IOBuffer* SSAOBuffer);
 	
 };

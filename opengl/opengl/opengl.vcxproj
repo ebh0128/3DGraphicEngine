@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DirLight.cpp" />
+    <ClCompile Include="IOBuffer.cpp" />
     <ClCompile Include="LightSystem.cpp" />
     <ClCompile Include="Drone.cpp" />
     <ClCompile Include="DroneCamera.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonHeader.h" />
     <ClInclude Include="DirLight.h" />
+    <ClInclude Include="IOBuffer.h" />
     <ClInclude Include="LightSystem.h" />
     <ClInclude Include="Drone.h" />
     <ClInclude Include="DroneCamera.h" />
@@ -73,6 +75,26 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="AssimpModelNode.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Blur.frag" />
+    <None Include="Shader\Blur.vert" />
+    <None Include="Shader\Deferred_DirLight.frag" />
+    <None Include="Shader\Deferred_DirLight.vert" />
+    <None Include="Shader\Deferred_GeoPass.frag" />
+    <None Include="Shader\Deferred_GeoPass.vert" />
+    <None Include="Shader\Deferred_PointLight.frag" />
+    <None Include="Shader\Deferred_PointLight.vert" />
+    <None Include="Shader\Deferred_SkyBox.frag" />
+    <None Include="Shader\Deferred_SkyBox.vert" />
+    <None Include="Shader\DepthCopy.frag" />
+    <None Include="Shader\DepthCopy.vert" />
+    <None Include="Shader\Ground_Deferred_GeoPass.frag" />
+    <None Include="Shader\Ground_Deferred_GeoPass.vert" />
+    <None Include="Shader\nullShader.frag" />
+    <None Include="Shader\nullShader.vert" />
+    <None Include="Shader\SSAO.frag" />
+    <None Include="Shader\SSAO.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{99A70DEC-E5EB-41DA-B6F4-9BC23CC83F84}</ProjectGuid>
