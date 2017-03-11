@@ -8,6 +8,7 @@
 #include "PerlinNoise.h"
 #include "ProgramManager.h"
 #include "PatchedGround.h"
+#include "DirLight.h"
 
 
 PatchedGround::PatchedGround()
@@ -29,6 +30,9 @@ PatchedGround::PatchedGround(Node* Parent, SceneGL *Scene, int seed, GLfloat Max
 	pDefGeoPass = new MyShader();
 	pDefGeoPass->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
 	//pDefLitPass->build_program_from_files("BasicShader.vert", "BasicShader.frag");
+
+	m_pShaderShadow = new MyShader("./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
+
 
 }
 
@@ -324,4 +328,16 @@ void PatchedGround :: GeoPassInit()
 	pDefGeoPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
 	pDefGeoPass->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
 
+}
+
+void PatchedGround::ShadowPassInit()
+{
+	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
+	glm::mat4 M;
+
+	if (Parent == nullptr) M = TransformMat;
+	else  M = TransformMat*Parent->GetModelMat();
+
+	m_pShaderShadow->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	m_pShaderShadow->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
 }

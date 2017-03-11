@@ -24,5 +24,6 @@ public:
 	void ShaderParamInit();
 	void GeoPassInit();
 	//void LitPassInit();
+	void ShadowPassInit();
 
 };

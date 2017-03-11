@@ -22,6 +22,9 @@ AssimpModelNode::AssimpModelNode(Node* parent, SceneGL* Scene) :Node(parent ,Sce
 	
 	int strSize = sizeof(PaddingLight);
 
+	m_pShaderShadow = new MyShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
+
+
 	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 ,pShader);
 	IsRootNode = false;
 	IsTextured = true;
@@ -42,6 +45,9 @@ AssimpModelNode::AssimpModelNode(Node* parent, SceneGL* Scene, std::string FileP
 
 	pDefGeoPass = new MyShader();
 	pDefGeoPass->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+
+
+	m_pShaderShadow = new MyShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
 
 	int strSize = sizeof(PaddingLight);
 	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , pShader);
@@ -197,5 +203,17 @@ void AssimpModelNode::GeoPassInit()
 	pDefGeoPass->SetUniformMatrix4fv("M", glm::value_ptr(M));
 	pDefGeoPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 	pDefGeoPass->SetUniform1i("IsTextured", IsTextured ? 1 : 0);
+
+}
+void AssimpModelNode::ShadowPassInit()
+{
+	//빛 공간 변환 행렬
+	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
+	
+	glm::mat4 M;
+	M = TransformMat*Parent->GetModelMat();
+
+	m_pShaderShadow->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	m_pShaderShadow->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
 
 }

@@ -62,4 +62,5 @@ public:
 	void Render();
 
 	void  GeoPassInit();
+	void ShadowPassInit();
 };

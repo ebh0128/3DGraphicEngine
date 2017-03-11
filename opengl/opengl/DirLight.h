@@ -26,10 +26,14 @@ protected:
 	MyShader* m_pShaderSSAO;
 	MyShader* m_pShaderBlur;
 	MyShader* m_pShaderHDR;
+	MyShader* m_pShaderShadow;
 
 	float Kernel[KERNEL_SIZE*3];
 
 	GLuint NosieTexture;
+
+	glm::mat4 LightOrtho;
+	glm::mat4 LightView;
 
 public:
 	DirLight();
@@ -44,6 +48,8 @@ public:
 	glm::vec3 GetDif() { return Diffuse; }
 	glm::vec3 GetAmb() { return Ambient; }
 	glm::vec3 GetSpec() { return Specular; }
+
+	glm::mat4 GetLightVPMat() { return LightOrtho * LightView; }
 
 	void Update(GLfloat dtime);
 	void Render();

@@ -8,7 +8,11 @@ uniform mat4	MV;
 uniform mat4 M;
 uniform mat4 VP;
 
+
+
 out vec4 vColor;
+out vec4 FragPosLightSpace;
+
 void main()
 {
 	gl_Position = aPosition;

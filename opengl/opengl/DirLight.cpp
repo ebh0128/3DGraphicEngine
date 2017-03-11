@@ -3,6 +3,7 @@
 #include "MyShader.h"
 #include "Camera.h"
 #include "Mesh.h"
+#include "IOBuffer.h"
 
 #include "DirLight.h"
 #include "Geometry.h"
@@ -50,7 +51,14 @@ DirLight::DirLight(Node* parent, SceneGL* Scene) :Node(parent, Scene)
 	m_pShaderSSAO = new MyShader("./Shader/SSAO.vert", "./Shader/SSAO.frag");
 	m_pShaderBlur = new MyShader("./Shader/Blur.vert", "./Shader/Blur.frag");
 	m_pShaderHDR = new MyShader("./Shader/HDR.vert", "./Shader/HDR.frag");
+	m_pShaderShadow = new MyShader("./Shader/HDR.vert", "./Shader/HDR.frag");
 
+	
+	LightOrtho = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, 0.1f, 1000.f);
+		LightView = glm::lookAt(
+		glm::vec3(-150, 225, 225)
+		, glm::vec3(0, 0, 0)
+		, glm::vec3(0, 1, 0));
 	InitKernel();
 	
 }
@@ -105,6 +113,12 @@ void  DirLight::SetSpec(glm::vec3 dif)
 }
 void DirLight::Update(GLfloat dtime)
 {
+	glm::vec4 ScaleLightPos = vPos * -15.f;
+	LightView = glm::lookAt(
+		 glm::vec3(ScaleLightPos.x , ScaleLightPos.y , ScaleLightPos.z) 
+		,glm::vec3(0,0,0)
+		,glm::vec3(0,1,0));
+
 
 	Node::Update(dtime);
 }
@@ -238,6 +252,10 @@ void DirLight::DirLitPassInit()
 	pDefDirLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 	pDefDirLitPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
 
+	glm::mat4 InvV = glm::inverse(V);
+	pDefDirLitPass->SetUniformMatrix4fv("InverseV", glm::value_ptr(InvV));
+	
+
 	glm::vec2 ScreenSize = glm::vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 	pDefDirLitPass->SetUniform2fv("gScreenSize", glm::value_ptr(ScreenSize));
 
@@ -262,6 +280,13 @@ void DirLight::DirLitPassInit()
 	pDefDirLitPass->SetUniform1i("gColorMap", DeferredRenderBuffers::TEXTURE_TYPE_DIFFUSE);
 	pDefDirLitPass->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
 	pDefDirLitPass->SetUniform1i("AOMap", 7);
+
+	pDefDirLitPass->SetUniform1i("ShadowMap", 8);
+
+	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
+
+	pDefDirLitPass->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
+
 
 }
 

@@ -30,6 +30,9 @@ public:
 	//라이트 패스
 	virtual void RenderPointLitPass() {}
 	virtual void RenderDirLitPass() {}
+
+	virtual void RenderShadowPass();
+
 	void AddChild(Object* pChild);
 	Node* GetRoot();
 	int GetInstanceNum();

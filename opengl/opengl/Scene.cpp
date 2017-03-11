@@ -29,6 +29,9 @@ SceneGL::SceneGL()
 
 	TickTimerCounter = 0;
 	CurruntState = DAY;
+	m_pShadowBuffer = new IOBuffer();
+	m_pShadowBuffer->Init(1024, 1024, true, GL_NONE);
+
 }
 SceneGL::SceneGL(Object* root, Camera* cam)
 {
@@ -43,6 +46,8 @@ SceneGL::SceneGL(Object* root, Camera* cam)
 	m_pDirLight = nullptr;
 	TickTimerCounter = 0;
 	CurruntState = DAY;
+	m_pShadowBuffer = new IOBuffer();
+	m_pShadowBuffer->Init(1024, 1024, true, GL_NONE);
 
 }
 
@@ -216,6 +221,24 @@ void SceneGL::SetSpotLight(SpotLight* pSpot)
 	pSpotLight = pSpot;
 }
 
+void SceneGL::ShadowMapPass()
+{
+	glViewport(0,0,1024 , 1024);
+	m_pShadowBuffer->BindForWriting();
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+	//지오메트리에서 플랜드 필요없음
+	glDisable(GL_BLEND);
+
+	Root->RenderShadowPass();
+
+	glViewport(0, 0, 1024, 768);
+}
+
 
 void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffer , IOBuffer *BlurBuffer)
 {
@@ -224,7 +247,9 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffe
 	//if (pSkyBox != nullptr)pSkyBox->Render();
 
 	//RenderGEODepth(gBuffer);
-	
+	ShadowMapPass();
+
+
 	gBuffer->StartDeferredRender();
 	glClearColor(0, 0, 0, 0);
 	//glClearColor(1, 1, 1, 1);
@@ -241,7 +266,7 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffe
 	//Dir 패스 시작
 	
 	/////////스탠실 만들기
-	
+
 	glEnable(GL_STENCIL_TEST);
 
 	RenderStencilPass(gBuffer);
@@ -250,7 +275,7 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffe
 	RenderPointLitPass(gBuffer);
 	
 	glDisable(GL_STENCIL_TEST);
-	
+
 	RenderDirLitPass(gBuffer , BlurBuffer);
 	
 	//Forward Rendering//////////////////////////
@@ -366,6 +391,7 @@ void  SceneGL::RenderDirLitPass(DeferredRenderBuffers* gBuffer, IOBuffer* BlurBu
 
 	//대략 잡은거
 	BlurBuffer->BindForReading(GL_TEXTURE7);
+	m_pShadowBuffer->BindForReading(GL_TEXTURE8);
 
 	gBuffer->BindForLightPass();
 	

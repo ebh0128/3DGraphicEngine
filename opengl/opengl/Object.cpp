@@ -59,6 +59,14 @@ void Object::RenderGeoPass()
 		ChildList[i]->RenderGeoPass();
 	}
 }
+void Object::RenderShadowPass()
+{
+	pRoot->RenderShadowPass();
+	for (int i = 0; i < ChildList.size(); i++)
+	{
+		ChildList[i]->RenderShadowPass();
+	}
+}
 
 
 void Object::AddChild(Object* pChild)

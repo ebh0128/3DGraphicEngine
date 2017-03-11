@@ -135,6 +135,9 @@ protected:
 	//디렉션 라이트
 	MyShader* pDefDirLitPass;
 	
+
+	MyShader* m_pShaderShadow;
+
 	GLuint ubo;
 	GLint UbSize;
 
@@ -165,12 +168,13 @@ public:
 	virtual void RenderGeoPass();
 	virtual void RenderPointLitPass() {}
 	virtual void RenderDirLitPass() {}
-
+	void RenderShadowPass();
 
 	virtual void ShaderParamInit();
 	virtual void GeoPassInit();
 	virtual void DirLitPassInit() {}
 	virtual void PointLitPassInit() {}
+	virtual void ShadowPassInit();
 
 	void AddMesh(Mesh* pmesh);
 	void AddChild(Node* pNode);

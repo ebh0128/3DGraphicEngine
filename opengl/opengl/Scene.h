@@ -52,6 +52,7 @@ protected:
 	//스카이박스는 따로 등록
 	Node* pSkyBox;
 
+	IOBuffer* m_pShadowBuffer;
 
 	DeferredState m_RenderState;
 	//Deferred Lighting 에서 계층 탐색없이 바로 찾아가기위해 사용
@@ -130,4 +131,6 @@ protected:
 	void SSAOPass(DeferredRenderBuffers* gBuffer, IOBuffer* SSAOBuffer);
 	void BlurPass(IOBuffer* BlurBuffer, IOBuffer* SSAOBuffer);
 	
+
+	void ShadowMapPass();
 };

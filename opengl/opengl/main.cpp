@@ -78,6 +78,8 @@ void init(void)
 	Scene = new SceneGL();
 	//朝五虞 持失
 	MyCamera = new Camera(glm::vec3(0, 128, 128), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+//	MyCamera = new Camera(glm::vec3(-150, 225, 225), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
 	//競 持失
 	
 	GoodGround = new PatchedGround(nullptr, Scene, 102, 64.f);
