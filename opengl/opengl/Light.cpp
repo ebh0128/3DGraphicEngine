@@ -1,12 +1,10 @@
 #pragma once
 #include "CommonHeader.h"
-#include "MyShader.h"
 #include "Camera.h"
-#include "Mesh.h"
+
 #include "Light.h"
 #include "Geometry.h"
 #include "Scene.h"
-#include "Object.h"
 #include "MyFrameBuffer.h"
 
 
@@ -152,7 +150,7 @@ void Light::RenderStencilPass()
 {
 	if (!nullShader)  return;
 	nullShader->ApplyShader();
-
+	 
 	for (GLuint i = 0; i<meshes.size(); i++)
 	{
 		// 변환 행렬 쉐이더 전송

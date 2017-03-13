@@ -2,9 +2,9 @@
 
 //여러개의 Triangle로 구성된 Patched Mesh
 // 마름모 모양으로 구성되게 index를 꼬아서 만듬
-
+class Object;
 class PerlinNoise;
-class PatchedGround : public Node
+class PatchedGround : public Object
 {
 private:
 	PerlinNoise* Perlin;
@@ -51,7 +51,7 @@ public:
 	PatchedGround();
 	
 	//메쉬 생성은 Create 호출
-	PatchedGround(Node* Parent, SceneGL *Scene, int seed, GLfloat MaxH);
+	PatchedGround(Object* Parent, SceneGL *Scene, int seed, GLfloat MaxH);
 
 	//메쉬 생성 함수
 	void Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS, GLint TileT);

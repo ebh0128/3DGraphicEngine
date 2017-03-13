@@ -49,9 +49,10 @@ public:
 class LightSystem : public Object
 {
 protected:
+	MyShader* nullShader;
 
 public:
-	LightSystem(Node* Root, Object* Parent, SceneGL* Sce);
+	LightSystem(Object* Parent, SceneGL* Sce);
 
 	void AddLight(LightInstance* pnew);
 	void Update(GLfloat dtime);
@@ -60,8 +61,12 @@ public:
 
 	//ºû
 	void RenderPointLitPass();
-	void RenderDirLitPass();
 	void RenderStencilPass();
 
+	void RenderGeoPass() {}
+	void GeoPassInit() {}
+
+	void PointLitPassInit();
+	void ShaderParamInit();
 };
 

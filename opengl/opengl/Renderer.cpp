@@ -1,13 +1,13 @@
 #include "CommonHeader.h"
 
 #include "Camera.h"
-#include "myShader.h"
 #include "Timer.h"
-#include "Mesh.h"
+
 #include "Scene.h"
 #include "MyFrameBuffer.h"
+
 #include "AssimpModelNode.h"
-#include "Object.h"
+
 #include "ProgramManager.h"
 #include "IOBuffer.h"
 #include "Renderer.h"

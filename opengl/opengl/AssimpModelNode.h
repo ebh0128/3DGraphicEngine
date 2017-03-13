@@ -1,6 +1,8 @@
 #pragma once
 
-class AssimpModelNode : public Node
+class Object;
+
+class AssimpObject : public Object
 {
 protected:
 	bool IsRootNode;
@@ -9,23 +11,26 @@ protected:
 	GLuint MainTextUnit;
 public:
 
-	AssimpModelNode();
+	AssimpObject();
 
 	//자식 노드생성
-	AssimpModelNode(Node* parent, SceneGL* Scene);
+	AssimpObject(Object* parent, SceneGL* Scene);
 	
 	//루트 노드 생성(Assimp Read)
-	AssimpModelNode(Node* parent, SceneGL* Scene ,std::string FilePath, std::string FileName);
-	void InitAssimpNode(aiNode* pNode , const aiScene* pScene, std::string FilePath);
+	AssimpObject(Object* parent, SceneGL* Scene ,std::string FilePath, std::string FileName);
+	
 	void SetNoTexture();
 	void SetScale(glm::vec3 scale);
-	void Update(GLfloat dtime);
-	void Render();
+	virtual void Update(GLfloat dtime);
+	virtual void Render();
+
+	virtual void RenderGeoPass();
+	virtual void RenderShadowPass();
 
 
-	void ShaderParamInit();
-	void GeoPassInit();
+	virtual void ShaderParamInit();
+	virtual void GeoPassInit();
 	//void LitPassInit();
-	void ShadowPassInit();
+	virtual void ShadowPassInit();
 
 };

@@ -15,16 +15,17 @@ typedef struct Material
 class Sampler;
 class Texture;
 class MeshEntry;
+class MyShader;
 // 실제 사용하는 모델 메쉬 덩어리
 class Model
 {
 protected:
-	std::vector<MeshEntry*> MeshList;
-
+	std::vector<MeshEntry*> m_MeshList;
+	GLuint m_MainTextureUnitNum;
 
 
 public:
-
+	Model();
 	//Assimp용 모델로드 이므로 숨김
 	void CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath);
 
@@ -36,9 +37,11 @@ public:
 
 	//Assimp에서 모델 로드할때 
 	void CreateModelFromFile(std::string FilePath, std::string FileName);
+	void AddMesh(MeshEntry* pNewMesh);
 
-	void Render();
-	void Render(glm::mat4 * MVPmats, unsigned int InstanceNum);
+	//Mat Location 0 = Diff , 1 = Ambi , 2 = Spec , 3 =  Shiness
+	void Render(GLuint* MatLocation = nullptr);
+	void Render(glm::mat4 * MVPmats, unsigned int InstanceNum, GLuint* MatLocation = nullptr);
 
 };
 
@@ -142,7 +145,7 @@ protected:
 	Node* Parent;
 	std::vector<Node*> Children;
 	std::vector<MeshEntry*> meshes;
-	
+	Model* m_pModel;
 
 	// 단일 & 여러 노드 오브젝트 공용
 	//(자식노드일 경우 부모변환들이 계속 중첩)

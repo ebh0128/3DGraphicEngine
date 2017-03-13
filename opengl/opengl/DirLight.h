@@ -4,7 +4,8 @@
 //빛 노드
 
 
-class DirLight :public Node
+
+class DirLight :public Object
 {
 	friend class SceneGL;
 
@@ -37,14 +38,14 @@ protected:
 
 public:
 	DirLight();
-	DirLight(Node* parent, SceneGL* Scene);
+	DirLight(Object* parent, SceneGL* Scene);
 
 	void SetPos(glm::vec4 Lightpos);
 	void SetDiffuse(glm::vec3 dif);
 	void SetSpec(glm::vec3 dif);
 
 	//dir 에선 방향임
-	glm::vec4 GetPos() { return vPos; }
+	//glm::vec4 GetPos() { return vPos; }
 	glm::vec3 GetDif() { return Diffuse; }
 	glm::vec3 GetAmb() { return Ambient; }
 	glm::vec3 GetSpec() { return Specular; }
@@ -74,3 +75,4 @@ public:
 
 	void InitKernel();
 };
+

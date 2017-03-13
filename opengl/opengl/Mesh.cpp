@@ -1,21 +1,21 @@
 #include "CommonHeader.h"
-#include "MyShader.h"
 #include "Camera.h"
 #include "Texture.h"
-#include "Object.h"
-#include "Mesh.h"
 
 #include "Scene.h"
 #include "ProgramManager.h"
-#include "DirLight.h"
 
 
 
-
+Model::Model()
+{
+	m_MainTextureUnitNum = 5;
+}
 
 //Assimp¿ë ¸ðµ¨·Îµå ÀÌ¹Ç·Î ¼û±è
 void Model::CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath)
 {
+
 	for (int i = 0; i < pAssimpScene->mNumMeshes; i++)
 	{
 		const aiMesh* AssimpMesh = pAssimpScene->mMeshes[i];
@@ -32,10 +32,12 @@ void Model::CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath)
 			char* TextureName = strrchr(TPath, '/');
 			if (TextureName == nullptr)  TextureName = strrchr(TPath, '\\');
 			std::string sDir = FilePath + TextureName;
-//			Sampler* MainSampler = new Sampler(sDir.c_str(), 7);
-	//		NewMesh->AddSampler(MainSampler);
+			Texture* MainTextue = new Texture(sDir.c_str(), m_MainTextureUnitNum);
+			NewMesh->AddTexture(MainTextue);
+		
 		}
-	
+		AddMesh(NewMesh);
+
 	}
 }
 
@@ -46,7 +48,7 @@ void Model::CreateMeshEntry(GLfloat* vertices, int VertexNum,
 	GLfloat* texcoords, int texcoordsNum)
 {
 	MeshEntry* newMesh = new MeshEntry(vertices, VertexNum, indices, indicesNum, normals, texcoords, texcoordsNum);
-	MeshList.push_back(newMesh);
+	m_MeshList.push_back(newMesh);
 
 }
 
@@ -64,20 +66,46 @@ void Model::CreateModelFromFile(std::string FilePath, std::string FileName)
 	CreateAssimpModel( AssimpScene, FilePath);
 
 }
-
-void Model::Render()
+void Model::AddMesh(MeshEntry* pNewMesh)
 {
-	for (int i = 0; i < MeshList.size(); i++)
+	if (pNewMesh == nullptr) return;
+	m_MeshList.push_back(pNewMesh);
+}
+
+void Model::Render( GLuint* MatLocation)
+{
+	for (int i = 0; i < m_MeshList.size(); i++)
 	{
-		MeshList[i]->Render();
+		if (MatLocation != nullptr)
+		{
+			Material* p = m_MeshList[i]->GetMaterial();
+
+			glUniform3fv(MatLocation[0],1, glm::value_ptr(p->diffuse));
+			glUniform3fv(MatLocation[1], 1, glm::value_ptr(p->ambient));
+			glUniform3fv(MatLocation[2], 1, glm::value_ptr(p->specular));
+			glUniform1f(MatLocation[3] , p->shininess);
+
+
+		}
+		m_MeshList[i]->Render();
 	}
 }
 
-void Model::Render(glm::mat4 * MVPmats, unsigned int InstanceNum)
+void Model::Render(glm::mat4 * MVPmats, unsigned int InstanceNum , GLuint* MatLocation)
 {
-	for (int i = 0; i < MeshList.size(); i++)
+	for (int i = 0; i < m_MeshList.size(); i++)
 	{
-		MeshList[i]->Render(MVPmats, InstanceNum);
+		if (MatLocation != nullptr)
+		{
+			Material* p = m_MeshList[i]->GetMaterial();
+
+			glUniform3fv(MatLocation[0], 1, glm::value_ptr(p->diffuse));
+			glUniform3fv(MatLocation[1], 1, glm::value_ptr(p->ambient));
+			glUniform3fv(MatLocation[2], 1, glm::value_ptr(p->specular));
+			glUniform1f(MatLocation[3], p->shininess);
+
+		}
+		m_MeshList[i]->Render(MVPmats, InstanceNum);
 	}
 }
 
@@ -428,7 +456,7 @@ Node::Node()
 	ubo = 0;
 	UbSize = 0;
 	MainTextureUnit = 0;
-
+	m_pModel = nullptr;
 }
 Node::Node(Node* _parent, SceneGL* scene) : Node()
 {
@@ -561,6 +589,7 @@ void Node::Render()
 	if (pShader) pShader->ApplyShader();
 
 	pScene->ApplySpotLight(pShader);
+	/*
 	for (GLuint i = 0; i<meshes.size(); i++)
 	{
 
@@ -580,6 +609,23 @@ void Node::Render()
 		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
 
 	}
+	*/
+	ShaderParamInit();
+
+	GLuint MatLocArray[4];
+	MatLocArray[0]= glGetUniformLocation(pShader->GetShaderProgram(), "material.diffuse");
+	MatLocArray[1] = glGetUniformLocation(pShader->GetShaderProgram(), "material.amdient");
+	MatLocArray[2] = glGetUniformLocation(pShader->GetShaderProgram(), "material.specular");
+	MatLocArray[3] = glGetUniformLocation(pShader->GetShaderProgram(), "material.shininess");
+
+
+	if (m_pModel != nullptr)
+	{
+		if (pObj == nullptr || pObj->GetInstanceNum() == 0) m_pModel->Render(MatLocArray);
+		else m_pModel->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(), MatLocArray);
+
+	}
+	
 	for (GLuint i = 0; i<Children.size(); i++)
 	{
 		Children[i]->Render();
@@ -596,20 +642,7 @@ void Node::ShaderParamInit()
 
 	//Dir Light Á¤º¸ º¸³»±â
 
-	DirLight* pDirLit = pScene->GetDirectionalLight();
-	glm::vec4 DirLightPos = pDirLit->GetPos();
-	//glm::vec4 DirLightPos = glm::vec4(0,-15,0,1);
-	pShader->SetUniform4fv("gDirLight.LPos", glm::value_ptr(DirLightPos));
-
-	glm::vec4 paramDiff = glm::vec4(pDirLit->GetDif(), 1);
-	glm::vec4 paramAmbi = glm::vec4(pDirLit->GetAmb(), 1);
-	glm::vec4 paramSpec = glm::vec4(pDirLit->GetSpec(), 1);
-
 	
-	pShader->SetUniform4fv("gDirLight.LDiff", glm::value_ptr(paramDiff));
-	pShader->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
-	pShader->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
-
 	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
 	pShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
 
@@ -660,7 +693,7 @@ void Node::RenderGeoPass()
 {
 	if (!pDefGeoPass)  return;
 	pDefGeoPass->ApplyShader();
-
+	/*
 	for (GLuint i = 0; i<meshes.size(); i++)
 	{
 
@@ -670,6 +703,23 @@ void Node::RenderGeoPass()
 		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
 
 	}
+	*/
+	GeoPassInit();
+
+	GLuint MatLocArray[4];
+	MatLocArray[0] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.diffuse");
+	MatLocArray[1] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.amdient");
+	MatLocArray[2] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.specular");
+	MatLocArray[3] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.shininess");
+
+
+	if (m_pModel != nullptr)
+	{
+		if (pObj == nullptr || pObj->GetInstanceNum() == 0) m_pModel->Render(MatLocArray);
+		else m_pModel->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(), MatLocArray);
+
+	}
+
 	for (GLuint i = 0; i<Children.size(); i++)
 	{
 		Children[i]->RenderGeoPass();

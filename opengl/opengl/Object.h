@@ -6,6 +6,7 @@ class Node;
 class ObjectInstance;
 class MeshEntry;
 class MyShader;
+class Model;
 
 //실제 사용시엔 프로토타입 패턴으로 만들어사용
 class Object
@@ -14,9 +15,9 @@ protected:
 	Node* pRoot;
 	SceneGL* pScene;
 	Object* mParent;
-
+	 
 	//메쉬 정보
-	std::vector<MeshEntry*> meshes;
+	Model*m_pModel;
 
 	std::vector<ObjectInstance*> InstanceList;
 
@@ -47,10 +48,13 @@ protected:
 	glm::vec3 vRot;
 	glm::vec3 vScale;
 
+	GLuint MainTextureUnit;
 
 public:
 	//루트 노드를 지정하고 생성
-	Object(Node* Root,Object* Parent , SceneGL* Sce);
+	Object();
+	Object(Object* Parent , SceneGL* Sce);
+	
 //	Object(MeshEntry* BaseMesh, Object* Parent, SceneGL* Sce);
 //	Object(MeshEntry* BaseMesh, Object* Parent, SceneGL* Sce);
 
@@ -59,14 +63,32 @@ public:
 	virtual void Render();
 
 	virtual void RenderGeoPass();
-	//라이트 패스
+	virtual void RenderShadowPass();
+
 	virtual void RenderPointLitPass() {}
 	virtual void RenderDirLitPass() {}
 
-	virtual void RenderShadowPass();
+
+	virtual void ShaderParamInit();
+	virtual void GeoPassInit();
+	virtual void ShadowPassInit();
+
+	virtual void DirLitPassInit() {}
+	virtual void PointLitPassInit() {}
 
 	void AddChild(Object* pChild);
 	Node* GetRoot();
 	int GetInstanceNum();
 	glm::mat4* GetInstanceMatrixData();
+	glm::mat4 GetModelMat();
+
+	//빛 정보를 받아보기위한 유니폼 블록
+	//빛 정보가 필요하면 써야됨
+	void AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset, MyShader* pshad);
+	void UpdateUBO(void* Data, GLuint Size, GLuint Offset);
+
+	void SetPosition(float x, float y, float z);
+	glm::vec4 GetPos() { return vPos; }
+
 };
+

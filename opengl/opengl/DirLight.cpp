@@ -1,24 +1,22 @@
 
 #include "CommonHeader.h"
-#include "MyShader.h"
 #include "Camera.h"
-#include "Mesh.h"
 #include "IOBuffer.h"
 
-#include "DirLight.h"
+
 #include "Geometry.h"
 #include "Scene.h"
-
-#include "Object.h"
 #include "MyFrameBuffer.h"
 
+#include "DirLight.h"
+#include "LightSystem.h"
 
 
 DirLight::DirLight()
 {
 
 }
-DirLight::DirLight(Node* parent, SceneGL* Scene) :Node(parent, Scene)
+DirLight::DirLight(Object* parent, SceneGL* Scene) :Object(parent, Scene)
 {
 	
 	//사실상 2d 이므로 2d 로사용
@@ -39,7 +37,10 @@ DirLight::DirLight(Node* parent, SceneGL* Scene) :Node(parent, Scene)
 
 	MeshEntry* QuadMesh = new MeshEntry((GLfloat*)Vertices, sizeof(Vertices) / sizeof(GLfloat),
 		(GLuint*)Indices, sizeof(Indices) / sizeof(GLuint), nullptr);
-	AddMesh(QuadMesh);
+	
+	m_pModel = new Model();
+	m_pModel->AddMesh(QuadMesh);
+	
 
 	pShader = new MyShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
 	Diffuse = glm::vec3(0.7, 0.5, 0.3);
@@ -120,14 +121,14 @@ void DirLight::Update(GLfloat dtime)
 		,glm::vec3(0,1,0));
 
 
-	Node::Update(dtime);
+	Object::Update(dtime);
 }
 
 // 노드 메소드 그대로 사용 >> 디버그를 위해 일단 재정의
 void DirLight::Render()
 {
 	
-	Node::Render();
+	Object::Render();
 }
 void DirLight::ShaderParamInit()
 {
@@ -146,17 +147,17 @@ void DirLight::RenderDirLitPass()
 	if (!pDefDirLitPass)  return;
 	pDefDirLitPass->ApplyShader();
 
-	for (GLuint i = 0; i<meshes.size(); i++)
+	DirLitPassInit();
+	
+	if (GetInstanceNum() == 0) m_pModel->Render();
+	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+
+	/*
+	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
-		// 변환 행렬 쉐이더 전송
-		DirLitPassInit();
-		meshes[i]->Render();
-		
+		ChildList[i]->RenderPointLitPass();
 	}
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		Children[i]->RenderPointLitPass();
-	}
+	*/
 }
 
 void DirLight::SSAOPass()
@@ -164,33 +165,30 @@ void DirLight::SSAOPass()
 	if (!m_pShaderSSAO)  return;
 	m_pShaderSSAO->ApplyShader();
 
-	for (GLuint i = 0; i<meshes.size(); i++)
-	{
-		// 변환 행렬 쉐이더 전송
-		//DirLitPassInit();
-
-		glm::mat4 P = pScene->GetPMatrix();
+	
+	glm::mat4 P = pScene->GetPMatrix();
 
 
-		m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
-		m_pShaderSSAO->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
+	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+	m_pShaderSSAO->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
 		
-		//NoiseTexture 전송
-		glActiveTexture(GL_TEXTURE10);
-		glBindTexture(GL_TEXTURE_2D, NosieTexture);
-		m_pShaderSSAO->SetUniform1i("gNoiseTexture", 10);
+	//NoiseTexture 전송
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, NosieTexture);
+	m_pShaderSSAO->SetUniform1i("gNoiseTexture", 10);
 
-		m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
-		m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
-		m_pShaderSSAO->SetUniform1f("gSampleRad", 0.3f);
-		m_pShaderSSAO->SetUniform3fv("gKernel", (GLfloat*)Kernel, KERNEL_SIZE);
+	m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
+	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+	m_pShaderSSAO->SetUniform1f("gSampleRad", 0.3f);
+	m_pShaderSSAO->SetUniform3fv("gKernel", (GLfloat*)Kernel, KERNEL_SIZE);
 
-		meshes[i]->Render();
+	if (GetInstanceNum() == 0) m_pModel->Render();
+	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
-	}
-	for (GLuint i = 0; i<Children.size(); i++)
+	
+	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
-		Children[i]->RenderPointLitPass();
+		ChildList[i]->RenderPointLitPass();
 	}
 }
 void DirLight::BlurPass()
@@ -198,17 +196,15 @@ void DirLight::BlurPass()
 	if (!m_pShaderBlur)  return;
 	m_pShaderBlur->ApplyShader();
 
-	for (GLuint i = 0; i<meshes.size(); i++)
-	{
 		// 변환 행렬 쉐이더 전송
-		m_pShaderBlur->SetUniform1i("gColorMap", 0);
+	m_pShaderBlur->SetUniform1i("gColorMap", 0);
 
-		meshes[i]->Render();
+	if (GetInstanceNum() == 0) m_pModel->Render();
+	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
-	}
-	for (GLuint i = 0; i<Children.size(); i++)
+	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
-		Children[i]->RenderPointLitPass();
+		ChildList[i]->RenderPointLitPass();
 	}
 }
 
@@ -217,24 +213,23 @@ void DirLight::HDRPass()
 	if (!m_pShaderHDR)  return;
 	m_pShaderHDR->ApplyShader();
 
-	for (GLuint i = 0; i<meshes.size(); i++)
-	{
 		// 변환 행렬 쉐이더 전송
 	
-	//	glm::mat4 P = pScene->GetPMatrix();
+//	glm::mat4 P = pScene->GetPMatrix();
 
-		m_pShaderHDR->SetUniform1i("gFinalMap", 4);
-		m_pShaderHDR->SetUniform1f("exposure", 0.01);
-	//	m_pShaderHDR->SetUniform1f("exposure", 1);
-	//	m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
-	//	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+	m_pShaderHDR->SetUniform1i("gFinalMap", 4);
+	m_pShaderHDR->SetUniform1f("exposure", 0.01);
+//	m_pShaderHDR->SetUniform1f("exposure", 1);
+//	m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
+//	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
 	
-		meshes[i]->Render();
+	if (GetInstanceNum() == 0) m_pModel->Render();
+	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
-	}
-	for (GLuint i = 0; i<Children.size(); i++)
+	
+	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
-		Children[i]->RenderPointLitPass();
+		ChildList[i]->RenderPointLitPass();
 	}
 }
 

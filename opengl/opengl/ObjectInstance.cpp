@@ -1,6 +1,6 @@
 #include "CommonHeader.h"
-#include "Object.h"
 #include "ObjectInstance.h"
+
 
 
 void ObjectInstance::Update(float dtime)

@@ -1,5 +1,6 @@
 #pragma once
 
+class Object;
 class Light;
 class LightSystem;
 class LightInstance;
@@ -33,7 +34,7 @@ enum DeferredState
 };
 //³·¹ã º¯È­½Ã°£
 #define DAY_CHANGE_TIMEMAX 30
-class Object;
+
 class DroneCamera;
 class SpotLight;
 class SkyBox;
@@ -138,4 +139,7 @@ protected:
 	
 
 	void ShadowMapPass();
+
+//	glm::vec4 GetDriLightPos() { return m_pDirLight->GetPos(); }
+
 };

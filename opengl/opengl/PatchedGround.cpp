@@ -1,22 +1,22 @@
 #pragma once
 #include "CommonHeader.h"
-#include "MyShader.h"
 #include "Camera.h"
-#include "Mesh.h"
+
 
 #include "Scene.h"
 #include "PerlinNoise.h"
 #include "ProgramManager.h"
-#include "PatchedGround.h"
-#include "DirLight.h"
-#include "Texture.h"
 
+#include "PatchedGround.h"
+
+#include "Texture.h"
+#include "DirLight.h"
 
 PatchedGround::PatchedGround()
 {
 
 }
-PatchedGround::PatchedGround(Node* Parent, SceneGL *Scene, int seed, GLfloat MaxH) :Node(Parent, Scene)
+PatchedGround::PatchedGround(Object* Parent, SceneGL *Scene, int seed, GLfloat MaxH) :Object(Parent, Scene)
 {
 	VertexCount = 0;
 	TriangleCount = 0;
@@ -191,23 +191,7 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	MeshEntry * GroundMesh = new MeshEntry((GLfloat*)pVertice, VertexCount*3, (GLuint*)pIndices, TriangleCount*3, (GLfloat*)pNormal,
 									(GLfloat*)pTexcoords, VertexCount*2);
 	GroundMesh->AddTexcoordAttibute((GLfloat*)pTexcoordForNoiseMap , VertexCount * 2);
-/*	
-	Sampler* MainSampler = GroundMesh->CreateSampler("./Texture/Ground.jpg", ProgramManager::GetInstance()->GetChannelID(),
-		glGetUniformLocation(pShader->GetShaderProgram(), "TextureGround") , glGetUniformLocation(pDefGeoPass->GetShaderProgram(),"TextureGround"));
 
-	MainSampler->CreateTexture("./Texture/Snow.jpg", ProgramManager::GetInstance()->GetChannelID(),
-		glGetUniformLocation(pShader->GetShaderProgram(), "TextureSnow"), glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "TextureSnow"));
-	MainSampler->CreateTexture("./Texture/Stone.jpg", ProgramManager::GetInstance()->GetChannelID(),
-		glGetUniformLocation(pShader->GetShaderProgram(), "TextureStone"), glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "TextureStone"));
-
-
-	//Noise 텍스쳐 만들기
-	Sampler* NoiseSampler = new Sampler();
-	NoiseSampler->CreateTextureByData(pNoiseData, VertexCountX, VertexCountZ, ProgramManager::GetInstance()->GetChannelID(),
-		glGetUniformLocation(pShader->GetShaderProgram(), "SamplerNoise"), glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "SamplerNoise"));
-
-	GroundMesh->AddSampler(NoiseSampler);
-	*/
 	Texture* MainTex = new Texture("./Texture/Ground.jpg",MainTexUnit);
 	GroundMesh->AddTexture(MainTex);
 	Texture* SnowTex = new Texture("./Texture/Snow.jpg", SnowTexUnit);
@@ -219,11 +203,13 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	GroundMesh->AddTexture(NoiseTex);
 	
 	GroundMesh->MakeInstancingBuffer();
-	AddMesh(GroundMesh);
 	
 	//최대 빛 수치만큼 UBO 사이즈 잡아놓기 (빛 정보-> float 16개 + int 1개(빛의 개수) )
 	int strSize = sizeof(PaddingLight);
 	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint),"LightInfoList", 0 , pShader);
+
+	m_pModel = new Model();
+	m_pModel->AddMesh(GroundMesh);
 
 	delete[] pVertice;
 	delete[] pIndices;
@@ -316,7 +302,7 @@ void PatchedGround::NormalReCompute(Vec* pVert, InVec* pind, Vec* pNorm)
 }
 void PatchedGround::Update(GLfloat dtime)
 {
-	Node::Update(dtime);
+	Object::Update(dtime);
 }
 
 GLfloat PatchedGround::GetMaxHeight()
@@ -330,7 +316,7 @@ void PatchedGround::Render()
 	pShader->SetUniform1i("TextureSnow", SnowTexUnit);
 	pShader->SetUniform1i("TextureStone", StoneTexUnit);
 	pShader->SetUniform1i("SamplerNoise", NoiseTexUnit);
-	Node::Render();
+	Object::Render();
 }
 
 void PatchedGround :: GeoPassInit()
@@ -339,8 +325,8 @@ void PatchedGround :: GeoPassInit()
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
 
-	if (Parent == nullptr) M = TransformMat;
-	else  M = TransformMat*Parent->GetModelMat();
+	if (mParent == nullptr) M = TransformMat;
+	else  M = TransformMat*mParent->GetModelMat();
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
@@ -361,8 +347,8 @@ void PatchedGround::ShadowPassInit()
 	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
 	glm::mat4 M;
 
-	if (Parent == nullptr) M = TransformMat;
-	else  M = TransformMat*Parent->GetModelMat();
+	if (mParent == nullptr) M = TransformMat;
+	else  M = TransformMat*mParent->GetModelMat();
 
 	m_pShaderShadow->SetUniformMatrix4fv("M", glm::value_ptr(M));
 	m_pShaderShadow->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));

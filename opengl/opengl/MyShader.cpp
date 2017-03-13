@@ -177,7 +177,7 @@ GLuint MyShader::build_program_from_files(
 }
 
 GLuint MyShader::GetShaderProgram()
-{
+{ 
 	return mProgram;
 }
 void MyShader::ApplyShader()

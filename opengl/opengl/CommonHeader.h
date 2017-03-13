@@ -53,3 +53,9 @@ typedef struct LightAttnuation
 	float Linear;
 	float exp;
 }LitAttnu;
+
+#include "MyShader.h"
+#include "Texture.h"
+#include "Mesh.h"
+#include "ObjectInstance.h"
+#include "Object.h"

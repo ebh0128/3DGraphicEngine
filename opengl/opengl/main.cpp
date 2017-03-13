@@ -2,22 +2,21 @@
 ///////////////////////////////////////////////////////////////////////
 #include "CommonHeader.h"
 
+
 #include "Camera.h"
-#include "myShader.h"
 #include "Timer.h"
-#include "Mesh.h"
-#include "SimpleGround.h"
+
 #include "PatchedGround.h"
 #include "Light.h"
 #include "Scene.h"
 #include "SkyBox.h"
 #include "MyFrameBuffer.h"
 #include "AssimpModelNode.h"
-#include "Object.h"
+
 #include "Drone.h"
 #include "ProgramManager.h"
 #include "Renderer.h"
-#include "ObjectInstance.h"
+
 #include "LightSystem.h"
 #include "DirLight.h"
 
@@ -59,9 +58,8 @@ PatchedGround* GoodGround;
 SceneGL* Scene;
 GLuint CurrentPollygonMode;
 SkyBox* pSkyBox;
-AssimpModelNode* ModelTest;
-Object* GroundObject;
-Object* ModelObject;
+AssimpObject* ModelTest;
+
 Drone* againDrone;
 Renderer* SceneRenderer;
 LightSystem *LightSys;
@@ -86,17 +84,17 @@ void init(void)
 	//GoodGround->Create(256, 256, 0.5f, 10, 10);
 	GoodGround->Create(512, 512, 0.5f, 10, 10);
 
-	GroundObject = new Object(GoodGround,nullptr,Scene);
-
-	ObjectInstance* NewInstance = new ObjectInstance(GroundObject);
+	//GroundObject = new Object(GoodGround,nullptr,Scene);
+	
+	ObjectInstance* NewInstance = new ObjectInstance(GoodGround);
 	NewInstance->SetPos(glm::vec3(0, 0, 0));
 	NewInstance->SetRot(glm::vec3(0, 0, 0));
 	NewInstance->SetScale(glm::vec3(1, 1, 1));
 
-	GroundObject->AddInstance(NewInstance);
+	GoodGround->AddInstance(NewInstance);
 
 	Scene->AddCam(MyCamera);
-	Scene->SetRoot(GroundObject);
+	Scene->SetRoot((Object*)GoodGround);
 	
 	glClearColor(0.3, 0.3, 0.3, 1.0);
 	
@@ -126,8 +124,9 @@ void init(void)
 
 
 	//Point Light
-	Light* newLight = new Light(nullptr,Scene);
-	LightSys = new LightSystem(newLight, GroundObject, Scene);
+	//Light* newLight = new Light(nullptr,Scene);
+	
+	LightSys = new LightSystem( GoodGround, Scene);
 
 	for (int i = 0; i < LIGHT_MAX - 1; i++)
 	{
@@ -176,14 +175,14 @@ void init(void)
 	//MyFrameBuffers* FB = new MyFrameBuffers(4, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 
 //	ModelTest = new AssimpModelNode(nullptr, Scene, "./Model/Windmill", "/windmill02.obj");
-	ModelTest = new AssimpModelNode(nullptr, Scene, "./Model/Medievalhouse", "/med_house_final.lwo");
+	ModelTest = new AssimpObject(GoodGround, Scene, "./Model/Medievalhouse", "/med_house_final.lwo");
 //	ModelTest = new AssimpModelNode(nullptr, Scene, "./Model/Monkey", "/monkey_high.obj");
 //	ModelTest = new AssimpModelNode(nullptr, Scene, "./Model/Monkey", "/box.obj");
 	
 	//¸ðµ¨ Æ®·£½ºÆû Á¶Àý
 	ModelTest->SetScale(glm::vec3(0.1, 0.1, 0.1));
 	ModelTest->SetPosition(0, 2, 0);
-	ModelObject = new Object(ModelTest, GroundObject, Scene);
+
 	for (int i = 0; i < 20; i++)
 	{
 		float x = (float)(dis(gen) - 0.5f) * GoodGround->GetXSize();
@@ -195,16 +194,14 @@ void init(void)
 		WorldTransform->vRot = glm::vec3(0, 0, 0);
 		WorldTransform->vScale = glm::vec3(1, 1, 1);
 		*/
-		ObjectInstance* NewInstance = new ObjectInstance(ModelObject);
+		ObjectInstance* NewInstance = new ObjectInstance(ModelTest);
 		NewInstance->SetPos(glm::vec3(x, y, z));
 		NewInstance->SetRot(glm::vec3(0, 0, 0));
 		NewInstance->SetScale(glm::vec3(1, 1, 1));
 
-		ModelObject->AddInstance(NewInstance);
+		ModelTest->AddInstance(NewInstance);
 	}
-	AssimpModelNode* DroneRoot = new AssimpModelNode(NULL, Scene, "./Model/Monkey", "/monkey_high.obj");
-	DroneRoot->SetNoTexture();
-	againDrone = new Drone(DroneRoot, GroundObject, Scene);
+	againDrone = new Drone( GoodGround, Scene, "./Model/Monkey", "/monkey_high.obj");
 	SceneRenderer = new Renderer();
 	
 }

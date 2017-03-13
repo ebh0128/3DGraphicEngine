@@ -2,12 +2,13 @@
 #include "MyShader.h"
 #include "Camera.h"
 #include "Mesh.h"
-#include "Object.h"
-#include "ObjectInstance.h"
+
+
 #include "LightSystem.h"
 #include "Geometry.h"
 #include "Scene.h"
 #include "Light.h"
+#include "MyFrameBuffer.h"
 
 LightInstance::LightInstance(Object* Ori, ObjectInstance* _Parents) :ObjectInstance(Ori,_Parents)
 {
@@ -21,6 +22,8 @@ LightInstance::LightInstance(Object* Ori, ObjectInstance* _Parents) :ObjectInsta
 	Attnuation.Constant = 0.3f;
 	Attnuation.exp = 0.02f;
 	Attnuation.Linear = 0.05f;
+
+
 }
 void LightInstance::Update(float dtime)
 {
@@ -48,9 +51,33 @@ float LightInstance::CalcLightArea()
 	return ret;
 }
 
-LightSystem::LightSystem(Node* Root, Object* Parent, SceneGL* Sce) : Object(Root, Parent, Sce)
+LightSystem::LightSystem( Object* Parent, SceneGL* Sce) : Object( Parent, Sce)
 {
 	Sce->SetLightSystem(this);
+
+	Sphere* Spheremesh = new Sphere(1.0f, 16, 16);
+
+	MeshEntry* mesh = new MeshEntry(&Spheremesh->vertices[0], Spheremesh->vertices.size()
+		, &Spheremesh->indices[0], Spheremesh->indices.size(), &Spheremesh->normals[0]);
+
+	mesh->MakeInstancingBuffer();
+	
+	m_pModel = new Model();
+	m_pModel->AddMesh(mesh);
+	
+	delete Spheremesh;
+
+	pShader = new MyShader("PointLight.vert", "PointLight.frag");
+	//Light 패스를 위한 쉐이더 정의
+	pDefPtLitPass = new MyShader("./Shader/Deferred_PointLight.vert", "./Shader/Deferred_PointLight.frag");
+	nullShader = new MyShader("./Shader/Deferred_PointLight.vert", "./Shader/Deferred_PointLight.frag");
+
+
+	//	vScale = glm::vec3(0.1f, 0.1f, 0.1f);
+	//씬에 라이트 추가하는 코드 넣기(씬에서 관리)
+	int strSize = sizeof(PaddingLight);
+	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0, pDefPtLitPass);
+
 }
 void LightSystem::Update(GLfloat dtime)
 {
@@ -70,15 +97,94 @@ void  LightSystem::AddLight(LightInstance* pnew)
 	AddInstance(pnew);
 }
 
+void LightSystem::ShaderParamInit()
+{
+	glm::vec4 TempDiff = glm::vec4(1, 1, 1, 1);
+	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(TempDiff));
+
+	glm::mat4 VP = pScene->GetVPMatrix();
+	glm::mat4 MVP = VP*TransformMat;
+	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	pShader->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
+	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+
+
+}
+
 void LightSystem::RenderPointLitPass()
 {
-	pRoot->RenderPointLitPass();
+	if (!pDefPtLitPass)  return;
+	pDefPtLitPass->ApplyShader();
+
+	
+		// 변환 행렬 쉐이더 전송
+	PointLitPassInit();
+	
+	if (GetInstanceNum() == 0) m_pModel->Render();
+	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+
+	
+	for (GLuint i = 0; i<ChildList.size(); i++)
+	{
+		ChildList[i]->RenderPointLitPass();
+	}
 }
-void LightSystem::RenderDirLitPass()
+
+void LightSystem::PointLitPassInit()
 {
-	pRoot->RenderDirLitPass();
+
+//	pDefPtLitPass->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
+
+	glm::mat4 V = pScene->GetVMatrix();
+	glm::mat4 VP = pScene->GetVPMatrix();
+	glm::mat4 MVP = VP*TransformMat;
+
+	pDefPtLitPass->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	pDefPtLitPass->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
+	pDefPtLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	pDefPtLitPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
+
+
+	glm::vec2 ScreenSize = glm::vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+	pDefPtLitPass->SetUniform2fv("gScreenSize", glm::value_ptr(ScreenSize));
+
+	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
+	pDefPtLitPass->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
+
+	//gBuffer 텍스쳐 보내기
+	pDefPtLitPass->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+	pDefPtLitPass->SetUniform1i("gColorMap", DeferredRenderBuffers::TEXTURE_TYPE_DIFFUSE);
+	pDefPtLitPass->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
+
+	LightList* DataforShader = pScene->GetLightSrouceArray();
+	GLuint Size = DataforShader->Count * sizeof(PaddingLight);
+	//meshes[i]->UpdateUBO(DataforShader, Size+ sizeof(GLuint), 0);
+	UpdateUBO(DataforShader, sizeof(GLuint), 0);
+
+	// std140 stride 16
+	UpdateUBO(DataforShader, Size, 12);
+	//	UpdateUBO(DataforShader, Size, 16);
+
 }
+
 void LightSystem::RenderStencilPass()
 {
-	((Light*)pRoot)->RenderStencilPass();
+	if (!nullShader)  return;
+	nullShader->ApplyShader();
+
+	
+		// 변환 행렬 쉐이더 전송
+	glm::mat4 VP = pScene->GetVPMatrix();
+	glm::mat4 MVP = VP*TransformMat;
+	pDefPtLitPass->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
+	pDefPtLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+
+	if (GetInstanceNum() == 0) m_pModel->Render();
+	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+
+	
+	for (GLuint i = 0; i<ChildList.size(); i++)
+	{
+		ChildList[i]->RenderPointLitPass();
+	}
 }

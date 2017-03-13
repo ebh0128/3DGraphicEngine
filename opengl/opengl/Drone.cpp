@@ -1,35 +1,28 @@
 #include "CommonHeader.h"
-#include "MyShader.h"
 #include "Camera.h"
-#include "Mesh.h"
 
 #include "Scene.h"
-#include "Object.h"
+
 #include "AssimpModelNode.h"
 #include "DroneCamera.h"
 #include "SpotLight.h"
-#include "ObjectInstance.h"
+
 #include "Drone.h"
 
 
 
-Drone::Drone(Node* Root, Object* Parent, SceneGL* Sce) : Object(Root,Parent ,Sce)
+Drone::Drone( Object* Parent, SceneGL* Sce) : AssimpObject(Parent ,Sce)
 {
 	
 
 	MoveSpeed = 15;
 	RotSpeed = 90;
-//	TransSet* WorldTransform = new TransSet();
-//	WorldTransform->vPos = glm::vec4(0, 50, 0, 1);
-//	WorldTransform->vRot = glm::vec3(0, 0, 0);
-//	WorldTransform->vScale = glm::vec3(10, 10, 10);
 	
 	ObjectInstance* NewInstance = new ObjectInstance(this);
 	NewInstance->SetPos(glm::vec3(0, 50, 0));
 	NewInstance->SetRot(glm::vec3(0, 0, 0));
 	NewInstance->SetScale(glm::vec3(10, 10, 10));
 	AddInstance(NewInstance);
-
 
 	vFront = glm::vec3(0, 0, 1);
 	vRight = glm::vec3(1, 0, 0);
@@ -44,14 +37,32 @@ Drone::Drone(Node* Root, Object* Parent, SceneGL* Sce) : Object(Root,Parent ,Sce
 	Sce->SetSpotLight(pSpotLight);
 
 }
-void Drone::Update(GLfloat dtime)
+
+Drone::Drone(Object* parent, SceneGL* Scene, std::string FilePath, std::string FileName):AssimpObject(parent, Scene , FilePath, FileName)
 {
-	Object::Update(dtime);
+	MoveSpeed = 15;
+	RotSpeed = 90;
+
+	ObjectInstance* NewInstance = new ObjectInstance(this);
+	NewInstance->SetPos(glm::vec3(0, 50, 0));
+	NewInstance->SetRot(glm::vec3(0, 0, 0));
+	NewInstance->SetScale(glm::vec3(10, 10, 10));
+	AddInstance(NewInstance);
+
+	vFront = glm::vec3(0, 0, 1);
+	vRight = glm::vec3(1, 0, 0);
+	vUp = glm::vec3(0, 1, 0);
+
+
+	pDroneCamera = new DroneCamera(glm::vec3(0, 40, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+	Scene->AddCam(pDroneCamera);
+
+	pSpotLight = new SpotLight(glm::vec3(0, 40, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 1)
+		, glm::vec4(1, 1, 0, 0), 45, 0.2);
+	Scene->SetSpotLight(pSpotLight);
+	SetNoTexture();
 }
-void Drone::Render()
-{
-	Object::Render();
-}
+
 
 void Drone::DroneMoveCallBackFunc(unsigned char key, GLfloat TickTime)
 {
@@ -133,4 +144,32 @@ void Drone::MoveFront(float dist)
 	//InstanceList[0]->vPos += glm::vec4(vFront*dist,0);
 	pDroneCamera->MovePosition(vFront, dist);
 	pSpotLight->MovePosition(vFront, dist);
+}
+
+void Drone::Render()
+{
+	AssimpObject::Render();
+}
+
+void Drone::RenderGeoPass()
+{
+	AssimpObject::RenderGeoPass();
+}
+void Drone::RenderShadowPass()
+{
+	AssimpObject::RenderShadowPass();
+}
+
+
+void Drone::ShaderParamInit()
+{
+	AssimpObject::ShaderParamInit();
+}
+void Drone::GeoPassInit()
+{
+	AssimpObject::GeoPassInit();
+}
+void Drone::ShadowPassInit()
+{
+	AssimpObject::ShadowPassInit();
 }

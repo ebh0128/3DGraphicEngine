@@ -1,21 +1,20 @@
 #pragma once
 #include "CommonHeader.h"
-#include "MyShader.h"
 #include "Camera.h"
-#include "Mesh.h"
+
 #include "Light.h"
 
 #include "SkyBox.h"
-#include "Object.h"
+
 #include "DroneCamera.h"
 #include "SpotLight.h"
 #include "MyFrameBuffer.h"
-#include "ObjectInstance.h"
+
 #include "LightSystem.h"
-#include "DirLight.h"
+
 #include "IOBuffer.h"
 #include "Scene.h"
-
+#include "DirLight.h"
 
 SceneGL::SceneGL()
 {
