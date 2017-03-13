@@ -7,7 +7,7 @@
 #include "Timer.h"
 
 #include "PatchedGround.h"
-#include "Light.h"
+ 
 #include "Scene.h"
 #include "SkyBox.h"
 #include "MyFrameBuffer.h"

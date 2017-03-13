@@ -443,7 +443,7 @@ Material* MeshEntry::GetMaterial()
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 //Node///////////////////////////////////////////////////////////////////////////////////
-
+/*
 Node::Node()
 {
 
@@ -466,19 +466,6 @@ Node::Node(Node* _parent, SceneGL* scene) : Node()
 }
 Node::~Node()
 {
-	/*
-	if (Parent)  Parent = NULL;
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		delete Children[i];
-	}
-	Children.empty();
-	for (GLuint i = 0; i<meshes.size(); i++)
-	{
-		delete meshes[i];
-	}
-	meshes.empty();
-	*/
 }
 void Node::Update(GLfloat dtime)
 {
@@ -589,27 +576,8 @@ void Node::Render()
 	if (pShader) pShader->ApplyShader();
 
 	pScene->ApplySpotLight(pShader);
-	/*
-	for (GLuint i = 0; i<meshes.size(); i++)
-	{
-
-		//메쉬별 쉐이더 재질 적용 
-		Material* p = meshes[i]->GetMaterial();
-
-		pShader->SetUniform3fv("material.diffuse", glm::value_ptr(p->diffuse));
-		pShader->SetUniform3fv("material.amdient", glm::value_ptr(p->ambient));
-		pShader->SetUniform3fv("material.specular", glm::value_ptr(p->specular));
-		pShader->SetUniform1f("material.shininess", p->shininess);
-
-		ShaderParamInit();
-		//GeoPassInit();
-		// 변환 행렬 쉐이더 전송
-		//meshes[i]->Render();
-		if (pObj == nullptr || pObj->GetInstanceNum() == 0) meshes[i]->Render();
-		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
-
-	}
-	*/
+	
+	
 	ShaderParamInit();
 
 	GLuint MatLocArray[4];
@@ -693,17 +661,7 @@ void Node::RenderGeoPass()
 {
 	if (!pDefGeoPass)  return;
 	pDefGeoPass->ApplyShader();
-	/*
-	for (GLuint i = 0; i<meshes.size(); i++)
-	{
 
-		// 변환 행렬 쉐이더 전송
-		GeoPassInit();
-		if (pObj->GetInstanceNum() == 0) meshes[i]->Render();
-		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
-
-	}
-	*/
 	GeoPassInit();
 
 	GLuint MatLocArray[4];
@@ -752,3 +710,4 @@ void Node::ShadowPassInit()
 {
 	
 }
+*/

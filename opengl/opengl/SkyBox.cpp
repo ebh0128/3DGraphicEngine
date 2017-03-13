@@ -13,7 +13,7 @@ SkyBox::SkyBox()
 {
 
 }
-SkyBox::SkyBox(Node* parent, SceneGL* Scene) :Node(parent , Scene)
+SkyBox::SkyBox(Object* parent, SceneGL* Scene) :Object(parent , Scene)
 {
 	//사실상 2d 이므로 2d 로사용
 	float DepthMax =0.9999999f;
@@ -34,8 +34,10 @@ SkyBox::SkyBox(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 
 	MeshEntry* SkyBoxMesh = new MeshEntry((GLfloat*)Vertices, sizeof(Vertices) / sizeof(GLfloat),
 					(GLuint*)Indices, sizeof(Indices) / sizeof(GLuint), nullptr);
-	AddMesh(SkyBoxMesh);
-
+	m_pModel = new Model();
+	m_pModel->AddMesh(SkyBoxMesh);
+	
+	
 	pShader = new MyShader("SkyBox.vert","SkyBox.frag");
 	pDefGeoPass = new MyShader("./Shader/Deferred_SkyBox.vert", "./Shader/Deferred_SkyBox.frag");
 	CubeMapTexturePathInfo* pCubeMapPath = new CubeMapTexturePathInfo();
@@ -88,13 +90,12 @@ void SkyBox::Render()
 	pShader->SetUniformMatrix4fv("InversVP", glm::value_ptr(InversVP));
 	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 	//포지션은 그대로 보낼것
-	for (GLuint i = 0; i<meshes.size(); i++)
+	
+		m_pModel->Render();
+	
+	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
-		meshes[i]->Render();
-	}
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		Children[i]->Render();
+		ChildList[i]->Render();
 	}
 	glEnable(GL_DEPTH_TEST);
 	//깊이 초기화
@@ -123,13 +124,11 @@ void SkyBox::RenderDepthRead()
 	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(LightDiffuse));
 	pShader->SetUniform1i("SkyBoxTexture", MainTextureUnit);
 	//포지션은 그대로 보낼것
-	for (GLuint i = 0; i<meshes.size(); i++)
+	m_pModel->Render();
+
+	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
-		meshes[i]->Render();
-	}
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		Children[i]->Render();
+		ChildList[i]->Render();
 	}
 	
 }

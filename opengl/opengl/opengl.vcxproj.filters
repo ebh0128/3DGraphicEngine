@@ -111,13 +111,7 @@
     <ClCompile Include="PatchedGround.cpp">
       <Filter>소스 파일\Object\Map</Filter>
     </ClCompile>
-    <ClCompile Include="SimpleGround.cpp">
-      <Filter>소스 파일\Object\Map</Filter>
-    </ClCompile>
     <ClCompile Include="SpotLight.cpp">
-      <Filter>소스 파일\Object\Light</Filter>
-    </ClCompile>
-    <ClCompile Include="Light.cpp">
       <Filter>소스 파일\Object\Light</Filter>
     </ClCompile>
     <ClCompile Include="LightSystem.cpp">
@@ -197,13 +191,7 @@
     <ClInclude Include="Drone.h">
       <Filter>헤더 파일\Object\AssimpObj</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>헤더 파일\Object\Light</Filter>
-    </ClInclude>
     <ClInclude Include="PatchedGround.h">
-      <Filter>헤더 파일\Object\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleGround.h">
       <Filter>헤더 파일\Object\Map</Filter>
     </ClInclude>
     <ClInclude Include="SpotLight.h">

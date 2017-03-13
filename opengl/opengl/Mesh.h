@@ -134,6 +134,7 @@ class SceneGL;
 class Object;
 //////////
 ///////// 여기부터 노드 클래스
+/*
 class Node
 {
 protected:
@@ -222,3 +223,4 @@ public:
 };
 
 
+*/

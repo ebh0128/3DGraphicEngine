@@ -7,7 +7,7 @@
 #include "LightSystem.h"
 #include "Geometry.h"
 #include "Scene.h"
-#include "Light.h"
+ 
 #include "MyFrameBuffer.h"
 
 LightInstance::LightInstance(Object* Ori, ObjectInstance* _Parents) :ObjectInstance(Ori,_Parents)
@@ -55,7 +55,7 @@ LightSystem::LightSystem( Object* Parent, SceneGL* Sce) : Object( Parent, Sce)
 {
 	Sce->SetLightSystem(this);
 
-	Sphere* Spheremesh = new Sphere(1.0f, 16, 16);
+	Sphere* Spheremesh = new Sphere(0.5f, 16, 16);
 
 	MeshEntry* mesh = new MeshEntry(&Spheremesh->vertices[0], Spheremesh->vertices.size()
 		, &Spheremesh->indices[0], Spheremesh->indices.size(), &Spheremesh->normals[0]);

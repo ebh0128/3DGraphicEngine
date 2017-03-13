@@ -29,7 +29,6 @@
     <ClCompile Include="ObjectInstance.cpp" />
     <ClCompile Include="ProgramManager.cpp" />
     <ClCompile Include="Geometry.cpp" />
-    <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyFrameBuffer.cpp" />
     <ClCompile Include="MyShader.cpp" />
@@ -40,7 +39,6 @@
     <ClCompile Include="ppm.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SimpleGround.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -59,7 +57,6 @@
     <ClInclude Include="ObjectInstance.h" />
     <ClInclude Include="ProgramManager.h" />
     <ClInclude Include="Geometry.h" />
-    <ClInclude Include="Light.h" />
     <ClInclude Include="MyFrameBuffer.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="PerlinNoise.h" />
@@ -67,7 +64,6 @@
     <ClInclude Include="ppm.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="SimpleGround.h" />
     <ClInclude Include="myShader.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="SkyBox.h" />

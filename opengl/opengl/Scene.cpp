@@ -2,7 +2,7 @@
 #include "CommonHeader.h"
 #include "Camera.h"
 
-#include "Light.h"
+ 
 
 #include "SkyBox.h"
 
