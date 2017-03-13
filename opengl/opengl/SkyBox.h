@@ -24,6 +24,6 @@ public:
 	
 	void Render();
 
-	void RenderGeoPass();
+	void RenderDepthRead();
 	void GeoPassInit();
 };

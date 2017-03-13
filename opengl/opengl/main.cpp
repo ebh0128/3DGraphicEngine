@@ -88,6 +88,13 @@ void init(void)
 
 	GroundObject = new Object(GoodGround,nullptr,Scene);
 
+	ObjectInstance* NewInstance = new ObjectInstance(GroundObject);
+	NewInstance->SetPos(glm::vec3(0, 0, 0));
+	NewInstance->SetRot(glm::vec3(0, 0, 0));
+	NewInstance->SetScale(glm::vec3(1, 1, 1));
+
+	GroundObject->AddInstance(NewInstance);
+
 	Scene->AddCam(MyCamera);
 	Scene->SetRoot(GroundObject);
 	

@@ -36,7 +36,7 @@ enum DeferredState
 class Object;
 class DroneCamera;
 class SpotLight;
-
+class SkyBox;
 
 
 class SceneGL
@@ -50,7 +50,7 @@ protected:
 	//Camera* pCamera;
 
 	//스카이박스는 따로 등록
-	Node* pSkyBox;
+	SkyBox* pSkyBox;
 
 	IOBuffer* m_pShadowBuffer;
 
@@ -92,7 +92,7 @@ public:
 	void AddCam(Camera* cam);
 
 	void SetRoot(Object* root);
-	void SetSkyBox(Node* Skybox);
+	void SetSkyBox(SkyBox* Skybox);
 
 	void SetLightSystem(LightSystem* lsys) { m_pPointLightSys = lsys; }
 

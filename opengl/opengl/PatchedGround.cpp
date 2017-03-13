@@ -202,6 +202,7 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 		glGetUniformLocation(pShader->GetShaderProgram(), "SamplerNoise"), glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "SamplerNoise") );
 	
 	GroundMesh->AddSampler(NoiseSampler);
+	GroundMesh->MakeInstancingBuffer();
 	AddMesh(GroundMesh);
 	
 	//최대 빛 수치만큼 UBO 사이즈 잡아놓기 (빛 정보-> float 16개 + int 1개(빛의 개수) )
@@ -323,10 +324,10 @@ void PatchedGround :: GeoPassInit()
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
 
-	pDefGeoPass->SetUniformMatrix4fv("WVP", glm::value_ptr(MVP));
-	pDefGeoPass->SetUniformMatrix4fv("World", glm::value_ptr(M));
+	pDefGeoPass->SetUniformMatrix4fv("M", glm::value_ptr(M));
 	pDefGeoPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
 	pDefGeoPass->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+	pDefGeoPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 
 }
 

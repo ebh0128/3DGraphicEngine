@@ -149,7 +149,7 @@ void SceneGL::SetRoot(Object* root)
 {
 	Root = root;
 }
-void SceneGL::SetSkyBox(Node* Skybox)
+void SceneGL::SetSkyBox(SkyBox* Skybox)
 {
 	pSkyBox = Skybox;
 }
@@ -279,9 +279,14 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffe
 	RenderDirLitPass(gBuffer , BlurBuffer);
 	
 	//Forward Rendering//////////////////////////
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	
+	if (pSkyBox != nullptr) pSkyBox->RenderDepthRead();
+
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
-
+	
 	//m_pPointLightSys->Render();
 	///////////////////////////////////////////
 	//현재 출력 버퍼 HDR임
@@ -328,8 +333,7 @@ void SceneGL::RenderGeoPass(DeferredRenderBuffers* gBuffer)
 	glDisable(GL_BLEND);
 
 	//Skybox Diffuse만 넣음
-	if (pSkyBox != nullptr)pSkyBox->RenderGeoPass();
-
+	
 	Root->RenderGeoPass();
 
 	glDepthMask(GL_FALSE);

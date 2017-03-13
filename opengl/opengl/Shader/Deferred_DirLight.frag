@@ -61,6 +61,8 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 	
 	shadow /= 9.0;
 	
+
+	
 	return shadow;
 }
 

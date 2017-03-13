@@ -16,12 +16,13 @@ SkyBox::SkyBox()
 SkyBox::SkyBox(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 {
 	//사실상 2d 이므로 2d 로사용
+	float DepthMax =0.9999999f;
 	Vec Vertices[] =
 	{
-		{ -1.00f , -1.00f , 0 },
-		{ 1.00f , -1.00f , 0 },
-		{ -1.00f , 1.00f , 0 },
-		{ 1.00f , 1.00f , 0 },
+		{ -1.00f , -1.00f , DepthMax },
+		{ 1.00f , -1.00f , DepthMax },
+		{ -1.00f , 1.00f , DepthMax },
+		{ 1.00f , 1.00f , DepthMax },
 	
 		
 	};
@@ -95,12 +96,12 @@ void SkyBox::Render()
 	//glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void SkyBox::RenderGeoPass()
+void SkyBox::RenderDepthRead()
 {
-	//깊이 테스트 사용하면 안됨
-	glDisable(GL_DEPTH_TEST);
-	if (pDefGeoPass) pDefGeoPass->ApplyShader();
+	if (pShader) pShader->ApplyShader();
 
+	GLint getDepth =123;
+	glGetIntegerv(GL_DEPTH_WRITEMASK , &getDepth);
 	glm::mat4 V = pScene->GetVMatrix();
 	//카메라 이동은 무시
 	V[3][0] = 0; V[3][1] = 0; V[3][2] = 0;
@@ -111,12 +112,10 @@ void SkyBox::RenderGeoPass()
 	glm::mat4 InversVP = glm::inverse(VP);
 	//glm::mat4 InversVP = invP*invV;
 	//InversVP = InversVP / InversVP[3][3];
-	pDefGeoPass->SetUniformMatrix4fv("InversVP", glm::value_ptr(InversVP));
+	pShader->SetUniformMatrix4fv("InversVP", glm::value_ptr(InversVP));
 
-	glm::vec4 LitDir = pScene->GetDirectionalLight()->GetPos();
-	LitDir = -LitDir;
-	pDefGeoPass->SetUniform4fv("inversLightVector", glm::value_ptr(LitDir));
-	pDefGeoPass->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
+	glm::vec4 LightDiffuse = glm::vec4 (pScene->GetDirectionalLight()->GetDif(),1);
+	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(LightDiffuse));
 	//포지션은 그대로 보낼것
 	for (GLuint i = 0; i<meshes.size(); i++)
 	{
@@ -126,10 +125,7 @@ void SkyBox::RenderGeoPass()
 	{
 		Children[i]->Render();
 	}
-	glEnable(GL_DEPTH_TEST);
-	//깊이 초기화
-	glClear(GL_DEPTH_BUFFER_BIT);
-
+	
 }
 void SkyBox::GeoPassInit()
 {

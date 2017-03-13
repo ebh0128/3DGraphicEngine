@@ -549,6 +549,8 @@ void Node::ShaderParamInit()
 	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
 	pShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
 	pShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+
 	// ºû Á¤º¸ UiformBlock ½¦ÀÌ´õ Àü¼Û 
 	LightList* DataforShader = pScene->GetLightSrouceArray();
 	GLuint Size = DataforShader->Count  * sizeof(PaddingLight);

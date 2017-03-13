@@ -10,11 +10,10 @@ uniform vec4 DiffuseCol;
 
 layout (location = 2) out vec3 DiffuseOut;
 //Normal채널 보냄으로서 SkyBox와 DirLight 연산 정도를 조절
-layout (location = 3) out vec3 NormalOut;
+
 void main()
 {
 	DiffuseOut = (DiffuseCol*texture(SkyBoxTexture , vTpos)).xyz;
-	NormalOut = inversLightVector.xyz;
 	
 }
 
