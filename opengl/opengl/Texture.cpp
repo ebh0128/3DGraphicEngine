@@ -39,6 +39,17 @@ void Texture::CreateTexture(const char* ImagePath, GLuint Channel)
 	glGenTextures(1, &TexID);
 	
 	glBindTexture(TextureKind, TexID);
+	
+	m_iWrap[0] = m_iWrap[1] = GL_REPEAT;
+	m_iFilter[0] = m_iFilter[1] = GL_LINEAR;
+	m_iMipMap = 8;
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_iWrap[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_iWrap[1]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_iFilter[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_iFilter[1]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, m_iMipMap);
 	glTexImage2D(TextureKind, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH)
 		, ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT)
 		, ilGetInteger(IL_IMAGE_TYPE), ilGetData());
@@ -72,10 +83,21 @@ void Texture::CreateTextureByData(GLfloat* Data, int Width, int Height, GLuint C
 	TextureChannel = Channel;
 
 	//PrinttoPPM(Data, Width, Height);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 3);
 	glGenTextures(1, &TexID);
 
+	m_iWrap[0] = m_iWrap[1] = GL_CLAMP_TO_BORDER;
+	m_iFilter[0] = m_iFilter[1] = GL_NEAREST;
+	m_iMipMap = 0;
+
 	glBindTexture(TextureKind, TexID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_iWrap[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_iWrap[1]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_iFilter[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_iFilter[1]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, m_iMipMap);
 	glTexImage2D(TextureKind, 0, GL_R32F, Width, Height, 0, GL_RED, GL_FLOAT, Data);
 }
 
@@ -85,11 +107,24 @@ void Texture::CreateCubeMapTexture(CubeMapTexturePathInfo* ImagePath, GLuint Cha
 	TextureKind = GL_TEXTURE_CUBE_MAP;
 	TextureChannel = Channel;
 
+	m_iWrap[0] = m_iWrap[1] = GL_CLAMP_TO_EDGE;
+	m_iFilter[0] = m_iFilter[1] = GL_LINEAR;
+	m_iMipMap = 0;
+
+
 	ILuint Img[6];
 	ilGenImages(6, Img);
 
 	glGenTextures(1, &TexID);
 	glBindTexture(TextureKind, TexID);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, m_iWrap[0]);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, m_iWrap[1]);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, m_iWrap[1]);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, m_iFilter[0]);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, m_iFilter[1]);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, m_iMipMap);
+
 	for (int i = 0; i < 6; i++)
 	{
 		ilBindImage(Img[i]);
@@ -142,15 +177,23 @@ void Texture::SetShaderValue(GLuint ShaderLoc, int IsDeferred)
 	if (IsDeferred > 1) IsDeferred = 1;
 	ShaderLocation[IsDeferred] = ShaderLoc;
 }
-void Texture::ApplyTexture(int isDeferred)
+
+void Texture::ApplyTexture()
 {
-	if (isDeferred > 1) isDeferred = 1;
-	glUniform1i(ShaderLocation[isDeferred], TextureChannel);
-		//몇번 채널로 텍스쳐 보낼건지
+
+	//몇번 채널로 텍스쳐 보낼건지
 	glActiveTexture(GL_TEXTURE0 + TextureChannel);
-		//무슨 텍스쳐 인지
+	//무슨 텍스쳐 인지
 	glBindTexture(TextureKind, TexID);
+	glTexParameteri(TextureKind, GL_TEXTURE_WRAP_S, m_iWrap[0]);
+	glTexParameteri(TextureKind, GL_TEXTURE_WRAP_T, m_iWrap[1]);
+	glTexParameteri(TextureKind, GL_TEXTURE_MAG_FILTER, m_iFilter[0]);
+	glTexParameteri(TextureKind, GL_TEXTURE_MIN_FILTER, m_iFilter[1]);
+	glTexParameteri(TextureKind, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(TextureKind, GL_TEXTURE_MAX_LEVEL, m_iMipMap);
+
 }
+
 void Texture::UpdateTextureBuffer(GLfloat* Data)
 {
 	if (tbo < 0) return;

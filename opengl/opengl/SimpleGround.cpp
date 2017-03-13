@@ -43,7 +43,7 @@ SimpleGround::SimpleGround(Node* parent, SceneGL* Scene) : Node(parent, Scene)
 	{
 		pNormal[i] = 0.f; pNormal[i + 1] = 1.f; pNormal[i + 2] = 0.f;
 	}
-	Mesh* GroundMesh = new Mesh(pVertices, VertCont, pindices, indCont, pNormal);
+	MeshEntry* GroundMesh = new MeshEntry(pVertices, VertCont, pindices, indCont, pNormal);
 
 	AddMesh(GroundMesh);
 	//쉐이더 초기화

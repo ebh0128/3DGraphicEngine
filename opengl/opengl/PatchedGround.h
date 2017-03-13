@@ -38,6 +38,11 @@ private:
 	{
 		GLfloat x; GLfloat y; 
 	}Tex;
+	GLuint MainTexUnit;
+	GLuint SnowTexUnit;
+	GLuint StoneTexUnit;
+	GLuint NoiseTexUnit;
+
 private:
 	//버텍스가 Noise나 Height Map에 의해 변경되면 재계산이 필요하다.
 

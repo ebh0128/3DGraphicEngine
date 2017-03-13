@@ -36,7 +36,7 @@ void main()
 	TexCol = noisecol*HightCol + (1-noisecol)* LowCol ;
 	
 	DiffuseOut = vec3(TexCol.r , TexCol.g , TexCol.b);
-	//DiffuseOut = SnowCol.xyz;
+	//DiffuseOut = vec3(noisecol,0,0);
 
 	//DiffuseOut = vec3(oTexcoord , 0.0);
 	

@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include "Light.h"
-#include "Sampler.h"
+
 #include "SkyBox.h"
 #include "Object.h"
 #include "DroneCamera.h"

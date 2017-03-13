@@ -2,7 +2,7 @@
 #include "MyShader.h"
 #include "Camera.h"
 #include "Mesh.h"
-#include "Sampler.h"
+
 #include "Scene.h"
 #include "Texture.h"
 #include "ProgramManager.h"
@@ -32,13 +32,12 @@ SkyBox::SkyBox(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 		{2 , 1 , 3}
 	};
 
-	Mesh* SkyBoxMesh = new Mesh((GLfloat*)Vertices, sizeof(Vertices) / sizeof(GLfloat),
+	MeshEntry* SkyBoxMesh = new MeshEntry((GLfloat*)Vertices, sizeof(Vertices) / sizeof(GLfloat),
 					(GLuint*)Indices, sizeof(Indices) / sizeof(GLuint), nullptr);
 	AddMesh(SkyBoxMesh);
 
 	pShader = new MyShader("SkyBox.vert","SkyBox.frag");
 	pDefGeoPass = new MyShader("./Shader/Deferred_SkyBox.vert", "./Shader/Deferred_SkyBox.frag");
-	Sampler* pSampler = new Sampler();
 	CubeMapTexturePathInfo* pCubeMapPath = new CubeMapTexturePathInfo();
 
 	
@@ -47,9 +46,15 @@ SkyBox::SkyBox(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 	pCubeMapPath->Path[POS_Z] = "./Texture/back.jpg"; pCubeMapPath->Path[NEG_Z] = "./Texture/front.jpg";
 
 	//pSampler->CreateCubeMapTexture(pCubeMapPath, ProgramManager::GetInstance()->GetChannelID(), glGetUniformLocation(pShader->GetShaderProgram(),"SkyBoxTexture"));
-	pSampler->CreateCubeMapTexture(pCubeMapPath, 15, glGetUniformLocation(pShader->GetShaderProgram(), "SkyBoxTexture"));
+	//pSampler->CreateCubeMapTexture(pCubeMapPath, 15, glGetUniformLocation(pShader->GetShaderProgram(), "SkyBoxTexture"));
 
-	SkyBoxMesh->AddSampler(pSampler);
+	MainTextureUnit = 12;
+	Texture* CubeTexture = new Texture();
+	//CubeTexture->SetShaderValue(glGetUniformLocation(pShader->GetShaderProgram(), "SkyBoxTexture"));
+	CubeTexture->CreateCubeMapTexture(pCubeMapPath, MainTextureUnit);
+	SkyBoxMesh->AddTexture(CubeTexture);
+
+
 	Diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1);
 	Diffuse = glm::vec4(1, 1, 1, 1);
 
@@ -116,6 +121,7 @@ void SkyBox::RenderDepthRead()
 
 	glm::vec4 LightDiffuse = glm::vec4 (pScene->GetDirectionalLight()->GetDif(),1);
 	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(LightDiffuse));
+	pShader->SetUniform1i("SkyBoxTexture", MainTextureUnit);
 	//포지션은 그대로 보낼것
 	for (GLuint i = 0; i<meshes.size(); i++)
 	{

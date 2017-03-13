@@ -5,6 +5,8 @@ class AssimpModelNode : public Node
 protected:
 	bool IsRootNode;
 	bool IsTextured;
+
+	GLuint MainTextUnit;
 public:
 
 	AssimpModelNode();

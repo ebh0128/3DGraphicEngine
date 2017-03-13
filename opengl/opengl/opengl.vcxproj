@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DeferredRenderingPass.cpp" />
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="IOBuffer.cpp" />
     <ClCompile Include="LightSystem.cpp" />
@@ -38,7 +39,6 @@
     <ClCompile Include="PatchedGround.cpp" />
     <ClCompile Include="ppm.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SimpleGround.cpp" />
     <ClCompile Include="SkyBox.cpp" />
@@ -50,6 +50,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonHeader.h" />
+    <ClInclude Include="DeferredRenderingPass.h" />
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="IOBuffer.h" />
     <ClInclude Include="LightSystem.h" />
@@ -65,7 +66,6 @@
     <ClInclude Include="PatchedGround.h" />
     <ClInclude Include="ppm.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Sampler.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SimpleGround.h" />
     <ClInclude Include="myShader.h" />

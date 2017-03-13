@@ -43,8 +43,13 @@ class SceneGL
 {
 protected:
 	GLuint id;
+	//오브젝트 트리 (업데이트시 계층따라감)
 	Object* Root;
-	// 멀티 카메라 구현시 vector로 변경 고려
+	
+	//Render용 메쉬 버퍼
+
+	Object* TerrianMesh;
+	std::vector<Object*> Meshes;
 
 	CameraManager* pCamManager;
 	//Camera* pCamera;

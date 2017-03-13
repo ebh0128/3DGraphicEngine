@@ -20,7 +20,7 @@ Light::Light(Node* parent, SceneGL* Scene) :Node(parent , Scene)
 {
 	Sphere* Spheremesh = new Sphere(0.4f, 16, 16);
 
-	Mesh* mesh = new Mesh(&Spheremesh->vertices[0], Spheremesh->vertices.size()
+	MeshEntry* mesh = new MeshEntry(&Spheremesh->vertices[0], Spheremesh->vertices.size()
 		, &Spheremesh->indices[0], Spheremesh->indices.size(), &Spheremesh->normals[0]);
 
 	mesh->MakeInstancingBuffer();
@@ -94,8 +94,8 @@ void Light::RenderPointLitPass()
 	{
 		// 변환 행렬 쉐이더 전송
 		PointLitPassInit();
-		if (pObj->GetInstanceNum() == 0) meshes[i]->Render(1);
-		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(), 1);
+		if (pObj->GetInstanceNum() == 0) meshes[i]->Render();
+		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum() );
 
 	}
 	for (GLuint i = 0; i<Children.size(); i++)
@@ -161,8 +161,8 @@ void Light::RenderStencilPass()
 		pDefPtLitPass->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
 		pDefPtLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 
-		if (pObj->GetInstanceNum() == 0) meshes[i]->Render(1);
-		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(), 1);
+		if (pObj->GetInstanceNum() == 0) meshes[i]->Render();
+		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
 
 	}
 	for (GLuint i = 0; i<Children.size(); i++)

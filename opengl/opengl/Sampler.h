@@ -25,7 +25,7 @@ protected:
 	void AddTexture(Texture* pNewtex);
 public:
 	Sampler();
-	Sampler(const char* ImagePath, GLuint Channel, GLint ShaderLoc , GLint DefShaderLoc = -100);
+	Sampler(const char* ImagePath, GLuint Channel, GLint ShaderLoc = -100 , GLint DefShaderLoc = -100);
 	
 	void CreateTexture(const char* ImagePath, GLuint Channel , GLint ShaderLoc, GLint DefShaderLoc = -100);
 	

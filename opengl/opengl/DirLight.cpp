@@ -37,7 +37,7 @@ DirLight::DirLight(Node* parent, SceneGL* Scene) :Node(parent, Scene)
 		{ 2 , 1 , 3 }
 	};
 
-	Mesh* QuadMesh = new Mesh((GLfloat*)Vertices, sizeof(Vertices) / sizeof(GLfloat),
+	MeshEntry* QuadMesh = new MeshEntry((GLfloat*)Vertices, sizeof(Vertices) / sizeof(GLfloat),
 		(GLuint*)Indices, sizeof(Indices) / sizeof(GLuint), nullptr);
 	AddMesh(QuadMesh);
 
@@ -150,7 +150,7 @@ void DirLight::RenderDirLitPass()
 	{
 		// 변환 행렬 쉐이더 전송
 		DirLitPassInit();
-		meshes[i]->Render(1);
+		meshes[i]->Render();
 		
 	}
 	for (GLuint i = 0; i<Children.size(); i++)
@@ -185,7 +185,7 @@ void DirLight::SSAOPass()
 		m_pShaderSSAO->SetUniform1f("gSampleRad", 0.3f);
 		m_pShaderSSAO->SetUniform3fv("gKernel", (GLfloat*)Kernel, KERNEL_SIZE);
 
-		meshes[i]->Render(1);
+		meshes[i]->Render();
 
 	}
 	for (GLuint i = 0; i<Children.size(); i++)
@@ -203,7 +203,7 @@ void DirLight::BlurPass()
 		// 변환 행렬 쉐이더 전송
 		m_pShaderBlur->SetUniform1i("gColorMap", 0);
 
-		meshes[i]->Render(1);
+		meshes[i]->Render();
 
 	}
 	for (GLuint i = 0; i<Children.size(); i++)
@@ -229,7 +229,7 @@ void DirLight::HDRPass()
 	//	m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
 	//	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
 	
-		meshes[i]->Render(1);
+		meshes[i]->Render();
 
 	}
 	for (GLuint i = 0; i<Children.size(); i++)

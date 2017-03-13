@@ -2,7 +2,7 @@
 #include "MyShader.h"
 #include "Camera.h"
 #include "Mesh.h"
-#include "Sampler.h"
+
 #include "Scene.h"
 #include "Object.h"
 #include "AssimpModelNode.h"

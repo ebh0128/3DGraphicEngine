@@ -2,7 +2,6 @@
 #include "MyShader.h"
 #include "Camera.h"
 #include "Texture.h"
-#include "Sampler.h"
 #include "Object.h"
 #include "Mesh.h"
 
@@ -14,7 +13,75 @@
 
 
 
-Mesh::Mesh()
+//Assimp용 모델로드 이므로 숨김
+void Model::CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath)
+{
+	for (int i = 0; i < pAssimpScene->mNumMeshes; i++)
+	{
+		const aiMesh* AssimpMesh = pAssimpScene->mMeshes[i];
+
+		MeshEntry* NewMesh = new MeshEntry(pAssimpScene, AssimpMesh);
+		//텍스쳐 찾기
+		aiMaterial* aiMat = pAssimpScene->mMaterials[AssimpMesh->mMaterialIndex];
+		aiString TexturePath;
+		//텍스쳐의 상대경로를 알아냄 (Object 의 경로로부터의)
+		aiReturn ret = aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &TexturePath);
+		if (ret == AI_SUCCESS)
+		{
+			char* TPath = TexturePath.data;
+			char* TextureName = strrchr(TPath, '/');
+			if (TextureName == nullptr)  TextureName = strrchr(TPath, '\\');
+			std::string sDir = FilePath + TextureName;
+//			Sampler* MainSampler = new Sampler(sDir.c_str(), 7);
+	//		NewMesh->AddSampler(MainSampler);
+		}
+	
+	}
+}
+
+//하나의 메쉬덩어리를 모델로 사용할때 이용할것
+void Model::CreateMeshEntry(GLfloat* vertices, int VertexNum,
+	GLuint* indices, int indicesNum,
+	GLfloat* normals,
+	GLfloat* texcoords, int texcoordsNum)
+{
+	MeshEntry* newMesh = new MeshEntry(vertices, VertexNum, indices, indicesNum, normals, texcoords, texcoordsNum);
+	MeshList.push_back(newMesh);
+
+}
+
+//Assimp에서 모델 로드할때 
+void Model::CreateModelFromFile(std::string FilePath, std::string FileName)
+{
+	Assimp::Importer importer;
+	std::string FullPath = FilePath + FileName;
+	const aiScene* AssimpScene = importer.ReadFile(FullPath,
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_GenSmoothNormals);
+
+	
+	CreateAssimpModel( AssimpScene, FilePath);
+
+}
+
+void Model::Render()
+{
+	for (int i = 0; i < MeshList.size(); i++)
+	{
+		MeshList[i]->Render();
+	}
+}
+
+void Model::Render(glm::mat4 * MVPmats, unsigned int InstanceNum)
+{
+	for (int i = 0; i < MeshList.size(); i++)
+	{
+		MeshList[i]->Render(MVPmats, InstanceNum);
+	}
+}
+
+MeshEntry::MeshEntry()
 {
 	material = new Material();
 	material->diffuse = glm::vec4(1.f, 1.f, 1.f, 1.f);
@@ -30,28 +97,28 @@ Mesh::Mesh()
 
 
 }
-Mesh::Mesh(GLfloat* vertices, int VertexNum,
+MeshEntry::MeshEntry(GLfloat* vertices, int VertexNum,
 	GLuint* indices, int IndicesNum,
 	GLfloat* normals,
-	GLfloat* texcoords, int texcoordsNum) : Mesh()
+	GLfloat* texcoords, int texcoordsNum) : MeshEntry()
 {
 
 	ObjectLoad(vertices, VertexNum,indices, IndicesNum, normals, texcoords, texcoordsNum);
 }
 
-Mesh::Mesh(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh) : Mesh()
+MeshEntry::MeshEntry(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh) : MeshEntry()
 {
 
 	ObjectLoad(pAssimpScene, pAssimpMesh);
 
 }
 
-Mesh::~Mesh()
+MeshEntry::~MeshEntry()
 {
 
 
 }
-GLfloat* Mesh::NormalGenerate(GLfloat* vertices, GLuint* indices)
+GLfloat* MeshEntry::NormalGenerate(GLfloat* vertices, GLuint* indices)
 {
 #define x(i) vertices[3*i]
 #define y(i) vertices[3*i+1]
@@ -84,7 +151,7 @@ GLfloat* Mesh::NormalGenerate(GLfloat* vertices, GLuint* indices)
 #undef z
 }
 
-void Mesh::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh)
+void MeshEntry::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh)
 {
 	if (pAssimpScene == nullptr || pAssimpMesh == nullptr)
 	{
@@ -180,7 +247,7 @@ void Mesh::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh)
 
 }
 
-void Mesh::ObjectLoad(GLfloat* vertices, int VertexNum,
+void MeshEntry::ObjectLoad(GLfloat* vertices, int VertexNum,
 					GLuint* indices, int IndicesNum,
 					GLfloat* normals,
 					GLfloat* texcoords, int texcoordsNum)
@@ -228,7 +295,7 @@ void Mesh::ObjectLoad(GLfloat* vertices, int VertexNum,
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Mesh::AddTexcoordAttibute(void* texcoords, int TexcoordNum)
+void MeshEntry::AddTexcoordAttibute(void* texcoords, int TexcoordNum)
 {
 	if (texcoords == nullptr) return;
 	glBindVertexArray(vao);
@@ -248,7 +315,7 @@ void Mesh::AddTexcoordAttibute(void* texcoords, int TexcoordNum)
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
-void Mesh::MakeInstancingBuffer()
+void MeshEntry::MakeInstancingBuffer()
 {
 	glBindVertexArray(vao);
 
@@ -262,23 +329,18 @@ void Mesh::MakeInstancingBuffer()
 	}
 }
 
-Sampler*  Mesh::CreateSampler(const char* ImagePath, GLuint Channel, GLint ShaderLoc, GLint DefShaderLoc)
+
+
+
+
+
+void MeshEntry::AddTexture(Texture* pNewTex)
 {
-	Sampler* pNewSampler = new Sampler(ImagePath, Channel, ShaderLoc, DefShaderLoc);
-	AddSampler(pNewSampler);
-	return pNewSampler;
-	
+	if (pNewTex == nullptr) return;
+	pTextureList.push_back(pNewTex);
 }
 
-
-
-void Mesh::AddSampler(Sampler* pNewSamp)
-{
-	if (pNewSamp == nullptr) return;
-	pMeshSamplerList.push_back(pNewSamp);
-}
-
-void Mesh::Render(int IsDeferred)
+void MeshEntry::Render()
 {
 	
 	glBindVertexArray(vao);
@@ -286,18 +348,23 @@ void Mesh::Render(int IsDeferred)
 	if(IsHaveNormal) glEnableVertexAttribArray(attrib_Normal);
 	
 	//샘플러가 있다면 적용
-	for (int i = 0; i < pMeshSamplerList.size(); i++)
-	{
-		if (IsHaveTexcoord)glEnableVertexAttribArray(attrib_Texcoord+i);
-		pMeshSamplerList[i]->ApplySampler(IsDeferred);
-
-	}
 	
+	
+	//하드코딩 일단 2개쓰므로
+	glEnableVertexAttribArray(attrib_Texcoord );
+	glEnableVertexAttribArray(attrib_Texcoord+1);
+
+	for (int i = 0; i < pTextureList.size(); i++)
+	{
+		pTextureList[i]->ApplyTexture();
+	}
+
+
 	//if (ubo > 0) glBindBuffer(GL_UNIFORM_BUFFER, ubo);
 
 	glDrawElements(GL_TRIANGLES, PrimCount, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 }
-void Mesh::Render(glm::mat4 * MVPmats, unsigned int InstanceNum , int IsDeferred)
+void MeshEntry::Render(glm::mat4 * MVPmats, unsigned int InstanceNum )
 {
 
 	
@@ -309,12 +376,18 @@ void Mesh::Render(glm::mat4 * MVPmats, unsigned int InstanceNum , int IsDeferred
 	if (IsHaveNormal) glEnableVertexAttribArray(attrib_Normal);
 
 	//샘플러가 있다면 적용
-	for (int i = 0; i < pMeshSamplerList.size(); i++)
+	for (int i = 0; i < TexCoordCnt; i++)
 	{
 		if (IsHaveTexcoord)glEnableVertexAttribArray(attrib_Texcoord + i);
-		pMeshSamplerList[i]->ApplySampler(IsDeferred);
+		//pMeshSamplerList[i]->ApplySampler(IsDeferred);
 
 	}
+	
+	for (int i = 0; i < pTextureList.size(); i++)
+	{
+		pTextureList[i]->ApplyTexture();
+	}
+	
 	GLuint StartIndex= 0;
 	//if (ubo > 0) glBindBuffer(GL_UNIFORM_BUFFER, ubo);
 	glDrawElementsInstancedBaseVertex(GL_TRIANGLES,
@@ -327,14 +400,14 @@ void Mesh::Render(glm::mat4 * MVPmats, unsigned int InstanceNum , int IsDeferred
 	//glDrawElements(GL_TRIANGLES, PrimCount, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 }
 //어떻게 넘겨줘도 대응해야되므로 깊은복사
-void Mesh::SetMaterial(Material* pmat)
+void MeshEntry::SetMaterial(Material* pmat)
 {
 	material->ambient = pmat->ambient;
 	material->diffuse = pmat->diffuse;
 	material->shininess = pmat->shininess;
 	material->specular = pmat->specular;
 }
-Material* Mesh::GetMaterial()
+Material* MeshEntry::GetMaterial()
 {
 	return material;
 }
@@ -354,6 +427,7 @@ Node::Node()
 
 	ubo = 0;
 	UbSize = 0;
+	MainTextureUnit = 0;
 
 }
 Node::Node(Node* _parent, SceneGL* scene) : Node()
@@ -449,7 +523,7 @@ void Node::UpdateUBO(void* Data, GLuint Size, GLuint Offset)
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo);
 	//LightList* d = (LightList*)Data;
 }
-void Node::AddMesh(Mesh* pmesh)
+void Node::AddMesh(MeshEntry* pmesh)
 {
 	meshes.push_back(pmesh);
 	int a = meshes.size();
@@ -592,8 +666,8 @@ void Node::RenderGeoPass()
 
 		// 변환 행렬 쉐이더 전송
 		GeoPassInit();
-		if (pObj->GetInstanceNum() == 0) meshes[i]->Render(1);
-		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(),1);
+		if (pObj->GetInstanceNum() == 0) meshes[i]->Render();
+		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
 
 	}
 	for (GLuint i = 0; i<Children.size(); i++)
@@ -613,8 +687,8 @@ void Node::RenderShadowPass()
 
 		// 변환 행렬 쉐이더 전송
 		ShadowPassInit();
-		if (pObj->GetInstanceNum() == 0) meshes[i]->Render(1);
-		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(), 1);
+		if (pObj->GetInstanceNum() == 0) meshes[i]->Render();
+		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
 
 	}
 	for (GLuint i = 0; i<Children.size(); i++)

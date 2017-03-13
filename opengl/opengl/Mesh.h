@@ -14,10 +14,36 @@ typedef struct Material
 
 class Sampler;
 class Texture;
-// 씬에서 그려지는 오브젝트(BaseClass)
-// 아직 텍스쳐 코드 관련 없음
-// Assimp 모델과 호환 아직 고려하지 않았으나 최대한 어울릴수 있게 디자인
-class Mesh
+class MeshEntry;
+// 실제 사용하는 모델 메쉬 덩어리
+class Model
+{
+protected:
+	std::vector<MeshEntry*> MeshList;
+
+
+
+public:
+
+	//Assimp용 모델로드 이므로 숨김
+	void CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath);
+
+	//하나의 메쉬덩어리를 모델로 사용할때 이용할것
+	void CreateMeshEntry(GLfloat* vertices, int VertexNum,
+		GLuint* indices, int indicesNum,
+		GLfloat* normals,
+		GLfloat* texcoords = nullptr, int texcoordsNum = 0);
+
+	//Assimp에서 모델 로드할때 
+	void CreateModelFromFile(std::string FilePath, std::string FileName);
+
+	void Render();
+	void Render(glm::mat4 * MVPmats, unsigned int InstanceNum);
+
+};
+
+//메쉬 하나를 말함
+class MeshEntry
 {
 
 private:
@@ -40,8 +66,9 @@ private:
 	GLsizei PrimCount;
 	GLsizei VerticesCount;
 
-	std::vector<Sampler*> pMeshSamplerList;
-	
+	//std::vector<Sampler*> pMeshSamplerList;
+	std::vector<Texture*> pTextureList;
+
 	bool IsHaveNormal;
 	bool IsHaveTexcoord;
 
@@ -67,14 +94,14 @@ public:
 	const GLuint attrib_MVPMat = 5;
 
 public:
-	Mesh();
-	Mesh(GLfloat* vertices , int VertexNum , 
+	MeshEntry();
+	MeshEntry(GLfloat* vertices , int VertexNum , 
 		GLuint* indices, int indicesNum, 
 		GLfloat* normals,
 		GLfloat* texcoords = nullptr, int texcoordsNum = 0);
 	
-	Mesh(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh);
-	~Mesh();
+	MeshEntry(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh);
+	~MeshEntry();
 
 	//텍스쳐 코드는 여러개가 존재 가능하므로
 	//어트리뷰트 확장시 이용할것
@@ -82,8 +109,7 @@ public:
 	void SetMaterial(Material* pmat);
 	Material* GetMaterial();
 	
-	void AddSampler(Sampler* pNewSamp);
-	Sampler* CreateSampler(const char* ImagePath, GLuint Channel, GLint ShaderLoc , GLint DefShaderLoc = -500);
+	void AddTexture(Texture* pNewTex);
 
 	//프로그램 내부에서 만든 메쉬 로드
 	virtual void ObjectLoad(GLfloat* vertices, int VertexNum,
@@ -95,8 +121,8 @@ public:
 	virtual void ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh);
 
 	void MakeInstancingBuffer();
-	void Render(int isDeferred = 0);
-	void Render(glm::mat4 * MVPmats, unsigned int InstanceNum, int isDeferred = 0);
+	void Render();
+	void Render(glm::mat4 * MVPmats, unsigned int InstanceNum);
 
 };
 
@@ -115,7 +141,7 @@ protected:
 	// 여러 노드로 구성된 오브젝트 ()
 	Node* Parent;
 	std::vector<Node*> Children;
-	std::vector<Mesh*> meshes;
+	std::vector<MeshEntry*> meshes;
 	
 
 	// 단일 & 여러 노드 오브젝트 공용
@@ -141,6 +167,8 @@ protected:
 	GLuint ubo;
 	GLint UbSize;
 
+	GLuint MainTextureUnit;
+
 public:
 	char* Name;
 
@@ -152,6 +180,7 @@ public:
 	Node();
 	Node(Node* _parent, SceneGL* scene);
 	~Node();
+
 
 	//보통 1노드에 1메쉬쓰기때문에 필요(index 지정 안하면 0번메쉬)
 	void SetMeshMaterial(Material* mat, int Index = 0);
@@ -176,7 +205,7 @@ public:
 	virtual void PointLitPassInit() {}
 	virtual void ShadowPassInit();
 
-	void AddMesh(Mesh* pmesh);
+	void AddMesh(MeshEntry* pmesh);
 	void AddChild(Node* pNode);
 	void SetPosition(float x, float y, float z );
 

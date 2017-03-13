@@ -14,6 +14,7 @@ struct CubeMapTexturePathInfo
 class Texture
 {
 protected:
+	
 	GLuint TexID;
 
 	GLuint tbo;
@@ -22,7 +23,10 @@ protected:
 	GLuint ShaderLocation[2];
 	GLuint TextureKind;
 	GLuint TextureFormat;
-
+	GLuint m_iWrap[2];
+	GLuint m_iFilter[2];
+	GLuint m_iMipMap;
+	
 public:
 	Texture();
 	Texture(const char* ImagePath, GLuint Channel);
@@ -34,8 +38,8 @@ public:
 
 	//glGetUniformLocation 결과값 주기
 	void SetShaderValue(GLuint ShaderLoc, int IsDeferred = 0);
-	void ApplyTexture(int isDeferred = 0);
-
+	void ApplyTexture();
+	
 	//일반 텍스쳐 2의 지수승 텍스쳐로 준비할것
 	void CreateTexture(const char* ImagePath, GLuint Channel);
 	
