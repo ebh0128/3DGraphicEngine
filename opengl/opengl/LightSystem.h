@@ -13,7 +13,7 @@ protected:
 	
 	//빛 감쇠 정도
 	LitAttnu Attnuation;
-
+	
 public:
 	//로직에 크게 영향없는 게임 플레이변수(나중에 Get Set 만들수도 있음)
 	GLfloat RespawnHeight;
@@ -41,7 +41,7 @@ public:
 	glm::vec3 GetDif() { return Diffuse; }
 	glm::vec3 GetAmbi() { return Ambient; }
 	glm::vec3 GetSpec() { return Specular; }
-
+	
 	LitAttnu GetAttnuation() { return Attnuation; }
 };
 
@@ -55,6 +55,11 @@ public:
 	LightSystem(Object* Parent, SceneGL* Sce);
 
 	void AddLight(LightInstance* pnew);
+
+	std::vector<glm::mat4> LightAttributeList;
+	void AddInstanceCallBack();
+
+	
 	void Update(GLfloat dtime);
 	
 	void Render();
@@ -68,5 +73,8 @@ public:
 
 	void PointLitPassInit();
 	void ShaderParamInit();
+
+	virtual void InstanceDataSetting();
+
 };
 

@@ -2,6 +2,8 @@
 in vec4 vColor;
 out vec4 fColor;
 
+flat in vec4 PtDiffuse; 
+
 struct sMaterial
 {
 	vec3	diffuse;
@@ -14,6 +16,6 @@ uniform sMaterial material;
 
 void main()
 {
-	fColor = vColor;
+	fColor = PtDiffuse *vColor;
 }
 

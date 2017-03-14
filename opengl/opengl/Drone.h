@@ -7,7 +7,7 @@ class Drone : public AssimpObject
 protected:
 	glm::vec3 vUp;
 	glm::vec3 vRight;
-	glm::vec3 vFront;
+	glm::vec3 vFront; 
 
 	float MoveSpeed;
 	float RotSpeed;

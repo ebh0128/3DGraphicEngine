@@ -20,5 +20,8 @@ void main()
 	mapped = pow(mapped , vec4(1.0/gamma));
 	
 	fColor = mapped;
+	fColor = HDRColor;
+	
+	//fColor = vec4(1,1,1,1);
 }
 

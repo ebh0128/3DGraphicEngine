@@ -46,6 +46,7 @@ protected:
 	GLuint id;
 	//오브젝트 트리 (업데이트시 계층따라감)
 	Object* Root;
+	ObjectInstance* m_pUpdateRoot;
 	
 	//Render용 메쉬 버퍼
 
@@ -97,6 +98,7 @@ public:
 
 	void AddCam(Camera* cam);
 
+	void SetUpdateRoot(ObjectInstance* ins);
 	void SetRoot(Object* root);
 	void SetSkyBox(SkyBox* Skybox);
 

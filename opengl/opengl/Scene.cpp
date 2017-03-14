@@ -107,6 +107,12 @@ LightList* SceneGL::GetLightSrouceArray()
 		//memcpy(ShaderLightInfoList.Lights[i].Ambient, glm::value_ptr(pLightList[i]->Ambient), 3 * sizeof(GLfloat));
 		//memcpy(ShaderLightInfoList.Lights[i].Specular, glm::value_ptr(pLightList[i]->Specular), 3 * sizeof(GLfloat));
 		glm::vec3 SourcePos = pLightBuffer[i]->GetPos();
+
+		//만약 부모가 있다면 변환해서 줘야됨
+	//	glm::mat4 LightTransform = InstanceL->GetMatWithoutScale();
+		//glm::vec4 Result = LightTransform*glm::vec4(SourcePos, 1);
+		//SourcePos = glm::vec3(Result);
+
 		glm::vec3 SourceDif = pLightBuffer[i]->GetDif();
 		glm::vec3 SourceAmb = pLightBuffer[i]->GetAmbi();
 		glm::vec3 SourceSpec = pLightBuffer[i]->GetSpec();
@@ -155,7 +161,14 @@ void SceneGL::SetSkyBox(SkyBox* Skybox)
 void SceneGL::Update(GLfloat dTime)
 {
 	if (m_pDirLight != nullptr) m_pDirLight->Update(dTime);
-	Root->Update(dTime);
+
+	//Root->Update(dTime);
+	m_pUpdateRoot->Update(dTime);
+}
+
+void SceneGL::SetUpdateRoot(ObjectInstance* ins)
+{
+	m_pUpdateRoot = ins;
 }
 void SceneGL::SetDirectionalLight(DirLight* pLight)
 {
@@ -282,6 +295,8 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffe
 	glDepthMask(GL_FALSE);
 	
 	if (pSkyBox != nullptr) pSkyBox->RenderDepthRead();
+
+	m_pPointLightSys->Render();
 
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
@@ -413,11 +428,11 @@ void SceneGL::RenderFinalPass(DeferredRenderBuffers* gBuffer)
 
 	gBuffer->BindForFinalPass();
 	//그냥 그리기
-	glBlitFramebuffer(0, 0, W, H, 0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	//glBlitFramebuffer(0, 0, W, H, 0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	
 	//HDR + reinhard tone mapping
-	//m_pDirLight->HDRPass();
-	
+	m_pDirLight->HDRPass();
+
 	//이 다음부터 Forward 해야되므로 초기화
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 

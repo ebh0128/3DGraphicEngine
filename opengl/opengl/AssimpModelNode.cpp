@@ -45,7 +45,7 @@ AssimpObject::AssimpObject(Object* parent, SceneGL* Scene, std::string FilePath,
 	pShader = new MyShader();
 		pShader->build_program_from_files("AssimpModel.vert", "AssimpModel.frag");
 //	pShader->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
-
+		 
 	pDefGeoPass = new MyShader();
 	pDefGeoPass->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
 
@@ -115,8 +115,10 @@ void AssimpObject::ShaderParamInit()
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
 
-	if (mParent == nullptr) M = TransformMat;
-	else  M = TransformMat*mParent->GetModelMat();
+	//if (mParent == nullptr) M = TransformMat;
+	//else  M = TransformMat*mParent->GetModelMat();
+
+	M = TransformMat;
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
@@ -145,8 +147,10 @@ void AssimpObject::GeoPassInit()
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
 
-	if (mParent == nullptr) M = TransformMat;
-	else  M = TransformMat*mParent->GetModelMat();
+	//if (mParent == nullptr) M = TransformMat;
+	//else  M = TransformMat*mParent->GetModelMat();
+
+	M = TransformMat;
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
@@ -165,8 +169,10 @@ void AssimpObject::ShadowPassInit()
 	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
 	
 	glm::mat4 M;
-	if (mParent == nullptr) M = TransformMat;
-	else  M = TransformMat*mParent->GetModelMat();
+	//if (mParent == nullptr) M = TransformMat;
+	//else  M = TransformMat*mParent->GetModelMat();
+
+	M = TransformMat;
 
 	m_pShaderShadow->SetUniformMatrix4fv("M", glm::value_ptr(M));
 	m_pShaderShadow->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));

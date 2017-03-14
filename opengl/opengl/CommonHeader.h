@@ -8,6 +8,7 @@
 #include <memory.h>
 #include <Windows.h>
 #include <vector>
+#include <list>
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>

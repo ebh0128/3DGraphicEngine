@@ -32,6 +32,6 @@ public:
 protected:
 	GLuint		m_Textures[NUM_TEXTURES];
 	GLuint		TexDepth;
-	GLuint		m_FinalTexture;
+	GLuint		m_FinalTexture; 
 	GLuint		fboID;
 };

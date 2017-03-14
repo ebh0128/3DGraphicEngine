@@ -50,6 +50,8 @@ protected:
 
 	GLuint MainTextureUnit;
 
+	GLboolean m_bUpdated;
+
 public:
 	//루트 노드를 지정하고 생성
 	Object();
@@ -59,6 +61,8 @@ public:
 //	Object(MeshEntry* BaseMesh, Object* Parent, SceneGL* Sce);
 
 	void AddInstance(ObjectInstance* TsetInfo);
+
+	virtual void AddInstanceCallBack() {}
 	virtual void Update(GLfloat dtime);
 	virtual void Render();
 
@@ -76,12 +80,15 @@ public:
 	virtual void DirLitPassInit() {}
 	virtual void PointLitPassInit() {}
 
+	//추가로 인스턴스를 쓴다면 반드시 재정의 
+	virtual void InstanceDataSetting();
+
 	void AddChild(Object* pChild);
 	Node* GetRoot();
 	int GetInstanceNum();
 	glm::mat4* GetInstanceMatrixData();
 	glm::mat4 GetModelMat();
-
+	void MatrixListInit(int index = 0);
 	//빛 정보를 받아보기위한 유니폼 블록
 	//빛 정보가 필요하면 써야됨
 	void AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset, MyShader* pshad);

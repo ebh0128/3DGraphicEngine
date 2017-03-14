@@ -39,6 +39,7 @@ void Model::CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath)
 		AddMesh(NewMesh);
 
 	}
+	MakeInstancingBuffer();
 }
 
 //하나의 메쉬덩어리를 모델로 사용할때 이용할것
@@ -91,8 +92,19 @@ void Model::Render( GLuint* MatLocation)
 	}
 }
 
-void Model::Render(glm::mat4 * MVPmats, unsigned int InstanceNum , GLuint* MatLocation)
+void Model::RenderInstance(int InstanceObjNum , GLuint* MatLocation)
 {
+
+	//인스턴스 버퍼 적용
+	/*
+	for (int i = 0;i < InstanceBufferCount; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, instance_vbo[i]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16 * InstanceObjNum, InstanceBufferData[i], GL_DYNAMIC_DRAW);
+
+	}
+	*/
+
 	for (int i = 0; i < m_MeshList.size(); i++)
 	{
 		if (MatLocation != nullptr)
@@ -105,9 +117,57 @@ void Model::Render(glm::mat4 * MVPmats, unsigned int InstanceNum , GLuint* MatLo
 			glUniform1f(MatLocation[3], p->shininess);
 
 		}
-		m_MeshList[i]->Render(MVPmats, InstanceNum);
+		m_MeshList[i]->RenderInstance(InstanceObjNum);
 	}
 }
+
+
+
+void Model::MakeInstancingBuffer(int iternum)
+{
+	/*
+	glBindVertexArray(vao);
+
+	for (int i = 0; i < iternum; i++)
+	{
+
+		glGenBuffers(1, &instance_vbo[InstanceBufferCount]);
+		glBindBuffer(GL_ARRAY_BUFFER, instance_vbo[InstanceBufferCount]);
+		for (int i = 0;i < 4; i++)
+		{
+			glEnableVertexAttribArray(attrib_MVPMat + i + 4 * InstanceBufferCount);
+			glVertexAttribPointer(attrib_MVPMat + i + 4 * InstanceBufferCount, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 16, (const GLvoid*)(sizeof(GLfloat)*i * 4));
+			glVertexAttribDivisor(attrib_MVPMat + i + 4 * InstanceBufferCount, 1);
+		}
+		InstanceBufferCount++;
+	}
+	*/
+	for (int i = 0; i < m_MeshList.size(); i++)
+	{
+		m_MeshList[i]->MakeInstancingBuffer(iternum);
+	}
+}
+
+void Model::SetInstanceBufferData(glm::mat4 *pData, int Index)
+{
+	//if (pData == nullptr) return;
+
+	//InstanceBufferData[Index] = pData;
+	for (int i = 0; i < m_MeshList.size(); i++)
+	{
+		m_MeshList[i]->SetInstanceBufferData(pData, Index);
+	}
+}
+
+
+
+
+
+
+
+
+
+
 
 MeshEntry::MeshEntry()
 {
@@ -267,7 +327,7 @@ void MeshEntry::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMes
 		AddTexcoordAttibute(temptex, VerticesCount * 2);
 		TexCnt++;
 	}
-	MakeInstancingBuffer();
+	//MakeInstancingBuffer();
 	
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -343,20 +403,6 @@ void MeshEntry::AddTexcoordAttibute(void* texcoords, int TexcoordNum)
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
-void MeshEntry::MakeInstancingBuffer()
-{
-	glBindVertexArray(vao);
-
-	glGenBuffers(1, &instance_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
-	for (int i = 0;i < 4; i++)
-	{
-		glEnableVertexAttribArray(attrib_MVPMat + i);
-		glVertexAttribPointer(attrib_MVPMat + i, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 16, (const GLvoid*)(sizeof(GLfloat)*i * 4));
-		glVertexAttribDivisor(attrib_MVPMat + i, 1);
-	}
-}
-
 
 
 
@@ -392,13 +438,18 @@ void MeshEntry::Render()
 
 	glDrawElements(GL_TRIANGLES, PrimCount, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 }
-void MeshEntry::Render(glm::mat4 * MVPmats, unsigned int InstanceNum )
+void MeshEntry::RenderInstance(int InstanceObjCount)
 {
-
 	
-	glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16 * InstanceNum, MVPmats, GL_DYNAMIC_DRAW);
+	for (int i = 0;i < InstanceBufferCount; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, instance_vbo[i]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16 * InstanceObjCount, InstanceBufferData[i], GL_DYNAMIC_DRAW);
 
+	}
+	
+	
+	
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(attrib_Pos);
 	if (IsHaveNormal) glEnableVertexAttribArray(attrib_Normal);
@@ -422,11 +473,13 @@ void MeshEntry::Render(glm::mat4 * MVPmats, unsigned int InstanceNum )
 										PrimCount,
 										GL_UNSIGNED_INT,
 										(void*) (StartIndex),
-										InstanceNum,
+										InstanceObjCount,
 										0
 										);
-	//glDrawElements(GL_TRIANGLES, PrimCount, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+	
 }
+
+
 //어떻게 넘겨줘도 대응해야되므로 깊은복사
 void MeshEntry::SetMaterial(Material* pmat)
 {
@@ -439,275 +492,29 @@ Material* MeshEntry::GetMaterial()
 {
 	return material;
 }
-//////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
-//Node///////////////////////////////////////////////////////////////////////////////////
-/*
-Node::Node()
+
+void MeshEntry::MakeInstancingBuffer(int iternum)
 {
+		glBindVertexArray(vao);
 
-
-	vPos = glm::vec4(0.f, 0.f, 0.f, 1.f);
-	vRot = glm::vec3(0.f, 0.f, 0.f);
-	vScale = glm::vec3(1.f, 1.f, 1.f);
-	TransformMat = glm::mat4();
-
-	ubo = 0;
-	UbSize = 0;
-	MainTextureUnit = 0;
-	m_pModel = nullptr;
-}
-Node::Node(Node* _parent, SceneGL* scene) : Node()
-{
-	Parent = _parent;
-	if (Parent != nullptr) Parent->AddChild(this);
-	pScene = scene;
-}
-Node::~Node()
-{
-}
-void Node::Update(GLfloat dtime)
-{
-	//자기자신 Update(즉 모델공간)
-	glm::mat4  mTrans = glm::translate(glm::vec3(vPos));
-
-	//회전의 경우 짐벌락등 여러 문제 발생가능
-	//나중에 쿼터니언이나 Local 축 기준 회전 이용 고려
-	glm::mat4  mRotate = glm::rotate(glm::mat4(), vRot.x, glm::vec3(1.f, 0.f, 0.f));
-	mRotate = glm::rotate(mRotate, vRot.y, glm::vec3(0.f, 1.f, 0.f));
-	mRotate = glm::rotate(mRotate, vRot.z, glm::vec3(0.f, 0.f, 1.f));
-
-	glm::mat4  mScale = glm::scale(vScale);
-
-	//S > R > T OpenGL에서는 뒤에서부터 읽음
-	TransformMat = mTrans * mRotate * mScale;
-
-
-	//자식 Update(Mesh는 관련 없음)
-	for (GLuint i = 0; i<Children.size(); i++)
+	for (int i = 0; i < iternum; i++)
 	{
-		Children[i]->Update(dtime);
+
+		glGenBuffers(1, &instance_vbo[InstanceBufferCount]);
+		glBindBuffer(GL_ARRAY_BUFFER, instance_vbo[InstanceBufferCount]);
+		for (int i = 0;i < 4; i++)
+		{
+			glEnableVertexAttribArray(attrib_MVPMat + i + 4 * InstanceBufferCount);
+			glVertexAttribPointer(attrib_MVPMat + i + 4 * InstanceBufferCount, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 16, (const GLvoid*)(sizeof(GLfloat)*i * 4));
+			glVertexAttribDivisor(attrib_MVPMat + i + 4 * InstanceBufferCount, 1);
+		}
+		InstanceBufferCount++;
 	}
 }
 
-
-
-
-void Node::AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset, MyShader* pshad)
+void MeshEntry::SetInstanceBufferData(glm::mat4 *pData, int Index)
 {
-	GLuint BlockIndex, BindingPoint = 1;
-	GLuint ShaderID = pshad->GetShaderProgram();
-	BlockIndex = glGetUniformBlockIndex(ShaderID, BlockName);
-	glUniformBlockBinding(ShaderID, BlockIndex, BindingPoint);
+	if (pData == nullptr) return;
 
-	glGenBuffers(1, &ubo);
-	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-
-	glGetActiveUniformBlockiv(ShaderID, BlockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &UbSize);
-
-
-	//Uniform Block 쿼리 
-	GLchar* name[6] = { "Count" , "List[0].LPos" , "List[0].LDiff" ,
-		"List[0].LAmbi" , "List[0].LSpec" , "List[0].LAttnuation" };
-	GLuint Index[6];
-	GLint offset[6];
-	GLint size[6];
-	GLint type[6];
-
-	glGetUniformIndices(ShaderID, 6, name, Index);
-	glGetActiveUniformsiv(ShaderID, 6, Index, GL_UNIFORM_OFFSET, offset);
-	glGetActiveUniformsiv(ShaderID, 6, Index, GL_UNIFORM_SIZE, size);
-	glGetActiveUniformsiv(ShaderID, 6, Index, GL_UNIFORM_TYPE, type);
-
-
-	glBufferData(GL_UNIFORM_BUFFER, UbSize, Data, GL_DYNAMIC_DRAW);
-	glBindBufferBase(GL_UNIFORM_BUFFER, BindingPoint, ubo);
-
-
-
-
+	InstanceBufferData[Index] = pData;
 }
-void Node::UpdateUBO(void* Data, GLuint Size, GLuint Offset)
-{
-	if (ubo <= 0) return;
-
-	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-	glBufferSubData(GL_UNIFORM_BUFFER, Offset, Size, Data);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo);
-	//LightList* d = (LightList*)Data;
-}
-void Node::AddMesh(MeshEntry* pmesh)
-{
-	meshes.push_back(pmesh);
-	int a = meshes.size();
-}
-void Node::AddChild(Node* pNode)
-{
-	Children.push_back(pNode);
-}
-
-glm::mat4  Node::GetModelMat()
-{
-	
-	return (Parent == nullptr)? TransformMat: TransformMat*Parent->GetModelMat();
-}
-void Node::SetMeshMaterial(Material* mat, int Index)
-{
-	if (Index < meshes.size())
-		meshes[Index]->SetMaterial(mat);
-}
-void Node::SetPosition(float x, float y, float z)
-{
-	vPos.x = x; vPos.y = y; vPos.z = z;
-}
-void Node::SetObject(Object* Obj)
-{
-	pObj = Obj;
-	for (int i = 0; i < Children.size(); i++)
-	{
-		Children[i]->SetObject(Obj);
-	}
-}
-void Node::Render()
-{
-
-	if (pShader) pShader->ApplyShader();
-
-	pScene->ApplySpotLight(pShader);
-	
-	
-	ShaderParamInit();
-
-	GLuint MatLocArray[4];
-	MatLocArray[0]= glGetUniformLocation(pShader->GetShaderProgram(), "material.diffuse");
-	MatLocArray[1] = glGetUniformLocation(pShader->GetShaderProgram(), "material.amdient");
-	MatLocArray[2] = glGetUniformLocation(pShader->GetShaderProgram(), "material.specular");
-	MatLocArray[3] = glGetUniformLocation(pShader->GetShaderProgram(), "material.shininess");
-
-
-	if (m_pModel != nullptr)
-	{
-		if (pObj == nullptr || pObj->GetInstanceNum() == 0) m_pModel->Render(MatLocArray);
-		else m_pModel->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(), MatLocArray);
-
-	}
-	
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		Children[i]->Render();
-	}
-
-
-}
-void Node::ShaderParamInit()
-{
-	glm::mat4 V = pScene->GetVMatrix();
-	glm::mat4 VP = pScene->GetVPMatrix();
-	glm::mat4 M;
-
-
-	//Dir Light 정보 보내기
-
-	
-	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
-	pShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
-
-
-	if (Parent == nullptr) M = TransformMat;
-	else  M = TransformMat*Parent->GetModelMat();
-
-	glm::mat4 MV = V*M;
-	glm::mat4 MVP = VP*M;
-	pShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
-	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-	pShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
-	pShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
-	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
-
-	// 빛 정보 UiformBlock 쉐이더 전송 
-	LightList* DataforShader = pScene->GetLightSrouceArray();
-	GLuint Size = DataforShader->Count  * sizeof(PaddingLight);
-	//meshes[i]->UpdateUBO(DataforShader, Size+ sizeof(GLuint), 0);
-	UpdateUBO(DataforShader, sizeof(GLuint), 0);
-
-	// std140 stride 16
-	UpdateUBO(DataforShader, Size, 12);
-
-}
-void Node::GeoPassInit()
-{
-	// 변환 행렬 쉐이더 전송
-
-	glm::mat4 V = pScene->GetVMatrix();
-	glm::mat4 VP = pScene->GetVPMatrix();
-	glm::mat4 M;
-
-	if (Parent == nullptr) M = TransformMat;
-	else  M = TransformMat*Parent->GetModelMat();
-
-	glm::mat4 MV = V*M;
-	glm::mat4 MVP = VP*M;
-
-	pDefGeoPass->SetUniformMatrix4fv("WVP", glm::value_ptr(MVP));
-	pDefGeoPass->SetUniformMatrix4fv("World", glm::value_ptr(M));
-	
-
-}
-
-
-void Node::RenderGeoPass()
-{
-	if (!pDefGeoPass)  return;
-	pDefGeoPass->ApplyShader();
-
-	GeoPassInit();
-
-	GLuint MatLocArray[4];
-	MatLocArray[0] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.diffuse");
-	MatLocArray[1] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.amdient");
-	MatLocArray[2] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.specular");
-	MatLocArray[3] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.shininess");
-
-
-	if (m_pModel != nullptr)
-	{
-		if (pObj == nullptr || pObj->GetInstanceNum() == 0) m_pModel->Render(MatLocArray);
-		else m_pModel->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum(), MatLocArray);
-
-	}
-
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		Children[i]->RenderGeoPass();
-		//Children[i]->Render();
-	}
-
-}
-void Node::RenderShadowPass()
-{
-	if (!m_pShaderShadow)  return;
-	m_pShaderShadow->ApplyShader();
-
-	for (GLuint i = 0; i<meshes.size(); i++)
-	{
-
-		// 변환 행렬 쉐이더 전송
-		ShadowPassInit();
-		if (pObj->GetInstanceNum() == 0) meshes[i]->Render();
-		else meshes[i]->Render(pObj->GetInstanceMatrixData(), pObj->GetInstanceNum());
-
-	}
-	for (GLuint i = 0; i<Children.size(); i++)
-	{
-		Children[i]->RenderShadowPass();
-		//Children[i]->Render();
-	}
-}
-
-void Node::ShadowPassInit()
-{
-	
-}
-*/

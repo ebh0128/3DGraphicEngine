@@ -2,6 +2,11 @@
 in vec4 vColor;
 flat in int InstanceID;
 
+flat in vec4 PtWorldPosition;
+flat in vec4 PtDiffuse; 
+flat in vec4 PtAmbient;
+flat in vec4 PtLightAttnu;
+
 struct sMaterial
 {
 	vec3	diffuse;
@@ -21,6 +26,7 @@ uniform vec3 gEyeWorldPos;
 
 uniform mat4 V;
 uniform mat4 M;
+uniform mat4 LightTransMat;
 //각 빛 성분의 4번째값은 factor
 struct LightInfo
 {
@@ -78,6 +84,7 @@ vec4 CalcPointLight(LightInfo Lit,
 					vec3 Normal)
 {
 	vec4 LightViewPos =  V*Lit.LPos*M;
+	//LightViewPos = V*PtWorldPosition*M;
 
 	vec3 LightDirection = ViewPos - LightViewPos.xyz;
 	float Distance = length(LightDirection);
@@ -114,15 +121,20 @@ void main()
 	Normal = normalize(Normal);
 	
 	vec4 LightResult = vec4(0,0,0,0);
-	//for(int i = 0 ; i < Count ; i++)
-	//{
-		LightResult = CalcPointLight(List[InstanceID % Count] , ViewPos , Normal);
-		//LightResult = List[i].LDiff;
-	//}
+	
+	LightInfo InstanceLight;
+	InstanceLight.LPos = PtWorldPosition;
+	InstanceLight.LDiff = PtDiffuse;
+	InstanceLight.LAmbi = PtAmbient;
+	InstanceLight.LAttnuation = PtLightAttnu;
+	InstanceLight.LSpec = vec4(0.5, 0.5, 0.5, 0.5);
+	
+	//LightResult = CalcPointLight(List[InstanceID % Count] , ViewPos , Normal);
+	LightResult = CalcPointLight(InstanceLight , ViewPos , Normal);
 	
 	fColor = vec4(Color , 1.0) * LightResult;
 	
-	//fColor = vec4(Normal, 1.0) ;
+	//fColor = vec4(Color , 1.0) * PtDiffuse ;
 	//fColor = LightResult; //*CalcPointLight(List[5] , ViewPos , Normal);
 	
 }

@@ -17,7 +17,7 @@ Object::Object()
 	UbSize = 0;
 	MainTextureUnit = 0;
 	m_pModel = nullptr;
-
+	m_bUpdated = false;
 }
 
 Object::Object( Object* Parent, SceneGL* Sce) :Object()
@@ -40,11 +40,13 @@ void Object::AddInstance(ObjectInstance* TsetInfo)
 	InstanceList.push_back(TsetInfo);
 	//행렬 버퍼 크기 증가
 	MatrixList.push_back(glm::mat4());
+	AddInstanceCallBack();
 }
 void Object::Update(GLfloat dtime)
 {
-
-	//리소스 (모델공간) 업데이트
+	//여러번 업데이트 방지
+	if (m_bUpdated) return;
+	//리소스 (모델공간) 업데이트 -> 초기값???
 	glm::mat4  mTrans = glm::translate(glm::vec3(vPos));
 
 	//회전의 경우 짐벌락등 여러 문제 발생가능
@@ -57,20 +59,20 @@ void Object::Update(GLfloat dtime)
 
 	//S > R > T OpenGL에서는 뒤에서부터 읽음
 	TransformMat = mTrans * mRotate * mScale;
-
-
+	//TransformMat = glm::mat4();
 
 	//인스턴스들 업데이트
-	for (int i = 0; i < InstanceList.size(); i++)
-	{
-		InstanceList[i]->Update(dtime);
-	}
+	//for (int i = 0; i < InstanceList.size(); i++)
+	//{
+	//	InstanceList[i]->Update(dtime);
+	//}
+	m_bUpdated = true;
 
 	//자식 오브젝트 업데이트
-	for (int i = 0; i < ChildList.size(); i++)
-	{
-		ChildList[i]->Update(dtime);
-	}
+	//for (int i = 0; i < ChildList.size(); i++)
+	//{
+	//	ChildList[i]->Update(dtime);
+	//}
 }
 void Object::Render()
 {
@@ -90,9 +92,15 @@ void Object::Render()
 	if (m_pModel != nullptr)
 	{
 		if (GetInstanceNum() == 0) m_pModel->Render(MatLocArray);
-		else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum(), MatLocArray);
+		else
+		{
+			InstanceDataSetting();
+			m_pModel->RenderInstance(GetInstanceNum(), MatLocArray);
 
+		}
 	}
+	// 그렸으므로 업데이트필요
+	m_bUpdated = false;
 
 	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
@@ -119,9 +127,15 @@ void Object::RenderGeoPass()
 	if (m_pModel != nullptr)
 	{
 		if ( GetInstanceNum() == 0) m_pModel->Render(MatLocArray);
-		else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum(), MatLocArray);
+		else
+		{
+			InstanceDataSetting();
+			m_pModel->RenderInstance( GetInstanceNum(), MatLocArray);
 
+		}
 	}
+	m_bUpdated = false;
+
 
 	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
@@ -139,7 +153,14 @@ void Object::RenderShadowPass()
 	// 변환 행렬 쉐이더 전송
 	ShadowPassInit();
 	if (GetInstanceNum() == 0) m_pModel->Render();
-	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+	else
+	{
+		InstanceDataSetting();
+		m_pModel->RenderInstance(GetInstanceNum());
+
+	}
+	
+	m_bUpdated = false;
 
 	
 	for (GLuint i = 0; i<ChildList.size(); i++)
@@ -150,6 +171,11 @@ void Object::RenderShadowPass()
 }
 
 
+void Object::InstanceDataSetting()
+{
+	m_pModel->SetInstanceBufferData(GetInstanceMatrixData(), 0);
+
+}
 
 void Object::GeoPassInit()
 {
@@ -157,14 +183,18 @@ void Object::GeoPassInit()
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
 
-	if (mParent == nullptr) M = TransformMat;
-	else  M = TransformMat*mParent->GetModelMat();
+	//if (mParent == nullptr) M = TransformMat;
+	//else  M = TransformMat*mParent->GetModelMat();
+	M = TransformMat;
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
 
 	pDefGeoPass->SetUniformMatrix4fv("WVP", glm::value_ptr(MVP));
 	pDefGeoPass->SetUniformMatrix4fv("World", glm::value_ptr(M));
+
+	////////InctanceData 셋팅
+	
 
 }
 void Object::ShaderParamInit()
@@ -194,8 +224,9 @@ void Object::ShaderParamInit()
 	pShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
 
 
-	if (mParent == nullptr) M = TransformMat;
-	else  M = TransformMat*mParent->GetModelMat();
+	//if (mParent == nullptr) M = TransformMat;
+	//else  M = TransformMat*mParent->GetModelMat();
+	M = TransformMat;
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
@@ -214,6 +245,9 @@ void Object::ShaderParamInit()
 	// std140 stride 16
 	UpdateUBO(DataforShader, Size, 12);
 
+
+	////////InctanceData 셋팅
+	m_pModel->SetInstanceBufferData(GetInstanceMatrixData(), 0);
 }
 void Object::ShadowPassInit()
 {
@@ -240,13 +274,15 @@ glm::mat4* Object::GetInstanceMatrixData()
 	{
 		MatrixList[i] = InstanceList[i]->GetMat();
 	}
-	return MatrixList.data();
+	return 	MatrixList.data();
+
 }
 
 glm::mat4  Object::GetModelMat()
 {
 
-	return (mParent == nullptr) ? TransformMat : TransformMat*mParent->GetModelMat();
+	//return (mParent == nullptr) ? TransformMat : TransformMat*mParent->GetModelMat();
+	return TransformMat;
 }
 
 void Object::AddUBO(void* Data, GLuint Size, const char* BlockName, GLuint* Offset, MyShader* pshad)

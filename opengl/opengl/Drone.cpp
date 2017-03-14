@@ -17,11 +17,13 @@ Drone::Drone( Object* Parent, SceneGL* Sce) : AssimpObject(Parent ,Sce)
 
 	MoveSpeed = 15;
 	RotSpeed = 90;
-	
+	//모델공간 초기값
+	//vPos = glm::vec4(0, 50, 0 ,1);
+
 	ObjectInstance* NewInstance = new ObjectInstance(this);
 	NewInstance->SetPos(glm::vec3(0, 50, 0));
-	NewInstance->SetRot(glm::vec3(0, 0, 0));
-	NewInstance->SetScale(glm::vec3(10, 10, 10));
+//	NewInstance->SetRot(glm::vec3(0, 0, 0));
+	NewInstance->SetScale(glm::vec3(1, 1, 1));
 	AddInstance(NewInstance);
 
 	vFront = glm::vec3(0, 0, 1);
@@ -43,11 +45,7 @@ Drone::Drone(Object* parent, SceneGL* Scene, std::string FilePath, std::string F
 	MoveSpeed = 15;
 	RotSpeed = 90;
 
-	ObjectInstance* NewInstance = new ObjectInstance(this);
-	NewInstance->SetPos(glm::vec3(0, 50, 0));
-	NewInstance->SetRot(glm::vec3(0, 0, 0));
-	NewInstance->SetScale(glm::vec3(10, 10, 10));
-	AddInstance(NewInstance);
+	
 
 	vFront = glm::vec3(0, 0, 1);
 	vRight = glm::vec3(1, 0, 0);
@@ -84,6 +82,7 @@ void Drone::DroneMoveCallBackFunc(unsigned char key, GLfloat TickTime)
 	
 
 	}
+
 }
 
 void Drone::LightMoveCallBackFunc(unsigned char key, GLfloat TickTime)
@@ -129,9 +128,9 @@ void Drone::RotatebyUp(float Angle)
 	vFront = glm::rotate(vFront, glm::radians(Angle), vUp);
 	vRight = glm::rotate(vRight, glm::radians(Angle), vUp);
 	//InstanceList[0]->vRot.y += glm::radians(Angle);
-	glm::vec3 TempRot = InstanceList[0]->GetRot();
+	glm::vec3 TempRot = glm::vec3(0,0,0);
 	TempRot.y += glm::radians(Angle);
-	InstanceList[0]->SetRot(TempRot);
+	InstanceList[0]->Rotation(TempRot);
 
 	//월드 회전
 	pDroneCamera->RotatebyWorldY( Angle);

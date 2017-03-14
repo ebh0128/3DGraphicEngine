@@ -86,16 +86,17 @@ void init(void)
 
 	//GroundObject = new Object(GoodGround,nullptr,Scene);
 	
-	ObjectInstance* NewInstance = new ObjectInstance(GoodGround);
-	NewInstance->SetPos(glm::vec3(0, 0, 0));
-	NewInstance->SetRot(glm::vec3(0, 0, 0));
-	NewInstance->SetScale(glm::vec3(1, 1, 1));
+	ObjectInstance* GroundInstance = new ObjectInstance(GoodGround);
+	GroundInstance->SetPos(glm::vec3(0, 0, 0));
+//	GroundInstance->SetRot(glm::vec3(0, 0, 0));
+	GroundInstance->SetScale(glm::vec3(1, 1, 1));
 
-	GoodGround->AddInstance(NewInstance);
+	GoodGround->AddInstance(GroundInstance);
 
 	Scene->AddCam(MyCamera);
 	Scene->SetRoot((Object*)GoodGround);
-	
+	Scene->SetUpdateRoot(GroundInstance);
+
 	glClearColor(0.3, 0.3, 0.3, 1.0);
 	
 	CurrentPollygonMode = GL_FILL;
@@ -122,6 +123,15 @@ void init(void)
 
 	Scene->SetDirectionalLight(MainDirLight);
 
+	againDrone = new Drone(GoodGround, Scene, "./Model/Monkey", "/monkey_high.obj");
+	againDrone->SetPosition(0,50,0);
+	againDrone->SetScale(glm::vec3(10, 10, 10));
+
+	ObjectInstance* DroneInstance = new ObjectInstance(againDrone, GroundInstance);
+	DroneInstance->SetPos(glm::vec3(0, 0, 0));
+//	DroneInstance->SetRot(glm::vec3(0, 0, 0));
+	DroneInstance->SetScale(glm::vec3(1, 1, 1));
+	againDrone->AddInstance(DroneInstance);
 
 	//Point Light
 	//Light* newLight = new Light(nullptr,Scene);
@@ -151,12 +161,12 @@ void init(void)
 
 
 		
-		LightInstance* newLight = new LightInstance(LightSys);
+		LightInstance* newLight = new LightInstance(LightSys, DroneInstance);
 		newLight->SetDiff(glm::vec3(r, g, b));
 	//	newLight->SetDiff(glm::vec3(1, 70, 1));
-		newLight->SetPos(glm::vec3(x, y, z));
+		newLight->SetPos(glm::vec3(x, y+10, z));
 		float ScaleFactor = newLight->CalcLightArea();
-		newLight->SetScale(glm::vec3(ScaleFactor, ScaleFactor, ScaleFactor));
+		newLight->SetScale(glm::vec3(1, 1, 1));
 		newLight->RespawnHeight = y;
 		newLight->DropSpeed = 5 * (float)dis(gen);
 		LightSys->AddLight(newLight);
@@ -181,7 +191,7 @@ void init(void)
 	
 	//¸ðµ¨ Æ®·£½ºÆû Á¶Àý
 	ModelTest->SetScale(glm::vec3(0.1, 0.1, 0.1));
-	ModelTest->SetPosition(0, 2, 0);
+	ModelTest->SetPosition(0, 0, 0);
 
 	for (int i = 0; i < 20; i++)
 	{
@@ -194,14 +204,15 @@ void init(void)
 		WorldTransform->vRot = glm::vec3(0, 0, 0);
 		WorldTransform->vScale = glm::vec3(1, 1, 1);
 		*/
-		ObjectInstance* NewInstance = new ObjectInstance(ModelTest);
+		ObjectInstance* NewInstance = new ObjectInstance(ModelTest , GroundInstance);
 		NewInstance->SetPos(glm::vec3(x, y, z));
-		NewInstance->SetRot(glm::vec3(0, 0, 0));
+		//NewInstance->SetRot(glm::vec3(0, 0, 0));
 		NewInstance->SetScale(glm::vec3(1, 1, 1));
 
 		ModelTest->AddInstance(NewInstance);
 	}
-	againDrone = new Drone( GoodGround, Scene, "./Model/Monkey", "/monkey_high.obj");
+	
+	
 	SceneRenderer = new Renderer();
 	
 }

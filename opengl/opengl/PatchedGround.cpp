@@ -202,7 +202,7 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	NoiseTex->CreateTextureByData(pNoiseData, VertexCountX, VertexCountZ, NoiseTexUnit);
 	GroundMesh->AddTexture(NoiseTex);
 	
-	GroundMesh->MakeInstancingBuffer();
+	//GroundMesh->MakeInstancingBuffer();
 	
 	//최대 빛 수치만큼 UBO 사이즈 잡아놓기 (빛 정보-> float 16개 + int 1개(빛의 개수) )
 	int strSize = sizeof(PaddingLight);
@@ -210,6 +210,7 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 
 	m_pModel = new Model();
 	m_pModel->AddMesh(GroundMesh);
+	m_pModel->MakeInstancingBuffer();
 
 	delete[] pVertice;
 	delete[] pIndices;
@@ -325,8 +326,10 @@ void PatchedGround :: GeoPassInit()
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
 
-	if (mParent == nullptr) M = TransformMat;
-	else  M = TransformMat*mParent->GetModelMat();
+	//if (mParent == nullptr) M = TransformMat;
+	//else  M = TransformMat*mParent->GetModelMat();
+
+	M = TransformMat;
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
@@ -347,8 +350,10 @@ void PatchedGround::ShadowPassInit()
 	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
 	glm::mat4 M;
 
-	if (mParent == nullptr) M = TransformMat;
-	else  M = TransformMat*mParent->GetModelMat();
+//	if (mParent == nullptr) M = TransformMat;
+//	else  M = TransformMat*mParent->GetModelMat();
+
+	M = TransformMat;
 
 	m_pShaderShadow->SetUniformMatrix4fv("M", glm::value_ptr(M));
 	m_pShaderShadow->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));

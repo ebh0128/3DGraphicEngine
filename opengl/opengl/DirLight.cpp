@@ -150,7 +150,7 @@ void DirLight::RenderDirLitPass()
 	DirLitPassInit();
 	
 	if (GetInstanceNum() == 0) m_pModel->Render();
-	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+//	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
 	/*
 	for (GLuint i = 0; i<ChildList.size(); i++)
@@ -183,7 +183,7 @@ void DirLight::SSAOPass()
 	m_pShaderSSAO->SetUniform3fv("gKernel", (GLfloat*)Kernel, KERNEL_SIZE);
 
 	if (GetInstanceNum() == 0) m_pModel->Render();
-	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+	//else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
 	
 	for (GLuint i = 0; i<ChildList.size(); i++)
@@ -200,7 +200,7 @@ void DirLight::BlurPass()
 	m_pShaderBlur->SetUniform1i("gColorMap", 0);
 
 	if (GetInstanceNum() == 0) m_pModel->Render();
-	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+	//else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
 	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
@@ -213,26 +213,22 @@ void DirLight::HDRPass()
 	if (!m_pShaderHDR)  return;
 	m_pShaderHDR->ApplyShader();
 
-		// 변환 행렬 쉐이더 전송
-	
+	// 변환 행렬 쉐이더 전송
+
 //	glm::mat4 P = pScene->GetPMatrix();
 
 	m_pShaderHDR->SetUniform1i("gFinalMap", 4);
-	m_pShaderHDR->SetUniform1f("exposure", 0.01);
-//	m_pShaderHDR->SetUniform1f("exposure", 1);
-//	m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
-//	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
-	
+	m_pShaderHDR->SetUniform1f("exposure", 0.7);
+	//	m_pShaderHDR->SetUniform1f("exposure", 1);
+	//	m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
+	//	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+
 	if (GetInstanceNum() == 0) m_pModel->Render();
-	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+	//	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
-	
-	for (GLuint i = 0; i<ChildList.size(); i++)
-	{
-		ChildList[i]->RenderPointLitPass();
-	}
+
+
 }
-
 
 void DirLight::DirLitPassInit()
 {

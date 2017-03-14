@@ -51,6 +51,14 @@ float LightInstance::CalcLightArea()
 	return ret;
 }
 
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////
+
+
+
 LightSystem::LightSystem( Object* Parent, SceneGL* Sce) : Object( Parent, Sce)
 {
 	Sce->SetLightSystem(this);
@@ -60,11 +68,13 @@ LightSystem::LightSystem( Object* Parent, SceneGL* Sce) : Object( Parent, Sce)
 	MeshEntry* mesh = new MeshEntry(&Spheremesh->vertices[0], Spheremesh->vertices.size()
 		, &Spheremesh->indices[0], Spheremesh->indices.size(), &Spheremesh->normals[0]);
 
-	mesh->MakeInstancingBuffer();
+	//mesh->MakeInstancingBuffer();
 	
 	m_pModel = new Model();
 	m_pModel->AddMesh(mesh);
-	
+	m_pModel->MakeInstancingBuffer();
+	m_pModel->MakeInstancingBuffer();
+
 	delete Spheremesh;
 
 	pShader = new MyShader("PointLight.vert", "PointLight.frag");
@@ -78,6 +88,36 @@ LightSystem::LightSystem( Object* Parent, SceneGL* Sce) : Object( Parent, Sce)
 	int strSize = sizeof(PaddingLight);
 	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0, pDefPtLitPass);
 
+}
+void LightSystem::AddInstanceCallBack()
+{
+	LightAttributeList.push_back(glm::mat4());
+}
+
+void LightSystem::InstanceDataSetting()
+{
+	int InstanceCount = GetInstanceNum();
+
+	//빛 정보 넘겨주기
+	//행렬로
+	for (int i = 0; i<LightAttributeList.size(); i++)
+	{
+		LightInstance* LightIns = (LightInstance*)InstanceList[i];
+
+		glm::vec4 LightPos = glm::vec4(LightIns->GetPos() , 1);
+		glm::vec4 LightDif = glm::vec4(LightIns->GetDif(), 1);
+		glm::vec4 LightAmb = glm::vec4(LightIns->GetAmbi(), 1);
+		LightAttnuation LitAtn = LightIns->GetAttnuation();
+		glm::vec4 vLightatn = glm::vec4(LitAtn.Constant, LitAtn.Linear, LitAtn.exp, 1);
+
+		LightAttributeList[i][0] = LightPos;
+		LightAttributeList[i][1] = LightDif;
+		LightAttributeList[i][2] = LightAmb;
+		LightAttributeList[i][3] = vLightatn;
+	}
+
+	m_pModel->SetInstanceBufferData(LightAttributeList.data(), 1);
+	Object::InstanceDataSetting();
 }
 void LightSystem::Update(GLfloat dtime)
 {
@@ -105,8 +145,13 @@ void LightSystem::ShaderParamInit()
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 MVP = VP*TransformMat;
 	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-	pShader->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
+
+	//광원 그리기용 스케일
+	glm::vec3 PtScale = glm::vec3(0.05f, 0.05f, 0.05f );
+	glm::mat4 NewTrans = TransformMat*glm::scale(PtScale);
+	pShader->SetUniformMatrix4fv("M", glm::value_ptr(NewTrans));
 	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+
 
 
 }
@@ -121,8 +166,13 @@ void LightSystem::RenderPointLitPass()
 	PointLitPassInit();
 	
 	if (GetInstanceNum() == 0) m_pModel->Render();
-	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
-
+	else 
+	{
+		InstanceDataSetting();
+		m_pModel->RenderInstance(GetInstanceNum());
+		
+	}
+	
 	
 	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
@@ -143,6 +193,9 @@ void LightSystem::PointLitPassInit()
 	pDefPtLitPass->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
 	pDefPtLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 	pDefPtLitPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
+
+	glm::mat4 ParentsTransform = InstanceList[0]->GetParentsMat();;
+	pDefPtLitPass->SetUniformMatrix4fv("LightTransMat", glm::value_ptr(ParentsTransform));
 
 
 	glm::vec2 ScreenSize = glm::vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
@@ -165,6 +218,11 @@ void LightSystem::PointLitPassInit()
 	UpdateUBO(DataforShader, Size, 12);
 	//	UpdateUBO(DataforShader, Size, 16);
 
+	for (int i = 0; i < InstanceList.size(); i++)
+	{
+		LightInstance* LightIns = ((LightInstance*)InstanceList[i]);
+		LightIns->SetScale(glm::vec3(LightIns->CalcLightArea()));
+	}
 }
 
 void LightSystem::RenderStencilPass()
@@ -180,8 +238,12 @@ void LightSystem::RenderStencilPass()
 	pDefPtLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 
 	if (GetInstanceNum() == 0) m_pModel->Render();
-	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
+	else
+	{
+		InstanceDataSetting();
+		m_pModel->RenderInstance(GetInstanceNum());
 
+	}
 	
 	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
