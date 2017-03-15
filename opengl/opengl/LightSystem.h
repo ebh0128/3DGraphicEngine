@@ -69,10 +69,10 @@ public:
 	void RenderStencilPass();
 
 	void RenderGeoPass() {}
-	void GeoPassInit() {}
+	void GeoPassInit(MyShader* ManagedShader = nullptr) {}
 
-	void PointLitPassInit();
-	void ShaderParamInit();
+	void PointLitPassInit(MyShader* ManagedShader = nullptr);
+	void ShaderParamInit(MyShader* ManagedShader = nullptr);
 
 	virtual void InstanceDataSetting();
 

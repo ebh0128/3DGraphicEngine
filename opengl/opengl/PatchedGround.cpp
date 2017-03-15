@@ -5,7 +5,7 @@
 
 #include "Scene.h"
 #include "PerlinNoise.h"
-#include "ProgramManager.h"
+ 
 
 #include "PatchedGround.h"
 
@@ -24,16 +24,19 @@ PatchedGround::PatchedGround(Object* Parent, SceneGL *Scene, int seed, GLfloat M
 	Perlin = new PerlinNoise(seed);
 	MaxHeight = MaxH;
 
-	pShader = new MyShader();
-	pShader->build_program_from_files("BasicShader.vert", "BasicShader.frag");
+	//pShader = new MyShader();
+	//pShader->build_program_from_files("BasicShader.vert", "BasicShader.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader("BasicShader.vert", "BasicShader.frag");
 //	pShader->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
 
-	pDefGeoPass = new MyShader();
-	pDefGeoPass->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
+	GeoShaderName =	m_pShaderManager->CreateShader("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
+	
+	//pDefGeoPass = new MyShader();
+	//pDefGeoPass->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
 	//pDefLitPass->build_program_from_files("BasicShader.vert", "BasicShader.frag");
 
-	m_pShaderShadow = new MyShader("./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
-
+	//m_pShaderShadow = new MyShader("./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
+	ShadowShaderName = m_pShaderManager->CreateShader("./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
 
 }
 
@@ -206,7 +209,7 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	
 	//최대 빛 수치만큼 UBO 사이즈 잡아놓기 (빛 정보-> float 16개 + int 1개(빛의 개수) )
 	int strSize = sizeof(PaddingLight);
-	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint),"LightInfoList", 0 , pShader);
+	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint),"LightInfoList", 0 , m_pShaderManager->ApplyShaderByName(ForwardShaderName));
 
 	m_pModel = new Model();
 	m_pModel->AddMesh(GroundMesh);
@@ -312,16 +315,20 @@ GLfloat PatchedGround::GetMaxHeight()
 }
 void PatchedGround::Render()
 {
-	if (pShader) pShader->ApplyShader();
-	pShader->SetUniform1i("TextureGround", MainTexUnit);
-	pShader->SetUniform1i("TextureSnow", SnowTexUnit);
-	pShader->SetUniform1i("TextureStone", StoneTexUnit);
-	pShader->SetUniform1i("SamplerNoise", NoiseTexUnit);
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ForwardShaderName);
+	ThisShader->SetUniform1i("TextureGround", MainTexUnit);
+	ThisShader->SetUniform1i("TextureSnow", SnowTexUnit);
+	ThisShader->SetUniform1i("TextureStone", StoneTexUnit);
+	ThisShader->SetUniform1i("SamplerNoise", NoiseTexUnit);
+
 	Object::Render();
 }
 
-void PatchedGround :: GeoPassInit()
+void PatchedGround :: GeoPassInit(MyShader* ManagedShader)
 {
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) ThisShader = pDefGeoPass;
+	else ThisShader = ManagedShader;
 	glm::mat4 V = pScene->GetVMatrix();
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
@@ -334,19 +341,23 @@ void PatchedGround :: GeoPassInit()
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
 
-	pDefGeoPass->SetUniformMatrix4fv("M", glm::value_ptr(M));
-	pDefGeoPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
-	pDefGeoPass->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
-	pDefGeoPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
-	pDefGeoPass->SetUniform1i("TextureGround", MainTexUnit);
-	pDefGeoPass->SetUniform1i("TextureSnow", SnowTexUnit);
-	pDefGeoPass->SetUniform1i("TextureStone", StoneTexUnit);
-	pDefGeoPass->SetUniform1i("SamplerNoise", NoiseTexUnit);
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	ThisShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	ThisShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+	ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	ThisShader->SetUniform1i("TextureGround", MainTexUnit);
+	ThisShader->SetUniform1i("TextureSnow", SnowTexUnit);
+	ThisShader->SetUniform1i("TextureStone", StoneTexUnit);
+	ThisShader->SetUniform1i("SamplerNoise", NoiseTexUnit);
 
 }
 
-void PatchedGround::ShadowPassInit()
+void PatchedGround::ShadowPassInit(MyShader* ManagedShader)
 {
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) ThisShader = m_pShaderShadow;
+	else ThisShader = ManagedShader;
+
 	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
 	glm::mat4 M;
 
@@ -355,6 +366,6 @@ void PatchedGround::ShadowPassInit()
 
 	M = TransformMat;
 
-	m_pShaderShadow->SetUniformMatrix4fv("M", glm::value_ptr(M));
-	m_pShaderShadow->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	ThisShader->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
 }

@@ -130,7 +130,7 @@ void DirLight::Render()
 	
 	Object::Render();
 }
-void DirLight::ShaderParamInit()
+void DirLight::ShaderParamInit(MyShader* ManagedShader)
 {
 	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 
@@ -230,7 +230,7 @@ void DirLight::HDRPass()
 
 }
 
-void DirLight::DirLitPassInit()
+void DirLight::DirLitPassInit(MyShader* ManagedShader)
 {
 
 	pDefDirLitPass->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));

@@ -1,6 +1,8 @@
 #include "CommonHeader.h"
-#include "ProgramManager.h"
-#include "myShader.h"
+ 
+#include"PassShaderObject.h" 
+
+//#include "myShader.h"
 
 
 
@@ -12,6 +14,15 @@ MyShader::MyShader(const char* file_vert, const char* file_frag,
 	const char* file_tesc, const char* file_tese,
 	const char* file_geom)
 {
+	/*
+	ShaderName = file_vert;
+	std::istringstream iss(ShaderName);
+	std::string token;
+	getline(iss, token, '.');
+	if(token.size() ==0) getline(iss, token, '.');
+
+	ShaderName = token;
+	*/
 	build_program_from_files(file_vert, file_frag, file_tesc, file_tese, file_geom);
 }
 
@@ -159,6 +170,11 @@ GLuint MyShader::build_program_from_files(
 	const char* file_tese,
 	const char* file_geom )
 {
+	//쉐이더 이름
+	
+
+	
+
 	std::string src_vert = get_file_contents(file_vert);
 	std::string src_frag;
 	std::string src_tesc;
@@ -183,8 +199,8 @@ GLuint MyShader::GetShaderProgram()
 void MyShader::ApplyShader()
 {
 	
-	ProgramManager* s = ProgramManager::GetInstance();
-		s->SetCurrentShader(this);
+	//ProgramManager* s = ProgramManager::GetInstance();
+	//	s->SetCurrentShader(this);
 
 	glUseProgram(mProgram);
 }
@@ -238,54 +254,71 @@ void MyShader::SetUniform1i(const char* Var, GLint value)
 	glUniform1i(glGetUniformLocation(mProgram, Var), value);
 }
 
+void MyShader::GetName(char* retName) 
+
+{
+	strcpy_s(retName ,sizeof(ShaderName) ,ShaderName.c_str());
+	//strncpy_s(retName , (const char*)ShaderName,256);
+}
+
+
 
 ////////////////////////////////////////////////////////////////
 /////////////////////쉐이더 매니져
 ShaderManager::ShaderManager()
 {
 	//ChannelCount = 2;
-	
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MaxTexture);
-	printf("Max Texture Unit : %d\n", MaxTexture);
-	m_pbUseTextrueUnit = new bool[MaxTexture] {false,};
-	m_pbUseTextrueUnit[0] = true;
-	m_pbUseTextrueUnit[1] = m_pbUseTextrueUnit[2] = m_pbUseTextrueUnit[3] =  true;
 }
 
-GLuint ShaderManager::GetChannelID()
+
+//생성 요청 만약 있으면 생성하지않고 등록만
+std::string ShaderManager::CreateShader(const char* file_vert, const char* file_frag,
+	const char* file_tesc, const char* file_tese ,
+	const char* file_geom)
 {
-	for (int i = 0; i < MaxTexture;i++)
+	std::string NewName;
+	NewName = file_vert;
+	std::istringstream iss(NewName);
+	std::string token;
+	getline(iss, token, '.');
+	if (token.size() == 0) getline(iss, token, '.');
+	NewName = token;
+
+	PassShaderObject* NewShaderPass = FindPassShader(NewName);
+
+	if (NewShaderPass)
 	{
-		if (m_pbUseTextrueUnit[i] == false)
-		{
-			m_pbUseTextrueUnit[i] = true;
-			return i;
-		}
+		return NewShaderPass->GetNameString();
+
 	}
-
-	//비어있는 텍스쳐 유닛 없음
-	printf("비어있는 텍스쳐 유닛 없음\n");
-	return -1;
-}
-void ShaderManager::LockShader(MyShader* pShader)
-{
-	m_IsLockShader = true;
-	m_pLockShader = pShader;
-}
-void ShaderManager::ReleaseLock()
-{
-	m_IsLockShader = false;
-}
-void ShaderManager::ReleaseChannel(int Channel)
-{
-	m_pbUseTextrueUnit[Channel] = true;
+	//없으면 생성후 등록
+	//MyShader* NewShader = new MyShader(file_vert, file_frag , file_tese, file_tesc, file_geom);
+	MyShader* NewShader = new MyShader(file_vert, file_frag, file_tese, file_tesc, file_geom);
+	NewShader->SetNameString(NewName);
+	NewShaderPass = new PassShaderObject(NewShader);
+	m_ShaderObjectList.push_back(NewShaderPass);
+//	return NewShaderPass->GetShaderName(ReturnName);
+	return NewShaderPass->GetNameString();
 }
 
-void ShaderManager::SetCurrentShader(MyShader* Cur)
+//쉐이더 오브젝트를 이름으로 찾는 메소드
+PassShaderObject* ShaderManager::FindPassShader(std::string InputName)
 {
-	CurrentShader = Cur;
+	for (int i = 0; i < m_ShaderObjectList.size(); i++)
+	{
+		if (m_ShaderObjectList[i]->CheckName(InputName)) return m_ShaderObjectList[i];
+	}
+	return nullptr;
 }
-MyShader* ShaderManager::GetCurrentShader()
+
+MyShader* ShaderManager::ApplyShaderByName(std::string shaderName)
 {
-	return CurrentShader;
+	PassShaderObject* ShaderObj = FindPassShader(shaderName);
+	if (ShaderObj) 
+	{ 
+		
+		return ShaderObj->ApplyPassShader();
+	}
+	return nullptr;
 }
+

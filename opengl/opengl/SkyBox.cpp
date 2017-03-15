@@ -5,7 +5,7 @@
 
 #include "Scene.h"
 #include "Texture.h"
-#include "ProgramManager.h"
+ 
 #include "SkyBox.h"
 #include "DirLight.h"
 
@@ -47,9 +47,7 @@ SkyBox::SkyBox(Object* parent, SceneGL* Scene) :Object(parent , Scene)
 	pCubeMapPath->Path[POS_Y] = "./Texture/top.jpg"; pCubeMapPath->Path[NEG_Y] = "./Texture/bottom.jpg";
 	pCubeMapPath->Path[POS_Z] = "./Texture/back.jpg"; pCubeMapPath->Path[NEG_Z] = "./Texture/front.jpg";
 
-	//pSampler->CreateCubeMapTexture(pCubeMapPath, ProgramManager::GetInstance()->GetChannelID(), glGetUniformLocation(pShader->GetShaderProgram(),"SkyBoxTexture"));
-	//pSampler->CreateCubeMapTexture(pCubeMapPath, 15, glGetUniformLocation(pShader->GetShaderProgram(), "SkyBoxTexture"));
-
+	
 	MainTextureUnit = 12;
 	Texture* CubeTexture = new Texture();
 	//CubeTexture->SetShaderValue(glGetUniformLocation(pShader->GetShaderProgram(), "SkyBoxTexture"));

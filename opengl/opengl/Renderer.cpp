@@ -8,7 +8,7 @@
 
 #include "AssimpModelNode.h"
 
-#include "ProgramManager.h"
+ 
 #include "IOBuffer.h"
 #include "Renderer.h"
 

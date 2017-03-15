@@ -145,30 +145,3 @@ void Drone::MoveFront(float dist)
 	pSpotLight->MovePosition(vFront, dist);
 }
 
-void Drone::Render()
-{
-	AssimpObject::Render();
-}
-
-void Drone::RenderGeoPass()
-{
-	AssimpObject::RenderGeoPass();
-}
-void Drone::RenderShadowPass()
-{
-	AssimpObject::RenderShadowPass();
-}
-
-
-void Drone::ShaderParamInit()
-{
-	AssimpObject::ShaderParamInit();
-}
-void Drone::GeoPassInit()
-{
-	AssimpObject::GeoPassInit();
-}
-void Drone::ShadowPassInit()
-{
-	AssimpObject::ShadowPassInit();
-}

@@ -30,14 +30,27 @@ protected:
 	//모델공간
 	glm::mat4 TransformMat;
 
+
+	ShaderManager* m_pShaderManager;
 	//이동 예정
 	MyShader* pShader;
+	std::string ForwardShaderName;
+	
+	
 	MyShader* pDefGeoPass;
+	std::string GeoShaderName;
+
+	
 	//포인트 라이트
 	MyShader* pDefPtLitPass;
+	std::string PTLightShaderName;
+
 	//디렉션 라이트
 	MyShader* pDefDirLitPass;
+	std::string DirLightShaderName;
+
 	MyShader* m_pShaderShadow;
+	std::string ShadowShaderName;
 
 	//빛 정보를 넘겨주기위한 버퍼(여기있어야되는지 검토는 필요)
 	GLuint ubo;
@@ -52,6 +65,7 @@ protected:
 
 	GLboolean m_bUpdated;
 
+	GLuint MatLocArray[4];
 public:
 	//루트 노드를 지정하고 생성
 	Object();
@@ -73,12 +87,12 @@ public:
 	virtual void RenderDirLitPass() {}
 
 
-	virtual void ShaderParamInit();
-	virtual void GeoPassInit();
-	virtual void ShadowPassInit();
+	virtual void ShaderParamInit(MyShader* ManagedShader = nullptr);
+	virtual void GeoPassInit(MyShader* ManagedShader = nullptr);
+	virtual void ShadowPassInit(MyShader* ManagedShader = nullptr);
 
-	virtual void DirLitPassInit() {}
-	virtual void PointLitPassInit() {}
+	virtual void DirLitPassInit(MyShader* ManagedShader = nullptr) {}
+	virtual void PointLitPassInit(MyShader* ManagedShader = nullptr) {}
 
 	//추가로 인스턴스를 쓴다면 반드시 재정의 
 	virtual void InstanceDataSetting();

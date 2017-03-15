@@ -3,7 +3,7 @@
 #include "Texture.h"
 
 #include "Scene.h"
-#include "ProgramManager.h"
+ 
 
 
 
@@ -79,12 +79,12 @@ void Model::Render( GLuint* MatLocation)
 	{
 		if (MatLocation != nullptr)
 		{
-			Material* p = m_MeshList[i]->GetMaterial();
+			//Material* p = m_MeshList[i]->GetMaterial();
 
-			glUniform3fv(MatLocation[0],1, glm::value_ptr(p->diffuse));
-			glUniform3fv(MatLocation[1], 1, glm::value_ptr(p->ambient));
-			glUniform3fv(MatLocation[2], 1, glm::value_ptr(p->specular));
-			glUniform1f(MatLocation[3] , p->shininess);
+			//glUniform3fv(MatLocation[0],1, glm::value_ptr(p->diffuse));
+			//glUniform3fv(MatLocation[1], 1, glm::value_ptr(p->ambient));
+		//	glUniform3fv(MatLocation[2], 1, glm::value_ptr(p->specular));
+		//	glUniform1f(MatLocation[3] , p->shininess);
 
 
 		}
@@ -109,12 +109,12 @@ void Model::RenderInstance(int InstanceObjNum , GLuint* MatLocation)
 	{
 		if (MatLocation != nullptr)
 		{
-			Material* p = m_MeshList[i]->GetMaterial();
+		//	Material* p = m_MeshList[i]->GetMaterial();
 
-			glUniform3fv(MatLocation[0], 1, glm::value_ptr(p->diffuse));
-			glUniform3fv(MatLocation[1], 1, glm::value_ptr(p->ambient));
-			glUniform3fv(MatLocation[2], 1, glm::value_ptr(p->specular));
-			glUniform1f(MatLocation[3], p->shininess);
+		//	glUniform3fv(MatLocation[0], 1, glm::value_ptr(p->diffuse));
+		//	glUniform3fv(MatLocation[1], 1, glm::value_ptr(p->ambient));
+		//	glUniform3fv(MatLocation[2], 1, glm::value_ptr(p->specular));
+		//	glUniform1f(MatLocation[3], p->shininess);
 
 		}
 		m_MeshList[i]->RenderInstance(InstanceObjNum);

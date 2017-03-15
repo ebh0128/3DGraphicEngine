@@ -19,15 +19,7 @@ public :
 	Drone(Object* parent, SceneGL* Scene, std::string FilePath, std::string FileName);
 
 	
-	virtual void Render();
-
-	virtual void RenderGeoPass();
-	virtual void RenderShadowPass();
-
-
-	virtual void ShaderParamInit();
-	virtual void GeoPassInit();
-	virtual void ShadowPassInit();
+	
 
 	void DroneMoveCallBackFunc(unsigned char key, GLfloat TickTime);
 	void LightMoveCallBackFunc(unsigned char key, GLfloat TickTime);

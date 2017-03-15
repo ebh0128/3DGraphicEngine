@@ -14,17 +14,13 @@ AssimpObject::AssimpObject()
 }
 AssimpObject::AssimpObject(Object* parent, SceneGL* Scene) :Object(parent ,Scene)
 {
-	pShader = new MyShader();
-	pShader->build_program_from_files("AssimpModel.vert", "AssimpModel.frag");
-//	pShader->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader("AssimpModel.vert", "AssimpModel.frag");
+	GeoShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
 
-	pDefGeoPass = new MyShader();
-	pDefGeoPass->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
-	
 	int strSize = sizeof(PaddingLight);
 
-	m_pShaderShadow = new MyShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
-
+	ShadowShaderName = m_pShaderManager->CreateShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
+	
 
 	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 ,pShader);
 	IsRootNode = false;
@@ -42,18 +38,14 @@ AssimpObject::AssimpObject(Object* parent, SceneGL* Scene, std::string FilePath,
 
 	MainTextUnit = 5;
 
-	pShader = new MyShader();
-		pShader->build_program_from_files("AssimpModel.vert", "AssimpModel.frag");
-//	pShader->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
-		 
-	pDefGeoPass = new MyShader();
-	pDefGeoPass->build_program_from_files("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+	
+	ForwardShaderName = m_pShaderManager->CreateShader("AssimpModel.vert", "AssimpModel.frag");
+	ShadowShaderName = m_pShaderManager->CreateShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
+	GeoShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
 
-
-	m_pShaderShadow = new MyShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
-
+	
 	int strSize = sizeof(PaddingLight);
-	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , pShader);
+	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , m_pShaderManager->ApplyShaderByName(ForwardShaderName));
 
 	//모델 버젼
 	
@@ -87,28 +79,30 @@ void AssimpObject::Render()
 	Object::Render();
 	
 }
-void AssimpObject::ShaderParamInit()
+void AssimpObject::ShaderParamInit(MyShader* ManagedShader)
 {
-
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) return;
+	else ThisShader = ManagedShader;
 	//Dir Light 정보 보내기
 
 	DirLight* pDirLit = pScene->GetDirectionalLight();
 	glm::vec4 DirLightPos = pDirLit->GetPos();
 	//glm::vec4 DirLightPos = glm::vec4(0,-15,0,1);
-	pShader->SetUniform4fv("gDirLight.LPos", glm::value_ptr(DirLightPos));
+	ThisShader->SetUniform4fv("gDirLight.LPos", glm::value_ptr(DirLightPos));
 
 	glm::vec4 paramDiff = glm::vec4(pDirLit->GetDif(), 1);
 	glm::vec4 paramAmbi = glm::vec4(pDirLit->GetAmb(), 1);
 	glm::vec4 paramSpec = glm::vec4(pDirLit->GetSpec(), 1);
 
 
-	pShader->SetUniform4fv("gDirLight.LDiff", glm::value_ptr(paramDiff));
-	pShader->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
-	pShader->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
-	pShader->SetUniform1i("TextureMain" , MainTextUnit);
+	ThisShader->SetUniform4fv("gDirLight.LDiff", glm::value_ptr(paramDiff));
+	ThisShader->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
+	ThisShader->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
+	ThisShader->SetUniform1i("TextureMain" , MainTextUnit);
 	
 	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
-	pShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
+	ThisShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
 
 
 	glm::mat4 V = pScene->GetVMatrix();
@@ -122,12 +116,12 @@ void AssimpObject::ShaderParamInit()
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
-	pShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
-	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-	pShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
-	pShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
-	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
-	pShader->SetUniform1i("IsTextured", IsTextured ? 1 : 0);
+	ThisShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+	ThisShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	ThisShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	ThisShader->SetUniform1i("IsTextured", IsTextured ? 1 : 0);
 	// 빛 정보 UiformBlock 쉐이더 전송 
 	LightList* DataforShader = pScene->GetLightSrouceArray();
 	GLuint Size = DataforShader->Count * sizeof(PaddingLight);
@@ -138,10 +132,12 @@ void AssimpObject::ShaderParamInit()
 	UpdateUBO(DataforShader, Size, 12);
 
 }
-void AssimpObject::GeoPassInit()
+void AssimpObject::GeoPassInit(MyShader* ManagedShader)
 {
 
-	//ShaderParamInit();
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) return;
+	else ThisShader = ManagedShader;
 	
 	glm::mat4 V = pScene->GetVMatrix();
 	glm::mat4 VP = pScene->GetVPMatrix();
@@ -154,17 +150,20 @@ void AssimpObject::GeoPassInit()
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
-	pDefGeoPass->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
-	pDefGeoPass->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-	pDefGeoPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
-	pDefGeoPass->SetUniformMatrix4fv("M", glm::value_ptr(M));
-	pDefGeoPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
-	pDefGeoPass->SetUniform1i("IsTextured", IsTextured ? 1 : 0);
-	pDefGeoPass->SetUniform1i("TextureMain", MainTextUnit);
+	ThisShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+	ThisShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	ThisShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	ThisShader->SetUniform1i("IsTextured", IsTextured ? 1 : 0);
+	ThisShader->SetUniform1i("TextureMain", MainTextUnit);
 
 }
-void AssimpObject::ShadowPassInit()
+void AssimpObject::ShadowPassInit(MyShader* ManagedShader)
 {
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) return;
+	else ThisShader = ManagedShader;
 	//빛 공간 변환 행렬
 	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
 	
@@ -174,8 +173,8 @@ void AssimpObject::ShadowPassInit()
 
 	M = TransformMat;
 
-	m_pShaderShadow->SetUniformMatrix4fv("M", glm::value_ptr(M));
-	m_pShaderShadow->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	ThisShader->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
 
 }
 

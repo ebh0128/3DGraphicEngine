@@ -1,7 +1,7 @@
 #include "CommonHeader.h"
 #include "MyShader.h"
 #include "Texture.h"
-#include "ProgramManager.h"
+ 
 #include "ppm.h"
 
 
@@ -149,7 +149,7 @@ void Texture::CreateTextureBuffer(GLfloat* Data, GLuint Size , GLuint VAO, GLuin
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
 	glBufferData(GL_TEXTURE_BUFFER, Size * sizeof(GLfloat), Data, GL_DYNAMIC_DRAW);
 
-	TextureChannel = ProgramManager::GetInstance()->GetChannelID();
+	//TextureChannel = ProgramManager::GetInstance()->GetChannelID();
 	glGenTextures(1, &TexID);
 	glBindTexture(GL_TEXTURE_BUFFER, TexID);
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);

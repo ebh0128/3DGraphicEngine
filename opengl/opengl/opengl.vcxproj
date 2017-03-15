@@ -20,14 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="DeferredRenderingPass.cpp" />
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="IOBuffer.cpp" />
     <ClCompile Include="LightSystem.cpp" />
     <ClCompile Include="Drone.cpp" />
     <ClCompile Include="DroneCamera.cpp" />
     <ClCompile Include="ObjectInstance.cpp" />
-    <ClCompile Include="ProgramManager.cpp" />
+    <ClCompile Include="PassShaderObject.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyFrameBuffer.cpp" />
@@ -48,14 +47,13 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonHeader.h" />
-    <ClInclude Include="DeferredRenderingPass.h" />
+    <ClInclude Include="PassShaderObject.h" />
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="IOBuffer.h" />
     <ClInclude Include="LightSystem.h" />
     <ClInclude Include="Drone.h" />
     <ClInclude Include="DroneCamera.h" />
     <ClInclude Include="ObjectInstance.h" />
-    <ClInclude Include="ProgramManager.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="MyFrameBuffer.h" />
     <ClInclude Include="Object.h" />

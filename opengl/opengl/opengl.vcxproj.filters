@@ -67,11 +67,11 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{90ff9468-417b-4184-9a01-37a88df7ad13}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Pass">
-      <UniqueIdentifier>{755d7caf-5ccb-4f19-ac9b-6f36e18bec6e}</UniqueIdentifier>
+    <Filter Include="소스 파일\PipeLine">
+      <UniqueIdentifier>{4c1af6b7-2b0c-4f47-a2fe-6c24c5db71af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Pass">
-      <UniqueIdentifier>{eb19c149-f3f2-459a-bbc2-fbf332bcae60}</UniqueIdentifier>
+    <Filter Include="헤더 파일\PileLine">
+      <UniqueIdentifier>{755d7caf-5ccb-4f19-ac9b-6f36e18bec6e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -98,9 +98,6 @@
     </ClCompile>
     <ClCompile Include="Object.cpp">
       <Filter>소스 파일\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="ProgramManager.cpp">
-      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>소스 파일</Filter>
@@ -147,8 +144,8 @@
     <ClCompile Include="IOBuffer.cpp">
       <Filter>소스 파일\OpenGLCore</Filter>
     </ClCompile>
-    <ClCompile Include="DeferredRenderingPass.cpp">
-      <Filter>소스 파일\Pass</Filter>
+    <ClCompile Include="PassShaderObject.cpp">
+      <Filter>소스 파일\PipeLine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -172,9 +169,6 @@
     </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>헤더 파일\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="ProgramManager.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
       <Filter>헤더 파일</Filter>
@@ -224,8 +218,8 @@
     <ClInclude Include="IOBuffer.h">
       <Filter>헤더 파일\OpenGLCore</Filter>
     </ClInclude>
-    <ClInclude Include="DeferredRenderingPass.h">
-      <Filter>헤더 파일\Pass</Filter>
+    <ClInclude Include="PassShaderObject.h">
+      <Filter>헤더 파일\PileLine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

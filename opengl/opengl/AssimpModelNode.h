@@ -28,9 +28,9 @@ public:
 	virtual void RenderShadowPass();
 
 
-	virtual void ShaderParamInit();
-	virtual void GeoPassInit();
+	virtual void ShaderParamInit(MyShader* ManagedShader = nullptr);
+	virtual void GeoPassInit(MyShader* ManagedShader = nullptr);
 	//void LitPassInit();
-	virtual void ShadowPassInit();
+	virtual void ShadowPassInit(MyShader* ManagedShader = nullptr);
 
 };

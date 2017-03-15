@@ -76,6 +76,8 @@ protected:
 
 	LightList ShaderLightInfoList;
 	TimeForLight CurruntState;
+
+	ShaderManager* m_pShaderManager;
 public:
 
 	const glm::vec3 NightDiffuse = glm::vec3(19 / 255, 12 / 255, 159 / 255);
@@ -120,6 +122,8 @@ public:
 
 	void DeferredRender(DeferredRenderBuffers* gBuffer , IOBuffer *SSAOBuffer , IOBuffer *BlurBuffer);
 	
+	void SetShaderManager(ShaderManager* ShManager);
+	ShaderManager* GetShaderManager();
 protected:
 	
 	//디퍼드 랜더링 Geometry pass

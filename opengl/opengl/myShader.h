@@ -3,10 +3,11 @@ class MyShader
 {
 private:
 	GLuint mProgram;
+	std::string ShaderName;
 
 public:
 	MyShader();
-	MyShader( const char* file_vert, const char* file_frag,
+	MyShader(const char* file_vert, const char* file_frag,
 		const char* file_tesc = NULL, const char* file_tese = NULL,
 		const char* file_geom = NULL);
 
@@ -24,54 +25,48 @@ public:
 	bool check_link_status(GLuint handle);
 
 	std::string get_file_contents(const char *filename);
-	
+
 	void SetUniform4fv(const char* Var, GLfloat* value, GLuint count = 1);
 	void SetUniform3fv(const char* Var, GLfloat* value, GLuint count = 1);
 	void SetUniform2fv(const char* Var, GLfloat* value, GLuint count = 1);
 
 
-	void SetUniformMatrix4fv(const char* Var, GLfloat* value , GLuint count=1);
+	void SetUniformMatrix4fv(const char* Var, GLfloat* value, GLuint count = 1);
 	void SetUniformMatrix3fv(const char* Var, GLfloat* value, GLuint count = 1);
 	void SetUniformMatrix2fv(const char* Var, GLfloat* value, GLuint count = 1);
 
 	void SetUniform1f(const char* Var, GLfloat value);
 	void SetUniform1i(const char* Var, GLint value);
 	GLuint GetShaderProgram();
+
+	void GetName(char* retName);
+	std::string GetNameString() { return ShaderName; }
+	void SetNameString(std::string sName) { ShaderName = sName; }
+
 	void ApplyShader();
 };
 
 //싱글톤 클래스 아님 전체매니져 하나에서만 사용
+class PassShaderObject;
+
 class ShaderManager
 {
-private:
-	//진입점에서 초기화해주면 좋음
-	MyShader* CurrentShader;
-	GLuint ChannelCount;
-
-	//텍스쳐 유닛이 사용하고 있는지 여부
-	bool* m_pbUseTextrueUnit;
-	GLint MaxTexture;
-
-	//쉐이더 락(강제로 특정 쉐이더를 적용할 때 사용)
-	bool m_IsLockShader;
-	MyShader* m_pLockShader;
+protected:
+	std::vector<PassShaderObject*> m_ShaderObjectList;
+	
 public:
 	//초기화는 여기서
 	ShaderManager();
 
-	void SetCurrentShader(MyShader* Cur);
-	GLuint GetChannelID();
-	
-	bool CheckLock() { return m_IsLockShader; }
-	//쉐이더 잠그기
-	void LockShader(MyShader* pShader);
+	//생성 요청 만약 있으면 생성하지않고 이름 반환
+	//없으면 생성후 이름반환
+	std::string CreateShader(const char* file_vert, const char* file_frag,
+		const char* file_tesc = NULL, const char* file_tese = NULL,
+		const char* file_geom = NULL);
 
-	//잠금 해제
-	void ReleaseLock();
+	//쉐이더 오브젝트를 이름으로 찾는 메소드
+	PassShaderObject* FindPassShader(std::string InputName);
+	MyShader* ApplyShaderByName(std::string shaderName);
 
-	//텍스쳐 채널해제 현재는 플래그만 해제
-	void ReleaseChannel(int Channel);
-	MyShader* GetCurrentShader();
-	
 
 };

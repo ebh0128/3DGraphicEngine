@@ -14,7 +14,7 @@
 #include "AssimpModelNode.h"
 
 #include "Drone.h"
-#include "ProgramManager.h"
+ 
 #include "Renderer.h"
 
 #include "LightSystem.h"
@@ -24,7 +24,6 @@
 #define TIME_PER_ONE_FRAME 10
 
 
-ProgramManager* ProgramManager::m_pInstance = nullptr;
 
 GLuint	vao;
 GLuint	vbo[2], ebo;

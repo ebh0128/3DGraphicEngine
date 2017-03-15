@@ -57,15 +57,15 @@ public:
 
 	//지오메트리 패스에서는 아무것도 안해야됨
 	void RenderGeoPass() {}
-	void GeoPassInit() {}
+	void GeoPassInit(MyShader* ManagedShader = nullptr) {}
 
 	//빛 패스에서 실제로 작동
 	void RenderPointLitPass() {}
 	void RenderDirLitPass();
 
-	void DirLitPassInit();
-	void PointLitPassInit() {}
-	void ShaderParamInit();
+	void DirLitPassInit(MyShader* ManagedShader = nullptr);
+	void PointLitPassInit(MyShader* ManagedShader = nullptr) {}
+	void ShaderParamInit(MyShader* ManagedShader = nullptr);
 
 	//기타 패스
 	void SSAOPass();

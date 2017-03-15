@@ -137,7 +137,7 @@ void  LightSystem::AddLight(LightInstance* pnew)
 	AddInstance(pnew);
 }
 
-void LightSystem::ShaderParamInit()
+void LightSystem::ShaderParamInit(MyShader* ManagedShader)
 {
 	glm::vec4 TempDiff = glm::vec4(1, 1, 1, 1);
 	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(TempDiff));
@@ -180,7 +180,7 @@ void LightSystem::RenderPointLitPass()
 	}
 }
 
-void LightSystem::PointLitPassInit()
+void LightSystem::PointLitPassInit(MyShader* ManagedShader)
 {
 
 //	pDefPtLitPass->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));

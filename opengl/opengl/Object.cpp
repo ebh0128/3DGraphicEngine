@@ -27,7 +27,7 @@ Object::Object( Object* Parent, SceneGL* Sce) :Object()
 	mParent = Parent;
 	if(Parent != nullptr) Parent->AddChild(this);
 	pScene = Sce;
-
+	m_pShaderManager = Sce->GetShaderManager();
 
 }
 
@@ -76,18 +76,23 @@ void Object::Update(GLfloat dtime)
 }
 void Object::Render()
 {
-	if (pShader) pShader->ApplyShader();
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ForwardShaderName);
 
-	pScene->ApplySpotLight(pShader);
+	if (!ThisShader)
+	{
+		if (!pShader) return;
+		pShader->ApplyShader();
+		ShaderParamInit();
+
+	}
+	else
+	{
+		ShaderParamInit(ThisShader);
+
+	}
 	
-	ShaderParamInit();
 
-	GLuint MatLocArray[4];
-	MatLocArray[0] = glGetUniformLocation(pShader->GetShaderProgram(), "material.diffuse");
-	MatLocArray[1] = glGetUniformLocation(pShader->GetShaderProgram(), "material.amdient");
-	MatLocArray[2] = glGetUniformLocation(pShader->GetShaderProgram(), "material.specular");
-	MatLocArray[3] = glGetUniformLocation(pShader->GetShaderProgram(), "material.shininess");
-
+	
 
 	if (m_pModel != nullptr)
 	{
@@ -112,17 +117,21 @@ void Object::Render()
 
 void Object::RenderGeoPass()
 {
-	if (!pDefGeoPass)  return;
-	pDefGeoPass->ApplyShader();
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(GeoShaderName);
+
+	if (!ThisShader)
+	{
+		if (!pDefGeoPass)  return;
+		pDefGeoPass->ApplyShader();
+		GeoPassInit();
 	
-	GeoPassInit();
-
-	GLuint MatLocArray[4];
-	MatLocArray[0] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.diffuse");
-	MatLocArray[1] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.amdient");
-	MatLocArray[2] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.specular");
-	MatLocArray[3] = glGetUniformLocation(pDefGeoPass->GetShaderProgram(), "material.shininess");
-
+	}
+	else
+	{
+		GeoPassInit(ThisShader);
+	
+	}
+	
 
 	if (m_pModel != nullptr)
 	{
@@ -146,12 +155,22 @@ void Object::RenderGeoPass()
 }
 void Object::RenderShadowPass()
 {
-	if (!m_pShaderShadow)  return;
-	m_pShaderShadow->ApplyShader();
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ShadowShaderName);
 
+	if (!ThisShader)
+	{
+		if (!m_pShaderShadow)  return;
+		m_pShaderShadow->ApplyShader();
+		// 변환 행렬 쉐이더 전송
+		ShadowPassInit();
+
+	}
+	else
+	{
+		ShadowPassInit(ThisShader);
+
+	}
 	
-	// 변환 행렬 쉐이더 전송
-	ShadowPassInit();
 	if (GetInstanceNum() == 0) m_pModel->Render();
 	else
 	{
@@ -177,8 +196,12 @@ void Object::InstanceDataSetting()
 
 }
 
-void Object::GeoPassInit()
+void Object::GeoPassInit(MyShader* ManagedShader)
 {
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) ThisShader = pDefGeoPass;
+	else ThisShader = ManagedShader;
+
 	glm::mat4 V = pScene->GetVMatrix();
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
@@ -190,15 +213,24 @@ void Object::GeoPassInit()
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
 
-	pDefGeoPass->SetUniformMatrix4fv("WVP", glm::value_ptr(MVP));
-	pDefGeoPass->SetUniformMatrix4fv("World", glm::value_ptr(M));
+	ThisShader->SetUniformMatrix4fv("WVP", glm::value_ptr(MVP));
+	ThisShader->SetUniformMatrix4fv("World", glm::value_ptr(M));
+
+	MatLocArray[0] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.diffuse");
+	MatLocArray[1] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.amdient");
+	MatLocArray[2] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.specular");
+	MatLocArray[3] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.shininess");
 
 	////////InctanceData 셋팅
 	
 
 }
-void Object::ShaderParamInit()
+void Object::ShaderParamInit(MyShader* ManagedShader)
 {
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) ThisShader = pShader;
+	else ThisShader = ManagedShader;
+
 	glm::mat4 V = pScene->GetVMatrix();
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 M;
@@ -209,19 +241,19 @@ void Object::ShaderParamInit()
 	DirLight* pDirLit = pScene->GetDirectionalLight();
 	glm::vec4 DirLightPos = pDirLit->GetPos();
 	//glm::vec4 DirLightPos = glm::vec4(0,-15,0,1);
-	pShader->SetUniform4fv("gDirLight.LPos", glm::value_ptr(DirLightPos));
+	ThisShader->SetUniform4fv("gDirLight.LPos", glm::value_ptr(DirLightPos));
 
 	glm::vec4 paramDiff = glm::vec4(pDirLit->GetDif(), 1);
 	glm::vec4 paramAmbi = glm::vec4(pDirLit->GetAmb(), 1);
 	glm::vec4 paramSpec = glm::vec4(pDirLit->GetSpec(), 1);
 
 
-	pShader->SetUniform4fv("gDirLight.LDiff", glm::value_ptr(paramDiff));
-	pShader->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
-	pShader->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
+	ThisShader->SetUniform4fv("gDirLight.LDiff", glm::value_ptr(paramDiff));
+	ThisShader->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
+	ThisShader->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
 
 	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
-	pShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
+	ThisShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
 
 
 	//if (mParent == nullptr) M = TransformMat;
@@ -230,11 +262,11 @@ void Object::ShaderParamInit()
 
 	glm::mat4 MV = V*M;
 	glm::mat4 MVP = VP*M;
-	pShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
-	pShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-	pShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
-	pShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
-	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	ThisShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+	ThisShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	ThisShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 
 	// 빛 정보 UiformBlock 쉐이더 전송 
 	LightList* DataforShader = pScene->GetLightSrouceArray();
@@ -248,8 +280,15 @@ void Object::ShaderParamInit()
 
 	////////InctanceData 셋팅
 	m_pModel->SetInstanceBufferData(GetInstanceMatrixData(), 0);
+
+	MatLocArray[0] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.diffuse");
+	MatLocArray[1] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.amdient");
+	MatLocArray[2] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.specular");
+	MatLocArray[3] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.shininess");
+
+
 }
-void Object::ShadowPassInit()
+void Object::ShadowPassInit(MyShader* ManagedShader)
 {
 
 }

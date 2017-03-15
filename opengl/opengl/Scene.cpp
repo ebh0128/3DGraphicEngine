@@ -21,6 +21,7 @@ SceneGL::SceneGL()
 	Root = nullptr;
 	//pCamera = nullptr;
 	pCamManager = new CameraManager();
+	m_pShaderManager = new ShaderManager();
 	LightCnt = 0;
 	pSkyBox = nullptr;
 	m_pPointLightSys = nullptr;
@@ -38,6 +39,8 @@ SceneGL::SceneGL(Object* root, Camera* cam)
 	//pCamera = cam;
 	pCamManager = new CameraManager();
 	pCamManager->ChangeCamera(pCamManager->AddCamera(cam));
+
+	m_pShaderManager = new ShaderManager();
 
 	LightCnt = 0;
 	pSkyBox = nullptr;
@@ -489,4 +492,14 @@ void SceneGL::DrawGBuffer(DeferredRenderBuffers* gBuffer)
 	gBuffer->SetReadBuffer(DeferredRenderBuffers::TEXTURE_TYPE_TEXCOORD);
 	glBlitFramebuffer(0, 0, W, H,
 		HalfWidth, 0, W, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+}
+
+
+void SceneGL::SetShaderManager(ShaderManager* ShManager)
+{
+	m_pShaderManager = ShManager;
+}
+ShaderManager* SceneGL::GetShaderManager()
+{
+	return m_pShaderManager;
 }

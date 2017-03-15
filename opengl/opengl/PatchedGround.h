@@ -66,6 +66,6 @@ public:
 	GLfloat GetZSize();
 	void Render();
 
-	void  GeoPassInit();
-	void ShadowPassInit();
+	void  GeoPassInit(MyShader* ManagedShader = nullptr);
+	void ShadowPassInit(MyShader* ManagedShader = nullptr);
 };
