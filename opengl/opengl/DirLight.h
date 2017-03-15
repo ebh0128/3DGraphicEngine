@@ -62,24 +62,7 @@ public:
 
 	void Update(GLfloat dtime);
 	void Render();
-
-	//지오메트리 패스에서는 아무것도 안해야됨
-	void RenderGeoPass() {}
-	void GeoPassInit(MyShader* ManagedShader = nullptr) {}
-
-	//빛 패스에서 실제로 작동
-	void RenderPointLitPass() {}
-	void RenderDirLitPass();
-
-	void DirLitPassInit(MyShader* ManagedShader = nullptr);
-	void PointLitPassInit(MyShader* ManagedShader = nullptr) {}
 	void ShaderParamInit(MyShader* ManagedShader = nullptr);
-
-	//기타 패스
-	void SSAOPass();
-	void BlurPass();
-
-	void HDRPass();
 
 	void InitKernel();
 };

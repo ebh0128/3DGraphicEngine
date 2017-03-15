@@ -27,13 +27,6 @@ public:
 	virtual void Update(GLfloat dtime);
 	virtual void Render();
 
-	virtual void RenderGeoPass();
-	virtual void RenderShadowPass();
-
-
 	virtual void ShaderParamInit(MyShader* ManagedShader = nullptr);
-	virtual void GeoPassInit(MyShader* ManagedShader = nullptr);
-	//void LitPassInit();
-	virtual void ShadowPassInit(MyShader* ManagedShader = nullptr);
-
+	
 };

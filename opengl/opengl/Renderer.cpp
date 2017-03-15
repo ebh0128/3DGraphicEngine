@@ -31,5 +31,4 @@ Renderer::Renderer()
 void Renderer::Render(SceneGL* Scene)
 {
 	if (m_Mode == FORWARD) Scene->Render();
-	else Scene->DeferredRender(GBuffers , m_SSaoBuffer , m_BlurBuffer);
 }

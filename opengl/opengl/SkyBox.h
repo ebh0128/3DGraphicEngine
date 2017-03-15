@@ -23,7 +23,6 @@ public:
 	
 	
 	void Render();
-
 	void RenderDepthRead();
-	void GeoPassInit();
+
 };

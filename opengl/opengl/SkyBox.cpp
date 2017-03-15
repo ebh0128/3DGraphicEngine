@@ -136,7 +136,3 @@ void SkyBox::RenderDepthRead()
 	}
 	
 }
-void SkyBox::GeoPassInit()
-{
-
-}

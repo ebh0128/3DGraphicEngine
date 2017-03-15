@@ -119,32 +119,9 @@ public:
 
 	void Update(GLfloat dTime);
 	void Render();
-
-	void DeferredRender(DeferredRenderBuffers* gBuffer , IOBuffer *SSAOBuffer , IOBuffer *BlurBuffer);
 	
 	void SetShaderManager(ShaderManager* ShManager);
 	ShaderManager* GetShaderManager();
-protected:
 	
-	//디퍼드 랜더링 Geometry pass
-	void RenderGeoPass(DeferredRenderBuffers* gBuffer);
-	
-	void RenderStencilPass(DeferredRenderBuffers* gBuffer);
-
-	//Lightt Pass	
-	void RenderPointLitPass(DeferredRenderBuffers* gBuffer);
-	void RenderDirLitPass(DeferredRenderBuffers* gBuffe , IOBuffer* BlurBuffer);
-	void RenderFinalPass(DeferredRenderBuffers* gBuffer);
-	
-	//디버그용 함수
-	void DrawGBuffer(DeferredRenderBuffers* gBuffer);
-
-	void RenderGEODepth(DeferredRenderBuffers* gBuffer);
-	void SSAOPass(DeferredRenderBuffers* gBuffer, IOBuffer* SSAOBuffer);
-	void BlurPass(IOBuffer* BlurBuffer, IOBuffer* SSAOBuffer);
-	
-	void ShadowMapPass();
-
-//	glm::vec4 GetDriLightPos() { return m_pDirLight->GetPos(); }
 
 };

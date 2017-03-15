@@ -64,17 +64,10 @@ public:
 	void Update(GLfloat dtime);
 	
 	void Render();
-
-	//ºû
-	void RenderPointLitPass();
-	void RenderStencilPass();
-
-	void RenderGeoPass() {}
-	void GeoPassInit(MyShader* ManagedShader = nullptr) {}
-
-	void PointLitPassInit(MyShader* ManagedShader = nullptr);
 	void ShaderParamInit(MyShader* ManagedShader = nullptr);
 
+	//ºû
+	
 	virtual void InstanceDataSetting();
 
 	void ScaleLightforDeferred();

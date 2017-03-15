@@ -158,110 +158,11 @@ void LightSystem::ShaderParamInit(MyShader* ManagedShader)
 
 }
 
-void LightSystem::RenderPointLitPass()
-{
-
-	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(PTLightShaderName);
-
-	if (ThisShader) PointLitPassInit(ThisShader);
-
-	
-		// 변환 행렬 쉐이더 전송
-	
-	
-	if (GetInstanceNum() == 0) m_pModel->Render();
-	else 
-	{
-		InstanceDataSetting();
-		m_pModel->RenderInstance(GetInstanceNum());
-		
-	}
-	
-	
-	for (GLuint i = 0; i<ChildList.size(); i++)
-	{
-		ChildList[i]->RenderPointLitPass();
-	}
-}
-
-void LightSystem::PointLitPassInit(MyShader* ManagedShader)
-{
-	MyShader* ThisShader;
-	if (ManagedShader == nullptr) return;
-	else ThisShader = ManagedShader;
-
-	glm::mat4 V = pScene->GetVMatrix();
-	glm::mat4 VP = pScene->GetVPMatrix();
-	glm::mat4 MVP = VP*TransformMat;
-
-	ThisShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
-	ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
-	ThisShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
-
-	glm::mat4 ParentsTransform = InstanceList[0]->GetParentsMat();;
-	ThisShader->SetUniformMatrix4fv("LightTransMat", glm::value_ptr(ParentsTransform));
-
-
-	glm::vec2 ScreenSize = glm::vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
-	ThisShader->SetUniform2fv("gScreenSize", glm::value_ptr(ScreenSize));
-
-	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
-	ThisShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
-
-	//gBuffer 텍스쳐 보내기
-	ThisShader->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
-	ThisShader->SetUniform1i("gColorMap", DeferredRenderBuffers::TEXTURE_TYPE_DIFFUSE);
-	ThisShader->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
-
-	LightList* DataforShader = pScene->GetLightSrouceArray();
-	GLuint Size = DataforShader->Count * sizeof(PaddingLight);
-	//meshes[i]->UpdateUBO(DataforShader, Size+ sizeof(GLuint), 0);
-	UpdateUBO(DataforShader, sizeof(GLuint), 0);
-
-	// std140 stride 16
-	UpdateUBO(DataforShader, Size, 12);
-	//	UpdateUBO(DataforShader, Size, 16);
-
-	ScaleLightforDeferred();
-}
-
 void LightSystem::ScaleLightforDeferred()
 {
 	for (int i = 0; i < InstanceList.size(); i++)
 	{
 		LightInstance* LightIns = ((LightInstance*)InstanceList[i]);
 		LightIns->SetScale(glm::vec3(LightIns->CalcLightArea()));
-	}
-}
-void LightSystem::RenderStencilPass()
-{
-	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(NullShaderName);
-
-	glm::mat4 VP = pScene->GetVPMatrix();
-	glm::mat4 MVP = VP*TransformMat;
-
-
-	if (ThisShader)
-	{
-		ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
-		ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
-	}
-		
-
-	
-		// 변환 행렬 쉐이더 전송
-	
-	if (GetInstanceNum() == 0) m_pModel->Render();
-	else
-	{
-		InstanceDataSetting();
-		m_pModel->RenderInstance(GetInstanceNum());
-
-	}
-	
-	for (GLuint i = 0; i<ChildList.size(); i++)
-	{
-		ChildList[i]->RenderPointLitPass();
 	}
 }

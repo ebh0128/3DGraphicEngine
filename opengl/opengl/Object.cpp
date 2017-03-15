@@ -122,65 +122,6 @@ void Object::RenderByPipeLine()
 	*/
 }
 
-void Object::RenderGeoPass()
-{
-	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(GeoShaderName);
-
-	if (ThisShader)
-	
-	{
-		GeoPassInit(ThisShader);
-	
-	}
-	
-
-	if (m_pModel != nullptr)
-	{
-		if ( GetInstanceNum() == 0) m_pModel->Render(MatLocArray);
-		else
-		{
-			InstanceDataSetting();
-			m_pModel->RenderInstance( GetInstanceNum(), MatLocArray);
-
-		}
-	}
-	m_bUpdated = false;
-
-
-	for (GLuint i = 0; i<ChildList.size(); i++)
-	{
-		ChildList[i]->RenderGeoPass();
-		//Children[i]->Render();
-	}
-
-}
-void Object::RenderShadowPass()
-{
-	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ShadowShaderName);
-
-	if (ThisShader)
-	{
-		ShadowPassInit(ThisShader);
-
-	}
-	
-	if (GetInstanceNum() == 0) m_pModel->Render();
-	else
-	{
-		InstanceDataSetting();
-		m_pModel->RenderInstance(GetInstanceNum());
-
-	}
-	
-	m_bUpdated = false;
-
-	
-	for (GLuint i = 0; i<ChildList.size(); i++)
-	{
-		ChildList[i]->RenderShadowPass();
-		//Children[i]->Render();
-	}
-}
 
 
 void Object::InstanceDataSetting()
@@ -189,35 +130,6 @@ void Object::InstanceDataSetting()
 
 }
 
-void Object::GeoPassInit(MyShader* ManagedShader)
-{
-	MyShader* ThisShader;
-	if (ManagedShader == nullptr) return;
-	else ThisShader = ManagedShader;
-
-	glm::mat4 V = pScene->GetVMatrix();
-	glm::mat4 VP = pScene->GetVPMatrix();
-	glm::mat4 M;
-
-	//if (mParent == nullptr) M = TransformMat;
-	//else  M = TransformMat*mParent->GetModelMat();
-	M = TransformMat;
-
-	glm::mat4 MV = V*M;
-	glm::mat4 MVP = VP*M;
-
-	ThisShader->SetUniformMatrix4fv("WVP", glm::value_ptr(MVP));
-	ThisShader->SetUniformMatrix4fv("World", glm::value_ptr(M));
-
-	MatLocArray[0] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.diffuse");
-	MatLocArray[1] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.amdient");
-	MatLocArray[2] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.specular");
-	MatLocArray[3] = glGetUniformLocation(ThisShader->GetShaderProgram(), "material.shininess");
-
-	////////InctanceData ¼ÂÆÃ
-	
-
-}
 void Object::ShaderParamInit(MyShader* ManagedShader)
 {
 	MyShader* ThisShader;
@@ -281,10 +193,7 @@ void Object::ShaderParamInit(MyShader* ManagedShader)
 
 
 }
-void Object::ShadowPassInit(MyShader* ManagedShader)
-{
 
-}
 
 void Object::AddChild(Object* pChild)
 {
