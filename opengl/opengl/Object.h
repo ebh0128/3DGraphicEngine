@@ -33,23 +33,23 @@ protected:
 
 	ShaderManager* m_pShaderManager;
 	//이동 예정
-	MyShader* pShader;
+//	MyShader* pShader;
 	std::string ForwardShaderName;
 	
 	
-	MyShader* pDefGeoPass;
+	//MyShader* pDefGeoPass;
 	std::string GeoShaderName;
 
 	
 	//포인트 라이트
-	MyShader* pDefPtLitPass;
+	//MyShader* pDefPtLitPass;
 	std::string PTLightShaderName;
 
 	//디렉션 라이트
-	MyShader* pDefDirLitPass;
+	//MyShader* pDefDirLitPass;
 	std::string DirLightShaderName;
 
-	MyShader* m_pShaderShadow;
+	//MyShader* m_pShaderShadow;
 	std::string ShadowShaderName;
 
 	//빛 정보를 넘겨주기위한 버퍼(여기있어야되는지 검토는 필요)

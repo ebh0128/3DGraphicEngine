@@ -38,8 +38,9 @@ SkyBox::SkyBox(Object* parent, SceneGL* Scene) :Object(parent , Scene)
 	m_pModel->AddMesh(SkyBoxMesh);
 	
 	
-	pShader = new MyShader("SkyBox.vert","SkyBox.frag");
-	pDefGeoPass = new MyShader("./Shader/Deferred_SkyBox.vert", "./Shader/Deferred_SkyBox.frag");
+//	pShader = new MyShader("SkyBox.vert","SkyBox.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader("SkyBox.vert", "SkyBox.frag");
+	//pDefGeoPass = new MyShader("./Shader/Deferred_SkyBox.vert", "./Shader/Deferred_SkyBox.frag");
 	CubeMapTexturePathInfo* pCubeMapPath = new CubeMapTexturePathInfo();
 
 	
@@ -73,7 +74,9 @@ void SkyBox::Render()
 {
 	//깊이 테스트 사용하면 안됨
 	glDisable(GL_DEPTH_TEST);
-	if (pShader) pShader->ApplyShader();
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ForwardShaderName);
+
+	if (!ThisShader) return;
 
 	glm::mat4 V = pScene->GetVMatrix();
 	//카메라 이동은 무시
@@ -85,8 +88,8 @@ void SkyBox::Render()
 	glm::mat4 InversVP = glm::inverse(VP);
 	//glm::mat4 InversVP = invP*invV;
 	//InversVP = InversVP / InversVP[3][3];
-	pShader->SetUniformMatrix4fv("InversVP", glm::value_ptr(InversVP));
-	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
+	ThisShader->SetUniformMatrix4fv("InversVP", glm::value_ptr(InversVP));
+	ThisShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 	//포지션은 그대로 보낼것
 	
 		m_pModel->Render();
@@ -102,7 +105,10 @@ void SkyBox::Render()
 
 void SkyBox::RenderDepthRead()
 {
-	if (pShader) pShader->ApplyShader();
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ForwardShaderName);
+
+	if (!ThisShader) return;
+
 
 	GLint getDepth =123;
 	glGetIntegerv(GL_DEPTH_WRITEMASK , &getDepth);
@@ -116,11 +122,11 @@ void SkyBox::RenderDepthRead()
 	glm::mat4 InversVP = glm::inverse(VP);
 	//glm::mat4 InversVP = invP*invV;
 	//InversVP = InversVP / InversVP[3][3];
-	pShader->SetUniformMatrix4fv("InversVP", glm::value_ptr(InversVP));
+	ThisShader->SetUniformMatrix4fv("InversVP", glm::value_ptr(InversVP));
 
 	glm::vec4 LightDiffuse = glm::vec4 (pScene->GetDirectionalLight()->GetDif(),1);
-	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(LightDiffuse));
-	pShader->SetUniform1i("SkyBoxTexture", MainTextureUnit);
+	ThisShader->SetUniform4fv("DiffuseCol", glm::value_ptr(LightDiffuse));
+	ThisShader->SetUniform1i("SkyBoxTexture", MainTextureUnit);
 	//포지션은 그대로 보낼것
 	m_pModel->Render();
 

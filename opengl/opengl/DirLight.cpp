@@ -42,18 +42,24 @@ DirLight::DirLight(Object* parent, SceneGL* Scene) :Object(parent, Scene)
 	m_pModel->AddMesh(QuadMesh);
 	
 
-	pShader = new MyShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
+	//pShader = new MyShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
 	Diffuse = glm::vec3(0.7, 0.5, 0.3);
 	//Diffuse = glm::vec3(70, 50, 30);
 
 	Ambient = Specular = glm::vec3(0.6, 0.6, 0.6);
 	
-	pDefDirLitPass = new MyShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
-	m_pShaderSSAO = new MyShader("./Shader/SSAO.vert", "./Shader/SSAO.frag");
-	m_pShaderBlur = new MyShader("./Shader/Blur.vert", "./Shader/Blur.frag");
-	m_pShaderHDR = new MyShader("./Shader/HDR.vert", "./Shader/HDR.frag");
-	m_pShaderShadow = new MyShader("./Shader/HDR.vert", "./Shader/HDR.frag");
+	//pDefDirLitPass = new MyShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
+	//m_pShaderSSAO = new MyShader("./Shader/SSAO.vert", "./Shader/SSAO.frag");
+	//m_pShaderBlur = new MyShader("./Shader/Blur.vert", "./Shader/Blur.frag");
+	//m_pShaderHDR = new MyShader("./Shader/HDR.vert", "./Shader/HDR.frag");
+	//m_pShaderShadow = new MyShader("./Shader/HDR.vert", "./Shader/HDR.frag");
 
+	ForwardShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
+	DirLightShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
+	SSAOShaderName = m_pShaderManager->CreateShader("./Shader/SSAO.vert", "./Shader/SSAO.frag");
+	BlurShaderName = m_pShaderManager->CreateShader("./Shader/Blur.vert", "./Shader/Blur.frag");
+	HDRShaderName = m_pShaderManager->CreateShader("./Shader/HDR.vert", "./Shader/HDR.frag");
+	
 	
 	LightOrtho = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, 0.1f, 1000.f);
 		LightView = glm::lookAt(
@@ -132,56 +138,52 @@ void DirLight::Render()
 }
 void DirLight::ShaderParamInit(MyShader* ManagedShader)
 {
-	pShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) return;
+	else ThisShader = ManagedShader;
+	ThisShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 
 	//MVP 필요없음
 	glm::mat4 VP = pScene->GetVPMatrix();
-	pShader->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
-	pShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
+	ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
 
 
 }
 
 void DirLight::RenderDirLitPass()
 {
-	if (!pDefDirLitPass)  return;
-	pDefDirLitPass->ApplyShader();
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(DirLightShaderName);
+	if (ThisShader)		DirLitPassInit(ThisShader);
 
-	DirLitPassInit();
 	
 	if (GetInstanceNum() == 0) m_pModel->Render();
-//	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
-	/*
-	for (GLuint i = 0; i<ChildList.size(); i++)
-	{
-		ChildList[i]->RenderPointLitPass();
-	}
-	*/
 }
 
 void DirLight::SSAOPass()
 {
-	if (!m_pShaderSSAO)  return;
-	m_pShaderSSAO->ApplyShader();
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(SSAOShaderName);
 
-	
 	glm::mat4 P = pScene->GetPMatrix();
+	
+	if (ThisShader)
+	{
+		ThisShader->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+		ThisShader->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
 
+		//NoiseTexture 전송
+		glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_2D, NosieTexture);
+		ThisShader->SetUniform1i("gNoiseTexture", 10);
 
-	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
-	m_pShaderSSAO->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
-		
-	//NoiseTexture 전송
-	glActiveTexture(GL_TEXTURE10);
-	glBindTexture(GL_TEXTURE_2D, NosieTexture);
-	m_pShaderSSAO->SetUniform1i("gNoiseTexture", 10);
+		ThisShader->SetUniformMatrix4fv("P", glm::value_ptr(P));
+		ThisShader->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+		ThisShader->SetUniform1f("gSampleRad", 0.3f);
+		ThisShader->SetUniform3fv("gKernel", (GLfloat*)Kernel, KERNEL_SIZE);
 
-	m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
-	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
-	m_pShaderSSAO->SetUniform1f("gSampleRad", 0.3f);
-	m_pShaderSSAO->SetUniform3fv("gKernel", (GLfloat*)Kernel, KERNEL_SIZE);
-
+	}
+	
 	if (GetInstanceNum() == 0) m_pModel->Render();
 	//else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
@@ -193,12 +195,13 @@ void DirLight::SSAOPass()
 }
 void DirLight::BlurPass()
 {
-	if (!m_pShaderBlur)  return;
-	m_pShaderBlur->ApplyShader();
-
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(BlurShaderName);
+	if (ThisShader)
+	{
 		// 변환 행렬 쉐이더 전송
-	m_pShaderBlur->SetUniform1i("gColorMap", 0);
-
+		ThisShader->SetUniform1i("gColorMap", 0);
+	}
+	
 	if (GetInstanceNum() == 0) m_pModel->Render();
 	//else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
@@ -210,21 +213,16 @@ void DirLight::BlurPass()
 
 void DirLight::HDRPass()
 {
-	if (!m_pShaderHDR)  return;
-	m_pShaderHDR->ApplyShader();
+	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(HDRShaderName);
 
-	// 변환 행렬 쉐이더 전송
+	if (ThisShader)
+	{
+		ThisShader->SetUniform1i("gFinalMap", 4);
+		ThisShader->SetUniform1f("exposure", 0.7);
 
-//	glm::mat4 P = pScene->GetPMatrix();
-
-	m_pShaderHDR->SetUniform1i("gFinalMap", 4);
-	m_pShaderHDR->SetUniform1f("exposure", 0.7);
-	//	m_pShaderHDR->SetUniform1f("exposure", 1);
-	//	m_pShaderSSAO->SetUniformMatrix4fv("P", glm::value_ptr(P));
-	//	m_pShaderSSAO->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+	}
 
 	if (GetInstanceNum() == 0) m_pModel->Render();
-	//	else m_pModel->Render(GetInstanceMatrixData(), GetInstanceNum());
 
 
 
@@ -233,50 +231,54 @@ void DirLight::HDRPass()
 void DirLight::DirLitPassInit(MyShader* ManagedShader)
 {
 
-	pDefDirLitPass->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
+	MyShader* ThisShader;
+	if (ManagedShader == nullptr) return;
+	else ThisShader = ManagedShader;
+
+	ThisShader->SetUniform4fv("DiffuseCol", glm::value_ptr(Diffuse));
 
 	glm::mat4 VP = pScene->GetVPMatrix();
 	glm::mat4 MVP = VP*TransformMat;
 	glm::mat4 V = pScene->GetVMatrix();
-	pDefDirLitPass->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
-	pDefDirLitPass->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
-	pDefDirLitPass->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
-	pDefDirLitPass->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	ThisShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(TransformMat));
+	ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	ThisShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
 
 	glm::mat4 InvV = glm::inverse(V);
-	pDefDirLitPass->SetUniformMatrix4fv("InverseV", glm::value_ptr(InvV));
+	ThisShader->SetUniformMatrix4fv("InverseV", glm::value_ptr(InvV));
 	
 
 	glm::vec2 ScreenSize = glm::vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
-	pDefDirLitPass->SetUniform2fv("gScreenSize", glm::value_ptr(ScreenSize));
+	ThisShader->SetUniform2fv("gScreenSize", glm::value_ptr(ScreenSize));
 
 	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
 	//
-	pDefDirLitPass->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
+	ThisShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
 
 	//Light 정보 보내기
-	pDefDirLitPass->SetUniform4fv("gDirLight.LPos", glm::value_ptr(vPos));
+	ThisShader->SetUniform4fv("gDirLight.LPos", glm::value_ptr(vPos));
 	
 	glm::vec4 paramDiff = glm::vec4(Diffuse, 1);
 	glm::vec4 paramAmbi = glm::vec4(Ambient, 1);
 	glm::vec4 paramSpec = glm::vec4(Specular, 1);
 
-	pDefDirLitPass->SetUniform4fv("gDirLight.LDiff", glm::value_ptr(paramDiff));
-	pDefDirLitPass->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
-	pDefDirLitPass->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
+	ThisShader->SetUniform4fv("gDirLight.LDiff", glm::value_ptr(paramDiff));
+	ThisShader->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
+	ThisShader->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
 	
 
 	//gBuffer 텍스쳐 보내기
-	pDefDirLitPass->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
-	pDefDirLitPass->SetUniform1i("gColorMap", DeferredRenderBuffers::TEXTURE_TYPE_DIFFUSE);
-	pDefDirLitPass->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
-	pDefDirLitPass->SetUniform1i("AOMap", 7);
+	ThisShader->SetUniform1i("gPositionMap", DeferredRenderBuffers::TEXTURE_TYPE_POSITION);
+	ThisShader->SetUniform1i("gColorMap", DeferredRenderBuffers::TEXTURE_TYPE_DIFFUSE);
+	ThisShader->SetUniform1i("gNormalMap", DeferredRenderBuffers::TEXTURE_TYPE_NORMAL);
+	ThisShader->SetUniform1i("AOMap", 7);
 
-	pDefDirLitPass->SetUniform1i("ShadowMap", 8);
+	ThisShader->SetUniform1i("ShadowMap", 8);
 
 	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
 
-	pDefDirLitPass->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
+	ThisShader->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
 
 
 }

@@ -78,18 +78,8 @@ void Object::Render()
 {
 	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ForwardShaderName);
 
-	if (!ThisShader)
-	{
-		if (!pShader) return;
-		pShader->ApplyShader();
-		ShaderParamInit();
+	if (ThisShader)	ShaderParamInit(ThisShader);
 
-	}
-	else
-	{
-		ShaderParamInit(ThisShader);
-
-	}
 	
 
 	
@@ -119,14 +109,8 @@ void Object::RenderGeoPass()
 {
 	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(GeoShaderName);
 
-	if (!ThisShader)
-	{
-		if (!pDefGeoPass)  return;
-		pDefGeoPass->ApplyShader();
-		GeoPassInit();
+	if (ThisShader)
 	
-	}
-	else
 	{
 		GeoPassInit(ThisShader);
 	
@@ -157,15 +141,7 @@ void Object::RenderShadowPass()
 {
 	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ShadowShaderName);
 
-	if (!ThisShader)
-	{
-		if (!m_pShaderShadow)  return;
-		m_pShaderShadow->ApplyShader();
-		// 변환 행렬 쉐이더 전송
-		ShadowPassInit();
-
-	}
-	else
+	if (ThisShader)
 	{
 		ShadowPassInit(ThisShader);
 
@@ -199,7 +175,7 @@ void Object::InstanceDataSetting()
 void Object::GeoPassInit(MyShader* ManagedShader)
 {
 	MyShader* ThisShader;
-	if (ManagedShader == nullptr) ThisShader = pDefGeoPass;
+	if (ManagedShader == nullptr) return;
 	else ThisShader = ManagedShader;
 
 	glm::mat4 V = pScene->GetVMatrix();
@@ -228,7 +204,7 @@ void Object::GeoPassInit(MyShader* ManagedShader)
 void Object::ShaderParamInit(MyShader* ManagedShader)
 {
 	MyShader* ThisShader;
-	if (ManagedShader == nullptr) ThisShader = pShader;
+	if (ManagedShader == nullptr) return;
 	else ThisShader = ManagedShader;
 
 	glm::mat4 V = pScene->GetVMatrix();

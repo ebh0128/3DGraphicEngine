@@ -49,6 +49,7 @@ public:
 class LightSystem : public Object
 {
 protected:
+	std::string NullShaderName;
 	MyShader* nullShader;
 
 public:

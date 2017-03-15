@@ -24,6 +24,11 @@ protected:
 
 	LitAttnu Attnu;
 
+	std::string SSAOShaderName;
+	std::string BlurShaderName;
+	std::string HDRShaderName;
+	std::string ShadowShaderName;
+
 	MyShader* m_pShaderSSAO;
 	MyShader* m_pShaderBlur;
 	MyShader* m_pShaderHDR;

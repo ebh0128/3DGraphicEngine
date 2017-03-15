@@ -327,7 +327,7 @@ void PatchedGround::Render()
 void PatchedGround :: GeoPassInit(MyShader* ManagedShader)
 {
 	MyShader* ThisShader;
-	if (ManagedShader == nullptr) ThisShader = pDefGeoPass;
+	if (ManagedShader == nullptr) return;
 	else ThisShader = ManagedShader;
 	glm::mat4 V = pScene->GetVMatrix();
 	glm::mat4 VP = pScene->GetVPMatrix();
@@ -355,7 +355,7 @@ void PatchedGround :: GeoPassInit(MyShader* ManagedShader)
 void PatchedGround::ShadowPassInit(MyShader* ManagedShader)
 {
 	MyShader* ThisShader;
-	if (ManagedShader == nullptr) ThisShader = m_pShaderShadow;
+	if (ManagedShader == nullptr) return;
 	else ThisShader = ManagedShader;
 
 	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();

@@ -22,7 +22,7 @@ AssimpObject::AssimpObject(Object* parent, SceneGL* Scene) :Object(parent ,Scene
 	ShadowShaderName = m_pShaderManager->CreateShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
 	
 
-	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 ,pShader);
+	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0, m_pShaderManager->ApplyShaderByName(ForwardShaderName));
 	IsRootNode = false;
 	IsTextured = true;
 
@@ -45,7 +45,7 @@ AssimpObject::AssimpObject(Object* parent, SceneGL* Scene, std::string FilePath,
 
 	
 	int strSize = sizeof(PaddingLight);
-	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , m_pShaderManager->ApplyShaderByName(ForwardShaderName));
+		AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , m_pShaderManager->ApplyShaderByName(ForwardShaderName));
 
 	//¸ðµ¨ ¹öÁ¯
 	
