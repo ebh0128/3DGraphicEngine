@@ -50,3 +50,9 @@ std::string PassShaderObject::GetNameString()
 {
 	return m_pPassShader->GetNameString();
 }
+/*
+void PassShaderObject::SetApplyCallback(void(*_CallBack)(Object*, MyShader*))
+{
+	ApplyCallback = _CallBack;
+}
+*/

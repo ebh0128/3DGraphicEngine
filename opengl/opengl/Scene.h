@@ -143,7 +143,6 @@ protected:
 	void SSAOPass(DeferredRenderBuffers* gBuffer, IOBuffer* SSAOBuffer);
 	void BlurPass(IOBuffer* BlurBuffer, IOBuffer* SSAOBuffer);
 	
-
 	void ShadowMapPass();
 
 //	glm::vec4 GetDriLightPos() { return m_pDirLight->GetPos(); }

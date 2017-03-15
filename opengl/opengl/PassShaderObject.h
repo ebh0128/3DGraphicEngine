@@ -12,7 +12,7 @@ protected:
 
 	std::vector<Object*> m_pPassObjectList;
 
-	//void (Object::*ApplyCallback)(MyShader*);
+//	void (PipeLine::*ApplyCallback)(Object*,MyShader*);
 
 public:
 	PassShaderObject(MyShader *passShader);
@@ -25,4 +25,5 @@ public:
 	void GetShaderName(char* retName);
 	std::string GetNameString();
 	MyShader* ApplyPassShader();
+//	void SetApplyCallback(void(PipeLine::*_CallBack)(Object*, MyShader*));
 };

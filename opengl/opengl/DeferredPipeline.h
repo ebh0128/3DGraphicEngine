@@ -1,6 +1,8 @@
 #pragma once
 
-class DeferredPipeline
+
+
+class DeferredPipeline 
 {
 protected:
 	
@@ -32,7 +34,11 @@ protected:
 
 	SceneGL * m_pScene;
 	PassShaderObject* SortedPipeLineObject[PASS_MAX];
-
+	
+	DeferredRenderBuffers* m_pGbuffer;
+	IOBuffer* m_pSSAOBuffer;
+	IOBuffer* m_pBlurBuffer;
+	IOBuffer* m_pShadowBuffer;
 
 	void SortShaderObject();
 
@@ -41,4 +47,50 @@ public:
 
 	void MakePipeLine();
 
+	void DeferredRender();
+
+	//그림자 패스
+	void ShadowMapPass();
+
+	//지오메트리 패스
+	void RenderGeoPass();
+	
+	//SSAO
+	void SSAOPass();
+	void BlurPass();
+
+	//포인트 라이트
+	void RenderStencilPass();
+	void RenderPointLitPass();
+	
+	//Dir 라이트
+	void RenderDirLitPass();
+	
+	//최종결과(HDR)
+	void RenderFinalPass();
+
+	
+
+
+	
+
+private:
+	//각 쉐이더들 초기화 함수
+	void ShadowObjectInit(MyShader* sha, Object* Obj);
+	
+	void GeoGroundInit(MyShader* sha, Object* Obj);
+	void GeoObjectInit(MyShader* sha, Object* Obj);
+
+	void SSAOInit(MyShader* sha, Object* Obj);
+	void BlurInit(MyShader* sha, Object* Obj);
+
+	void PointStencilInit(MyShader* sha, Object* Obj);
+	void PointLightInit(MyShader* sha, Object* Obj);
+
+	void DirLightInit(MyShader* sha, Object* Obj);
+
+	void ForwardSkyInit(MyShader* sha, Object* Obj);
+	void ForwardPointInit(MyShader* sha, Object* Obj);
+
+	void HDRInit(MyShader* sha, Object* Obj);
 };

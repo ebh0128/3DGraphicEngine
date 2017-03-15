@@ -68,4 +68,9 @@ public:
 
 	void  GeoPassInit(MyShader* ManagedShader = nullptr);
 	void ShadowPassInit(MyShader* ManagedShader = nullptr);
+
+	GLuint GetMainTexUnit() { return MainTexUnit; }
+	GLuint GetSnowTexUnit() { return SnowTexUnit; }
+	GLuint GetStoneTexUnit() { return StoneTexUnit; }
+	GLuint GetNoiseTexUnit() { return NoiseTexUnit; }
 };

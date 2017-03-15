@@ -269,6 +269,7 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffe
 	glClearColor(0, 0, 0, 0);
 	//glClearColor(1, 1, 1, 1);
 
+//	gBuffer->BindForGeomPass();
 
 	RenderGeoPass(gBuffer);
 
@@ -276,6 +277,7 @@ void SceneGL::DeferredRender(DeferredRenderBuffers* gBuffer, IOBuffer *SSAOBuffe
 
 	BlurPass(BlurBuffer, SSAOBuffer);
 
+	//SSAO패스 거치면서 바꿨던것 초기화
 	gBuffer->BindForGeomPass();
 	
 	//Dir 패스 시작

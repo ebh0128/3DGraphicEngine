@@ -80,6 +80,9 @@ public:
 	virtual void Update(GLfloat dtime);
 	virtual void Render();
 
+	//내부에서 쉐이더 적용, 초기화등 전무 , 외부에서 해줘야됨
+	virtual void RenderByPipeLine();
+
 	virtual void RenderGeoPass();
 	virtual void RenderShadowPass();
 
@@ -94,7 +97,8 @@ public:
 	virtual void DirLitPassInit(MyShader* ManagedShader = nullptr) {}
 	virtual void PointLitPassInit(MyShader* ManagedShader = nullptr) {}
 
-	//추가로 인스턴스를 쓴다면 반드시 재정의 
+	//추가로 인스턴스를 쓴다면 반드시 재정의 해서 추가로 수행할 것
+	// 기본 메쉬용 World Instance 만 보냄
 	virtual void InstanceDataSetting();
 
 	void AddChild(Object* pChild);

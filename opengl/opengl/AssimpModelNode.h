@@ -21,6 +21,9 @@ public:
 	
 	void SetNoTexture();
 	void SetScale(glm::vec3 scale);
+
+	GLuint GetMainTexUint() { return MainTextUnit; }
+	bool GetIsTextured() { return IsTextured; }
 	virtual void Update(GLfloat dtime);
 	virtual void Render();
 

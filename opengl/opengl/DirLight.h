@@ -57,6 +57,9 @@ public:
 
 	glm::mat4 GetLightVPMat() { return LightOrtho * LightView; }
 
+	GLuint GetNoiseTexture() { return NosieTexture; }
+	float* GetKernel() { return Kernel; }
+
 	void Update(GLfloat dtime);
 	void Render();
 

@@ -170,7 +170,7 @@ void AssimpObject::ShadowPassInit(MyShader* ManagedShader)
 	glm::mat4 M;
 	//if (mParent == nullptr) M = TransformMat;
 	//else  M = TransformMat*mParent->GetModelMat();
-
+	 
 	M = TransformMat;
 
 	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));

@@ -325,7 +325,7 @@ void PatchedGround::Render()
 }
 
 void PatchedGround :: GeoPassInit(MyShader* ManagedShader)
-{
+{ 
 	MyShader* ThisShader;
 	if (ManagedShader == nullptr) return;
 	else ThisShader = ManagedShader;

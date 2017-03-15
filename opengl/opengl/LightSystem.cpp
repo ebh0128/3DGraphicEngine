@@ -223,13 +223,17 @@ void LightSystem::PointLitPassInit(MyShader* ManagedShader)
 	UpdateUBO(DataforShader, Size, 12);
 	//	UpdateUBO(DataforShader, Size, 16);
 
+	ScaleLightforDeferred();
+}
+
+void LightSystem::ScaleLightforDeferred()
+{
 	for (int i = 0; i < InstanceList.size(); i++)
 	{
 		LightInstance* LightIns = ((LightInstance*)InstanceList[i]);
 		LightIns->SetScale(glm::vec3(LightIns->CalcLightArea()));
 	}
 }
-
 void LightSystem::RenderStencilPass()
 {
 	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(NullShaderName);

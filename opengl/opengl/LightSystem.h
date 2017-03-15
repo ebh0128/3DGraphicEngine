@@ -77,5 +77,6 @@ public:
 
 	virtual void InstanceDataSetting();
 
+	void ScaleLightforDeferred();
 };
 

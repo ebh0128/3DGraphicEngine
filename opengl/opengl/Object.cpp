@@ -80,9 +80,6 @@ void Object::Render()
 
 	if (ThisShader)	ShaderParamInit(ThisShader);
 
-	
-
-	
 
 	if (m_pModel != nullptr)
 	{
@@ -103,6 +100,25 @@ void Object::Render()
 	}
 
 
+}
+void Object::RenderByPipeLine()
+{
+	if (m_pModel != nullptr)
+	{
+		if (GetInstanceNum() == 0) m_pModel->Render(MatLocArray);
+		else
+		{
+			InstanceDataSetting();
+			m_pModel->RenderInstance(GetInstanceNum(), MatLocArray);
+		}
+	}
+	// 그렸으므로 업데이트필요
+	m_bUpdated = false;
+
+	for (GLuint i = 0; i<ChildList.size(); i++)
+	{
+		ChildList[i]->Render();
+	}
 }
 
 void Object::RenderGeoPass()
