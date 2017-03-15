@@ -18,6 +18,21 @@ DeferredPipeline::DeferredPipeline(SceneGL* pScene)
 	m_pScene = pScene;
 	m_pShaderManager = pScene->GetShaderManager();
 	MakePipeLine();
+
+
+	//버퍼들 초기화
+	GLuint W = glutGet(GLUT_WINDOW_WIDTH);
+	GLuint H = glutGet(GLUT_WINDOW_HEIGHT);
+	m_pGbuffer = new DeferredRenderBuffers(W, H);
+
+	m_pSSAOBuffer = new IOBuffer();
+	m_pSSAOBuffer->Init(W, H, false, GL_R32F);
+
+	m_pBlurBuffer = new IOBuffer();
+	m_pBlurBuffer->Init(W, H, false, GL_R32F);
+
+	m_pShadowBuffer = new IOBuffer();
+	m_pShadowBuffer->Init(1024, 1024, true, GL_NONE);
 }
 
 void DeferredPipeline::MakePipeLine()
@@ -48,6 +63,19 @@ void DeferredPipeline::MakePipeLine()
 void DeferredPipeline::SortShaderObject()
 {
 
+}
+
+
+void DeferredPipeline::PassRender(PassShaderObject* PassObj, void(DeferredPipeline::*InitMethod)(MyShader*, Object*))
+{
+	MyShader* CurruntPassShader;
+	CurruntPassShader = PassObj->ApplyPassShader();
+	for (int i = 0; i < PassObj->GetPassObjectCount(); i++)
+	{
+		Object* DrawObj = PassObj->GetDrawObject(i);
+		(this->*InitMethod)(CurruntPassShader, DrawObj);
+		DrawObj->RenderByPipeLine();
+	}
 }
 
 
@@ -83,11 +111,7 @@ void DeferredPipeline::DeferredRender()
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
 
-	//스카이
-//	if (pSkyBox != nullptr) pSkyBox->RenderDepthRead();
-
-	//포인트 포워드
-//	m_pPointLightSys->Render();
+	RenderForwardObjPass();
 
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
@@ -117,7 +141,13 @@ void DeferredPipeline::ShadowMapPass()
 	//쉐이더 변수 전송
 	//Object Draw
 
-	//Root->RenderShadowPass();
+	
+	//지형Shadow 패스
+	PassRender(SortedPipeLineObject[SHADOW_GROUND_PASS], (&DeferredPipeline::ShadowObjectInit));
+
+	//오브젝트 Shadow 패스 (그림자 초기화는 동일)
+	PassRender(SortedPipeLineObject[SHADOW_GOBJECT_PASS], (&DeferredPipeline::ShadowObjectInit));
+	
 
 	glViewport(0, 0, 1024, 768);
 
@@ -138,6 +168,12 @@ void DeferredPipeline::RenderGeoPass()
 	//쉐이더 적용
 	//쉐이더 변수 전송
 	//Object Draw
+
+	//지형 Geo 패스
+	PassRender(SortedPipeLineObject[GEO_GROUND_PASS], &DeferredPipeline::GeoGroundInit);
+	
+	//오브젝트 Geo패스
+	PassRender(SortedPipeLineObject[GEO_OBJECT_PASS], &DeferredPipeline::GeoObjectInit);
 
 	
 //	Root->RenderGeoPass();
@@ -160,6 +196,9 @@ void DeferredPipeline::SSAOPass()
 	//쉐이더 변수 전송
 	//Object Draw
 
+	//SSAO Pass
+	PassRender(SortedPipeLineObject[SSAO_PASS], &DeferredPipeline::SSAOInit);
+
 
 	//m_pDirLight->SSAOPass();
 }
@@ -176,6 +215,7 @@ void DeferredPipeline::BlurPass()
 	//쉐이더 변수 전송
 	//Object Draw
 
+	PassRender(SortedPipeLineObject[BLUR_PASS], &DeferredPipeline::BlurInit);
 
 	//m_pDirLight->BlurPass();
 }
@@ -197,6 +237,9 @@ void DeferredPipeline::RenderStencilPass()
 	//쉐이더 적용
 	//쉐이더 변수 전송
 	//Object Draw
+
+	PassRender(SortedPipeLineObject[POINT_STENCIL_PASS], &DeferredPipeline::PointStencilInit);
+
 
 //	m_pPointLightSys->RenderStencilPass();
 
@@ -222,6 +265,7 @@ void DeferredPipeline::RenderPointLitPass()
 	//쉐이더 변수 전송
 	//Object Draw
 
+	PassRender(SortedPipeLineObject[POINT_LIGHT_PASS], &DeferredPipeline::PointLightInit);
 
 
 	//m_pPointLightSys->RenderPointLitPass();
@@ -245,11 +289,21 @@ void DeferredPipeline::RenderDirLitPass()
 
 	m_pGbuffer->BindForLightPass();
 
+	PassRender(SortedPipeLineObject[DIR_LIGHT_PASS], &DeferredPipeline::DirLightInit);
+
 	//m_pDirLight->RenderDirLitPass();
 
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 
+}
+
+void DeferredPipeline::RenderForwardObjPass()
+{
+	//스카이 박스 (뎁스 리드)
+	PassRender(SortedPipeLineObject[FORWARD_SKY_PASS], &DeferredPipeline::ForwardSkyInit);
+	//포인트 라이트
+	PassRender(SortedPipeLineObject[FORWARD_POINT_PASS], &DeferredPipeline::ForwardPointInit);
 }
 
 //최종결과(HDR)
@@ -261,6 +315,8 @@ void DeferredPipeline::RenderFinalPass()
 	m_pGbuffer->BindForFinalPass();
 	//그냥 그리기
 	//glBlitFramebuffer(0, 0, W, H, 0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	PassRender(SortedPipeLineObject[HDR_PASS], &DeferredPipeline::HDRInit);
 
 	//HDR + reinhard tone mapping
 	//m_pDirLight->HDRPass();
@@ -502,6 +558,28 @@ void DeferredPipeline::ForwardSkyInit(MyShader* sha, Object* Obj)
 	MyShader* ThisShader;
 	if (sha == nullptr) return;
 	else ThisShader = sha;
+
+	if (!ThisShader) return;
+
+
+	GLint getDepth = 123;
+	glGetIntegerv(GL_DEPTH_WRITEMASK, &getDepth);
+	glm::mat4 V = m_pScene->GetVMatrix();
+	//카메라 이동은 무시
+	V[3][0] = 0; V[3][1] = 0; V[3][2] = 0;
+	glm::mat4 P = m_pScene->GetPMatrix();
+	glm::mat4 VP = P*V;
+	glm::mat4 invV = glm::inverse(V);
+	glm::mat4 invP = glm::inverse(P);
+	glm::mat4 InversVP = glm::inverse(VP);
+	//glm::mat4 InversVP = invP*invV;
+	//InversVP = InversVP / InversVP[3][3];
+	ThisShader->SetUniformMatrix4fv("InversVP", glm::value_ptr(InversVP));
+
+	glm::vec4 LightDiffuse = glm::vec4(m_pScene->GetDirectionalLight()->GetDif(), 1);
+	ThisShader->SetUniform4fv("DiffuseCol", glm::value_ptr(LightDiffuse));
+	ThisShader->SetUniform1i("SkyBoxTexture", Obj->GetMainTextureUnit());
+	
 
 }
 void DeferredPipeline::ForwardPointInit(MyShader* sha, Object* Obj)

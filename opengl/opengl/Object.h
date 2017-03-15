@@ -115,5 +115,7 @@ public:
 	void SetPosition(float x, float y, float z);
 	glm::vec4 GetPos() { return vPos; }
 
+	GLuint GetMainTextureUnit() { return MainTextureUnit; }
+
 };
 

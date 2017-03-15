@@ -25,5 +25,7 @@ public:
 	void GetShaderName(char* retName);
 	std::string GetNameString();
 	MyShader* ApplyPassShader();
+	int GetPassObjectCount();
+	Object* GetDrawObject(int index);
 //	void SetApplyCallback(void(PipeLine::*_CallBack)(Object*, MyShader*));
 };

@@ -56,3 +56,11 @@ void PassShaderObject::SetApplyCallback(void(*_CallBack)(Object*, MyShader*))
 	ApplyCallback = _CallBack;
 }
 */
+int PassShaderObject::GetPassObjectCount()
+{
+	return m_pPassObjectList.size();
+}
+Object* PassShaderObject::GetDrawObject(int index)
+{
+	return m_pPassObjectList[index];
+}

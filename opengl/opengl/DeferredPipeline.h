@@ -65,11 +65,13 @@ public:
 	
 	//Dir 라이트
 	void RenderDirLitPass();
+
+	void RenderForwardObjPass();
 	
 	//최종결과(HDR)
 	void RenderFinalPass();
 
-	
+	void PassRender(PassShaderObject* PassObj , void (DeferredPipeline::*InitMethod)(MyShader*,Object*));
 
 
 	
@@ -93,4 +95,5 @@ private:
 	void ForwardPointInit(MyShader* sha, Object* Obj);
 
 	void HDRInit(MyShader* sha, Object* Obj);
+
 };

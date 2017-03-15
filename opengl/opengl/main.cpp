@@ -233,8 +233,8 @@ void display(void)
 	//Scene Draw
 	//Scene->Render();
 	
-	SceneRenderer->Render(Scene);
-
+	//SceneRenderer->Render(Scene);
+	Pipe->DeferredRender();
 	
 	
 	glutSwapBuffers();

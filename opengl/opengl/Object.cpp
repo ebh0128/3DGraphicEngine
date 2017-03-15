@@ -114,11 +114,12 @@ void Object::RenderByPipeLine()
 	}
 	// 그렸으므로 업데이트필요
 	m_bUpdated = false;
-
+	/*
 	for (GLuint i = 0; i<ChildList.size(); i++)
 	{
 		ChildList[i]->Render();
 	}
+	*/
 }
 
 void Object::RenderGeoPass()
