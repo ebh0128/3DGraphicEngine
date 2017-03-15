@@ -12,6 +12,7 @@ protected:
 
 	std::vector<Object*> m_pPassObjectList;
 
+	//void (Object::*ApplyCallback)(MyShader*);
 
 public:
 	PassShaderObject(MyShader *passShader);

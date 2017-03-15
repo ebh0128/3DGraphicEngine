@@ -147,6 +147,9 @@
     <ClCompile Include="PassShaderObject.cpp">
       <Filter>소스 파일\PipeLine</Filter>
     </ClCompile>
+    <ClCompile Include="DeferredPipeLine.cpp">
+      <Filter>소스 파일\PipeLine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonHeader.h">
@@ -219,6 +222,9 @@
       <Filter>헤더 파일\OpenGLCore</Filter>
     </ClInclude>
     <ClInclude Include="PassShaderObject.h">
+      <Filter>헤더 파일\PileLine</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredPipeline.h">
       <Filter>헤더 파일\PileLine</Filter>
     </ClInclude>
   </ItemGroup>

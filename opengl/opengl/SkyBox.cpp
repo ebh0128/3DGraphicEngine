@@ -39,7 +39,7 @@ SkyBox::SkyBox(Object* parent, SceneGL* Scene) :Object(parent , Scene)
 	
 	
 //	pShader = new MyShader("SkyBox.vert","SkyBox.frag");
-	ForwardShaderName = m_pShaderManager->CreateShader("SkyBox.vert", "SkyBox.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader(this, "SkyBox.vert", "SkyBox.frag");
 	//pDefGeoPass = new MyShader("./Shader/Deferred_SkyBox.vert", "./Shader/Deferred_SkyBox.frag");
 	CubeMapTexturePathInfo* pCubeMapPath = new CubeMapTexturePathInfo();
 

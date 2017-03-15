@@ -49,6 +49,7 @@ public:
 //싱글톤 클래스 아님 전체매니져 하나에서만 사용
 class PassShaderObject;
 
+class Object;
 class ShaderManager
 {
 protected:
@@ -60,7 +61,7 @@ public:
 
 	//생성 요청 만약 있으면 생성하지않고 이름 반환
 	//없으면 생성후 이름반환
-	std::string CreateShader(const char* file_vert, const char* file_frag,
+	std::string CreateShader(Object* pObj, const char* file_vert, const char* file_frag,
 		const char* file_tesc = NULL, const char* file_tese = NULL,
 		const char* file_geom = NULL);
 

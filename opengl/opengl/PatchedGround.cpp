@@ -26,17 +26,17 @@ PatchedGround::PatchedGround(Object* Parent, SceneGL *Scene, int seed, GLfloat M
 
 	//pShader = new MyShader();
 	//pShader->build_program_from_files("BasicShader.vert", "BasicShader.frag");
-	ForwardShaderName = m_pShaderManager->CreateShader("BasicShader.vert", "BasicShader.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader(this,"BasicShader.vert", "BasicShader.frag");
 //	pShader->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
 
-	GeoShaderName =	m_pShaderManager->CreateShader("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
+	GeoShaderName =	m_pShaderManager->CreateShader(this, "./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
 	
 	//pDefGeoPass = new MyShader();
 	//pDefGeoPass->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
 	//pDefLitPass->build_program_from_files("BasicShader.vert", "BasicShader.frag");
 
 	//m_pShaderShadow = new MyShader("./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
-	ShadowShaderName = m_pShaderManager->CreateShader("./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
+	ShadowShaderName = m_pShaderManager->CreateShader(this, "./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
 
 }
 

@@ -2,13 +2,14 @@
 ///////////////////////////////////////////////////////////////////////
 #include "CommonHeader.h"
 
-
 #include "Camera.h"
 #include "Timer.h"
 
 #include "PatchedGround.h"
  
 #include "Scene.h"
+#include "DeferredPipeLine.h"
+
 #include "SkyBox.h"
 #include "MyFrameBuffer.h"
 #include "AssimpModelNode.h"
@@ -19,6 +20,7 @@
 
 #include "LightSystem.h"
 #include "DirLight.h"
+
 
 //60프레임 에서의 1프레임당 밀리초 16
 #define TIME_PER_ONE_FRAME 10
@@ -63,6 +65,7 @@ Drone* againDrone;
 Renderer* SceneRenderer;
 LightSystem *LightSys;
 DirLight* MainDirLight;
+DeferredPipeline* Pipe;
 
 
 void init(void)
@@ -213,6 +216,7 @@ void init(void)
 	
 	
 	SceneRenderer = new Renderer();
+	Pipe = new DeferredPipeline(Scene);
 	
 }
 

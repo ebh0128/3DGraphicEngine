@@ -79,9 +79,9 @@ LightSystem::LightSystem( Object* Parent, SceneGL* Sce) : Object( Parent, Sce)
 
 	//쉐이더 생성
 
-	ForwardShaderName = m_pShaderManager->CreateShader("PointLight.vert", "PointLight.frag");
-	PTLightShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_PointLight.vert", "./Shader/Deferred_PointLight.frag");
-	NullShaderName  = m_pShaderManager->CreateShader("./Shader/nullShader.vert", "./Shader/nullShader.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader(this, "PointLight.vert", "PointLight.frag");
+	PTLightShaderName = m_pShaderManager->CreateShader(this, "./Shader/Deferred_PointLight.vert", "./Shader/Deferred_PointLight.frag");
+	NullShaderName  = m_pShaderManager->CreateShader(this, "./Shader/nullShader.vert", "./Shader/nullShader.frag");
 
 	//	vScale = glm::vec3(0.1f, 0.1f, 0.1f);
 	//씬에 라이트 추가하는 코드 넣기(씬에서 관리)

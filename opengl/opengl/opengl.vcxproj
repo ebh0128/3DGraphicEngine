@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DeferredPipeLine.cpp" />
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="IOBuffer.cpp" />
     <ClCompile Include="LightSystem.cpp" />
@@ -47,6 +48,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonHeader.h" />
+    <ClInclude Include="DeferredPipeline.h" />
     <ClInclude Include="PassShaderObject.h" />
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="IOBuffer.h" />

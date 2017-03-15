@@ -8,7 +8,14 @@ PassShaderObject::PassShaderObject(MyShader *passShader)
 }
 void PassShaderObject::AddPassObject(Object* obj)
 {
-
+	for (int i = 0; i < m_pPassObjectList.size(); i++)
+	{
+		//같은 오브젝트가 등록되있으면 거절
+		// 허용하면 두번 그려지게됨
+		if (m_pPassObjectList[i] == obj) return;
+	}
+	
+	m_pPassObjectList.push_back(obj);
 }
 //이 쉐이더의 이름과 똑같으면 true반환
 bool PassShaderObject::CheckName(char* newName)
@@ -24,7 +31,7 @@ bool PassShaderObject::CheckName(std::string newName)
 	//디버그 위해
 	//char ShaderName[256];
 	//m_pPassShader->GetName(ShaderName);
-	
+	 
 	std::string  ShaderName = m_pPassShader->GetNameString();
 	bool ret = !strcmp(newName.c_str(), ShaderName.c_str());
 	return ret;

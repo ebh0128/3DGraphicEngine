@@ -267,12 +267,12 @@ void MyShader::GetName(char* retName)
 /////////////////////쉐이더 매니져
 ShaderManager::ShaderManager()
 {
-	//ChannelCount = 2;
+	//ChannelCount = 2; 
 }
 
 
 //생성 요청 만약 있으면 생성하지않고 등록만
-std::string ShaderManager::CreateShader(const char* file_vert, const char* file_frag,
+std::string ShaderManager::CreateShader(Object* pObj ,const char* file_vert, const char* file_frag,
 	const char* file_tesc, const char* file_tese ,
 	const char* file_geom)
 {
@@ -288,6 +288,8 @@ std::string ShaderManager::CreateShader(const char* file_vert, const char* file_
 
 	if (NewShaderPass)
 	{
+		//오브젝트 등록은 해줘야 됨
+		NewShaderPass->AddPassObject(pObj);
 		return NewShaderPass->GetNameString();
 
 	}
@@ -297,7 +299,10 @@ std::string ShaderManager::CreateShader(const char* file_vert, const char* file_
 	NewShader->SetNameString(NewName);
 	NewShaderPass = new PassShaderObject(NewShader);
 	m_ShaderObjectList.push_back(NewShaderPass);
-//	return NewShaderPass->GetShaderName(ReturnName);
+
+	//오브젝트 등록
+	NewShaderPass->AddPassObject(pObj);
+
 	return NewShaderPass->GetNameString();
 }
 

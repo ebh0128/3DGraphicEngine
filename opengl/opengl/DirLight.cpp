@@ -54,11 +54,11 @@ DirLight::DirLight(Object* parent, SceneGL* Scene) :Object(parent, Scene)
 	//m_pShaderHDR = new MyShader("./Shader/HDR.vert", "./Shader/HDR.frag");
 	//m_pShaderShadow = new MyShader("./Shader/HDR.vert", "./Shader/HDR.frag");
 
-	ForwardShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
-	DirLightShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
-	SSAOShaderName = m_pShaderManager->CreateShader("./Shader/SSAO.vert", "./Shader/SSAO.frag");
-	BlurShaderName = m_pShaderManager->CreateShader("./Shader/Blur.vert", "./Shader/Blur.frag");
-	HDRShaderName = m_pShaderManager->CreateShader("./Shader/HDR.vert", "./Shader/HDR.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader(this, "./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
+	DirLightShaderName = m_pShaderManager->CreateShader(this, "./Shader/Deferred_DirLight.vert", "./Shader/Deferred_DirLight.frag");
+	SSAOShaderName = m_pShaderManager->CreateShader(this, "./Shader/SSAO.vert", "./Shader/SSAO.frag");
+	BlurShaderName = m_pShaderManager->CreateShader(this, "./Shader/Blur.vert", "./Shader/Blur.frag");
+	HDRShaderName = m_pShaderManager->CreateShader(this, "./Shader/HDR.vert", "./Shader/HDR.frag");
 	
 	
 	LightOrtho = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, 0.1f, 1000.f);

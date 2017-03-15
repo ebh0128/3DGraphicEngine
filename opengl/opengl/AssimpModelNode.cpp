@@ -14,12 +14,12 @@ AssimpObject::AssimpObject()
 }
 AssimpObject::AssimpObject(Object* parent, SceneGL* Scene) :Object(parent ,Scene)
 {
-	ForwardShaderName = m_pShaderManager->CreateShader("AssimpModel.vert", "AssimpModel.frag");
-	GeoShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader(this, "AssimpModel.vert", "AssimpModel.frag");
+	GeoShaderName = m_pShaderManager->CreateShader(this, "./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
 
 	int strSize = sizeof(PaddingLight);
 
-	ShadowShaderName = m_pShaderManager->CreateShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
+	ShadowShaderName = m_pShaderManager->CreateShader(this, "./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
 	
 
 	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0, m_pShaderManager->ApplyShaderByName(ForwardShaderName));
@@ -39,9 +39,9 @@ AssimpObject::AssimpObject(Object* parent, SceneGL* Scene, std::string FilePath,
 	MainTextUnit = 5;
 
 	
-	ForwardShaderName = m_pShaderManager->CreateShader("AssimpModel.vert", "AssimpModel.frag");
-	ShadowShaderName = m_pShaderManager->CreateShader("./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
-	GeoShaderName = m_pShaderManager->CreateShader("./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader(this, "AssimpModel.vert", "AssimpModel.frag");
+	ShadowShaderName = m_pShaderManager->CreateShader(this, "./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
+	GeoShaderName = m_pShaderManager->CreateShader(this, "./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
 
 	
 	int strSize = sizeof(PaddingLight);
