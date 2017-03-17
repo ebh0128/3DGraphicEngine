@@ -10,6 +10,23 @@ typedef struct Material
 	GLfloat shininess;
 	
 };
+#define NUM_BONES_PER_VERTEX 4
+
+struct VertexBoneData
+{
+	GLuint IDs[NUM_BONES_PER_VERTEX];
+	float Weights[NUM_BONES_PER_VERTEX];
+	VertexBoneData()
+	{
+		Reset();
+	}
+	void Reset()
+	{
+		memset(IDs, 0, sizeof(IDs));
+		memset(Weights, 0, sizeof(Weights));
+	}
+	void AddBoneData(GLuint BoneID, float Weight);
+};
 
 
 class Sampler;
@@ -23,17 +40,17 @@ protected:
 	std::vector<MeshEntry*> m_MeshList;
 	GLuint m_MainTextureUnitNum;
 
-//	GLuint instance_vbo[10];
-//	GLuint InstanceBufferCount;
-//	glm::mat4* InstanceBufferData[10];
+	const aiScene* m_pScene;
+	Assimp::Importer m_Importer;
+	int m_NumVertices;
 
-//	const GLuint attrib_MVPMat = 5;
+
+	//Assimp용 모델로드 이므로 숨김
+	virtual void CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath);
 
 public:
 	Model();
-	//Assimp용 모델로드 이므로 숨김
-	void CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath);
-
+	
 	//하나의 메쉬덩어리를 모델로 사용할때 이용할것
 	void CreateMeshEntry(GLfloat* vertices, int VertexNum,
 		GLuint* indices, int indicesNum,
@@ -41,7 +58,7 @@ public:
 		GLfloat* texcoords = nullptr, int texcoordsNum = 0);
 
 	//Assimp에서 모델 로드할때 
-	void CreateModelFromFile(std::string FilePath, std::string FileName);
+	virtual void CreateModelFromFile(std::string FilePath, std::string FileName);
 	void AddMesh(MeshEntry* pNewMesh);
 
 	//Mat Location 0 = Diff , 1 = Ambi , 2 = Spec , 3 =  Shiness
@@ -66,7 +83,8 @@ private:
 	GLuint vbo_position;
 	GLuint vbo_normal;
 
-
+	////뼈정보 버퍼
+	GLuint Bonebo;
 	
 	//여러개의 텍스쳐 코드 들어올수 있음
 	GLuint vbo_texcoord[TEXCOORD_MAX];
@@ -91,6 +109,10 @@ private:
 	glm::mat4* InstanceBufferData[10];
 
 
+
+	GLuint m_BaseVertex;
+	GLuint m_BaseIndex;
+
 private:
 	//빛 계산하기때문에 노말 없으면 안됨(즉석에서 계산 하기)
 	//왠만하면 노말 넘겨주자 (뺄셈 2번 + 외적 + 노말라이즈)
@@ -103,24 +125,23 @@ public:
 	enum VBO_BUF_NAME { VBO_POSITION = 0 , VBO_NORMAL, NUM_VBOS};
 
 	//default pos = 0 , norm = 1
-	const GLuint attrib_Pos = 0;
-	const GLuint attrib_Normal = 1;
 	
 	//시작 Attrib번호 즉 이후로는 attrib_Texcoord +1~+n
 	const GLuint attrib_Texcoord =2;
 
 	//인스턴싱용 5~
-	const GLuint attrib_MVPMat = 5;
+	const GLuint attrib_MVPMat = 8;
 
-
+	bool IsSkinning;
 public:
+
 	MeshEntry();
 	MeshEntry(GLfloat* vertices , int VertexNum , 
 		GLuint* indices, int indicesNum, 
 		GLfloat* normals,
 		GLfloat* texcoords = nullptr, int texcoordsNum = 0);
 	
-	MeshEntry(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh);
+	MeshEntry(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh, bool IsSkinned = false);
 	~MeshEntry();
 
 	//텍스쳐 코드는 여러개가 존재 가능하므로
@@ -138,13 +159,20 @@ public:
 		GLfloat* texcoords = nullptr, int texcoordsNum = 0);
 
 	//Assimp를 이용한 메쉬 로드
-	virtual void ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh);
+	virtual void ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh , bool IsSkinned =false);
+
+	void AddBoneData(std::vector<VertexBoneData>& Bones);
 
 	void Render();
 	void RenderInstance(int InstanceObjCount);
 
 	void MakeInstancingBuffer(int iternum = 1);
 	void SetInstanceBufferData(glm::mat4 *pData, int Index);
+
+	void SetBaseVertex(int Base) { m_BaseVertex = Base; }
+	int GetBaseVertex() { return m_BaseVertex; }
+	void SetBaseIndex(int Base) { m_BaseIndex = Base; }
+	int GetBaseIndex() { return m_BaseIndex; }
 
 };
 

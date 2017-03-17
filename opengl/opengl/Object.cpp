@@ -28,6 +28,7 @@ Object::Object( Object* Parent, SceneGL* Sce) :Object()
 	if(Parent != nullptr) Parent->AddChild(this);
 	pScene = Sce;
 	m_pShaderManager = Sce->GetShaderManager();
+	//ShaderInit();
 
 }
 

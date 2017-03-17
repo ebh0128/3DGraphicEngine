@@ -23,6 +23,10 @@ bool IOBuffer::Init(GLuint Width, GLuint Height, bool WithDepth, GLenum Internal
 
 	switch (InternalType)
 	{
+	case GL_RGBA16F:
+		Format = GL_RGBA;
+		Type = GL_FLOAT;
+		break;
 	case GL_RGB32F:
 		Format = GL_RGB;
 		Type = GL_FLOAT;

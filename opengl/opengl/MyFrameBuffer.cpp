@@ -38,7 +38,7 @@ DeferredRenderBuffers::DeferredRenderBuffers(int Width, int Height)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_FinalTexture, 0);
 
 
@@ -80,6 +80,16 @@ void DeferredRenderBuffers::BindForStencilPass()
 void DeferredRenderBuffers::BindForFinalPass()
 {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID);
+	glReadBuffer(GL_COLOR_ATTACHMENT4);
+	//SetReadBuffer(TEXTURE_TYPE_TEXCOORD);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, m_FinalTexture);
+
+}
+
+void DeferredRenderBuffers::BindForBloomPass()
+{
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID);
 	glReadBuffer(GL_COLOR_ATTACHMENT4);
 	//SetReadBuffer(TEXTURE_TYPE_TEXCOORD);

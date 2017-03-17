@@ -58,7 +58,7 @@ vec4 CalcLight(LightInfo Lit,
 	
 	if(DiffuseFactor > 0.0)
 	{
-		DiffuseColor = Lit.LDiff * DiffuseFactor * Lit.LDiff.w;
+		DiffuseColor = Lit.LDiff * DiffuseFactor ;//* Lit.LDiff.w;
 		DiffuseColor.w =1;
 		
 		vec3 VertexToEye = normalize( - ViewPos);

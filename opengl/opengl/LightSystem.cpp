@@ -12,7 +12,8 @@
 
 LightInstance::LightInstance(Object* Ori, ObjectInstance* _Parents) :ObjectInstance(Ori,_Parents)
 {
-	Ambient = Specular = Diffuse = glm::vec3(0.3f, 0.3f, 0.3f);
+	Ambient = Specular  = glm::vec3(0.3f, 0.3f, 0.3f);
+	Diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1);
 	//Ambient = Specular = Diffuse = glm::vec3(0.0f, 0.0f, 0.0f);
 	
 	DiffuseFactor = 1;

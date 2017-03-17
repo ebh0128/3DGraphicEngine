@@ -1,6 +1,6 @@
 #pragma once
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <cerrno>
 #include <random>
@@ -9,7 +9,9 @@
 #include <Windows.h>
 #include <vector>
 #include <list>
+#include <map>
 #include <sstream>
+#include <math.h>
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>
@@ -23,6 +25,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/quaternion.hpp>
 //DevIL
 #include <IL\il.h>
 #include <IL/ilut.h>
@@ -40,6 +43,14 @@
 #define KERNEL_SIZE 64
 #define TEXCOORD_MAX 3
 
+#define POSITION_LOCATION		0
+#define NORMAL_LOCATION			1
+#define TEX_COORD_LOCATION		2
+#define TEX_COORD2_LOCATION		3
+#define BONE_ID_LOCATION		4
+#define BONE_WEIGHT_LOCATION	5
+#define INSTANCE_LOCATION		8
+
 
 typedef struct TransformationSet
 {
@@ -56,8 +67,10 @@ typedef struct LightAttnuation
 	float exp;
 }LitAttnu;
 
+#include "Util.h"
 #include "MyShader.h"
 #include "Texture.h"
 #include "Mesh.h"
 #include "ObjectInstance.h"
 #include "Object.h"
+

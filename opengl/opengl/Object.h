@@ -71,6 +71,9 @@ public:
 	Object();
 	Object(Object* Parent , SceneGL* Sce);
 	
+	//여기서 쉐이더 초기화 할것
+	virtual void ShaderInit() {}
+	
 //	Object(MeshEntry* BaseMesh, Object* Parent, SceneGL* Sce);
 //	Object(MeshEntry* BaseMesh, Object* Parent, SceneGL* Sce);
 
@@ -79,6 +82,8 @@ public:
 	virtual void AddInstanceCallBack() {}
 	virtual void Update(GLfloat dtime);
 	virtual void Render();
+	
+
 
 	virtual void ShaderParamInit(MyShader* ManagedShader = nullptr);
 	//내부에서 쉐이더 적용, 초기화등 전무 , 외부에서 해줘야됨

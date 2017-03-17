@@ -19,6 +19,8 @@ public:
 	//루트 노드 생성(Assimp Read)
 	AssimpObject(Object* parent, SceneGL* Scene ,std::string FilePath, std::string FileName);
 	
+	virtual void InitModel(std::string FilePath, std::string FileName);
+	virtual void ShaderInit();
 	void SetNoTexture();
 	void SetScale(glm::vec3 scale);
 

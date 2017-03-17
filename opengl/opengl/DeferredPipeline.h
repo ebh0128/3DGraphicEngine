@@ -13,6 +13,7 @@ protected:
 
 		GEO_GROUND_PASS,
 		GEO_OBJECT_PASS,
+		GEO_SKINNING_PASS,
 
 		SSAO_PASS,
 		BLUR_PASS,
@@ -24,6 +25,8 @@ protected:
 
 		FORWARD_SKY_PASS,
 		FORWARD_POINT_PASS,
+
+		BLOOM_PASS,
 
 		HDR_PASS,
 		PASS_MAX
@@ -39,7 +42,12 @@ protected:
 	IOBuffer* m_pSSAOBuffer;
 	IOBuffer* m_pBlurBuffer;
 	IOBuffer* m_pShadowBuffer;
+	IOBuffer* m_pBloomBuffer;
+	IOBuffer* m_pPingPongBuffer[2];
 
+
+	MyShader* m_pBloomSourceCreateShader;
+	MyShader* m_pGausianBlurShader;
 	void SortShaderObject();
 
 public:
@@ -68,6 +76,8 @@ public:
 
 	void RenderForwardObjPass();
 	
+	void RenderBloomPass();
+	void GausianBlur(Object* Quad);
 	//최종결과(HDR)
 	void RenderFinalPass();
 
@@ -82,6 +92,7 @@ private:
 	
 	void GeoGroundInit(MyShader* sha, Object* Obj);
 	void GeoObjectInit(MyShader* sha, Object* Obj);
+	void GeoSkinningInit(MyShader* sha, Object* Obj);
 
 	void SSAOInit(MyShader* sha, Object* Obj);
 	void BlurInit(MyShader* sha, Object* Obj);
@@ -95,5 +106,8 @@ private:
 	void ForwardPointInit(MyShader* sha, Object* Obj);
 
 	void HDRInit(MyShader* sha, Object* Obj);
+
+	//파이프라인 내부 객체나 쉐이더에서만 쓰는 초기화
+	void BloomCopyInit(MyShader* sha);
 
 };

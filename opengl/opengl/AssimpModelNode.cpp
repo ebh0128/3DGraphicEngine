@@ -29,32 +29,32 @@ AssimpObject::AssimpObject(Object* parent, SceneGL* Scene) :Object(parent ,Scene
 }
 AssimpObject::AssimpObject(Object* parent, SceneGL* Scene, std::string FilePath, std::string FileName):Object(parent, Scene)
 {
-	Assimp::Importer importer;
-	std::string FullPath = FilePath + FileName;
-	const aiScene* AssimpScene = importer.ReadFile(FullPath,
-		aiProcess_Triangulate		|
-		aiProcess_JoinIdenticalVertices	|
-		aiProcess_GenSmoothNormals	);
 
 	MainTextUnit = 5;
 
-	
+	ShaderInit();
+	//¸ðµ¨ ¹öÁ¯
+	InitModel(FilePath , FileName);
+
+	IsRootNode = true;
+	IsTextured = true;
+
+}
+void AssimpObject::ShaderInit()
+{
 	ForwardShaderName = m_pShaderManager->CreateShader(this, "AssimpModel.vert", "AssimpModel.frag");
 	ShadowShaderName = m_pShaderManager->CreateShader(this, "./Shader/Shadow_InstanceObj.vert", "./Shader/Shadow_InstanceObj.frag");
 	GeoShaderName = m_pShaderManager->CreateShader(this, "./Shader/Deferred_GeoPass.vert", "./Shader/Deferred_GeoPass.frag");
 
-	
-	int strSize = sizeof(PaddingLight);
-		AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0 , m_pShaderManager->ApplyShaderByName(ForwardShaderName));
 
-	//¸ðµ¨ ¹öÁ¯
-	
+	int strSize = sizeof(PaddingLight);
+	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0, m_pShaderManager->ApplyShaderByName(ForwardShaderName));
+
+}
+void AssimpObject::InitModel(std::string FilePath, std::string FileName)
+{
 	m_pModel = new Model();
 	m_pModel->CreateModelFromFile(FilePath, FileName);
-
-
-	IsRootNode = true;
-	IsTextured = true;
 
 }
 

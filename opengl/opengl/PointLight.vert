@@ -1,8 +1,8 @@
 #version 330 core
 layout(location = 0) in vec4 aPosition;
 layout(location = 1) in vec4 aNormal;
-layout(location = 5) in mat4 World;
-layout(location = 9) in mat4 LightAttnu;
+layout(location = 8) in mat4 World;
+layout(location = 12) in mat4 LightAttnu;
 
 uniform vec4 DiffuseCol;
 uniform mat4x4 MVP;

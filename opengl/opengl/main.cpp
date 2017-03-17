@@ -20,7 +20,7 @@
 
 #include "LightSystem.h"
 #include "DirLight.h"
-
+#include "SkinnedObject.h"
 
 //60프레임 에서의 1프레임당 밀리초 16
 #define TIME_PER_ONE_FRAME 10
@@ -30,7 +30,7 @@
 GLuint	vao;
 GLuint	vbo[2], ebo;
 GLuint	h_prog;
-static GLuint	attrib_position = 0;
+static GLuint	POSITION_LOCATIONition = 0;
 static GLuint	attrib_color = 7;
 enum VBO_Bufs { VBO_POSITION = 0,  NUM_VBOS = 2 };
 
@@ -120,7 +120,11 @@ void init(void)
 	//Dir부터
 	MainDirLight = new DirLight(nullptr, Scene);
 	MainDirLight->SetPos(glm::vec4(10, -15, -15 ,1));
-	MainDirLight->SetDiffuse(glm::vec3(0.8, 0.5, 0.4));
+	//밝은 저녁
+	MainDirLight->SetDiffuse(glm::vec3(0.7, 0.4, 0.5));
+	
+
+	
 	//MainDirLight->SetDiffuse(glm::vec3(80, 50, 40));
 
 	Scene->SetDirectionalLight(MainDirLight);
@@ -157,14 +161,14 @@ void init(void)
 		//float y = 10 * (float)dis(gen);
 
 		//색 rgb 1~0.5
-		float r = 1.f - 0.5f*(float)dis(gen);
-		float g = 1.f - 0.5f*(float)dis(gen);
-		float b = 1.f - 0.5f*(float)dis(gen);
+		float r = 1.5f - 1.1f*(float)dis(gen);
+		float g = 1.5f - 1.1f*(float)dis(gen);
+		float b = 1.5f - 1.1f*(float)dis(gen);
 
 
 		
 		LightInstance* newLight = new LightInstance(LightSys, DroneInstance);
-		newLight->SetDiff(glm::vec3(r, g, b));
+		newLight->SetDiff(glm::vec4(r, g, b , 1));
 	//	newLight->SetDiff(glm::vec3(1, 70, 1));
 		newLight->SetPos(glm::vec3(x, y+10, z));
 		float ScaleFactor = newLight->CalcLightArea();
@@ -213,10 +217,17 @@ void init(void)
 
 		ModelTest->AddInstance(NewInstance);
 	}
-	
-	
+	/*
+	SkinnedObject* pSkin = new SkinnedObject(GoodGround, Scene, "./Model", "/boblampclean.md5mesh");
+	ObjectInstance* pNewSkinIns = new ObjectInstance(pSkin, GroundInstance);
+	pNewSkinIns->SetPos(glm::vec3(0, 30, 0));
+	//NewInstance->SetRot(glm::vec3(0, 0, 0));
+	pNewSkinIns->SetScale(glm::vec3(1, 1, 1));
+	pSkin->AddInstance(pNewSkinIns);
+	*/
 	SceneRenderer = new Renderer();
 	Pipe = new DeferredPipeline(Scene);
+	
 	
 }
 

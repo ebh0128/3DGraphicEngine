@@ -6,10 +6,29 @@
  
 
 
+void VertexBoneData::AddBoneData(GLuint BoneID, float Weight)
+{
+	for (int i = 0; i < NUM_BONES_PER_VERTEX; i++)
+	{
+		if (Weights[i] == 0.0)
+		{
+			IDs[i] = BoneID;
+			Weights[i] = Weight;
+			return;
+		}
+	}
+
+	//버텍스당 뼈수가 현재보다 많음
+	assert(0);
+}
+
+
 
 Model::Model()
 {
 	m_MainTextureUnitNum = 5;
+	m_pScene = nullptr;
+	m_NumVertices = 0;
 }
 
 //Assimp용 모델로드 이므로 숨김
@@ -21,6 +40,8 @@ void Model::CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath)
 		const aiMesh* AssimpMesh = pAssimpScene->mMeshes[i];
 
 		MeshEntry* NewMesh = new MeshEntry(pAssimpScene, AssimpMesh);
+		NewMesh->SetBaseVertex(m_NumVertices);
+		m_NumVertices += AssimpMesh->mNumVertices;
 		//텍스쳐 찾기
 		aiMaterial* aiMat = pAssimpScene->mMaterials[AssimpMesh->mMaterialIndex];
 		aiString TexturePath;
@@ -31,6 +52,7 @@ void Model::CreateAssimpModel(const aiScene* pAssimpScene, std::string FilePath)
 			char* TPath = TexturePath.data;
 			char* TextureName = strrchr(TPath, '/');
 			if (TextureName == nullptr)  TextureName = strrchr(TPath, '\\');
+			if (TextureName == nullptr) TextureName = TPath;
 			std::string sDir = FilePath + TextureName;
 			Texture* MainTextue = new Texture(sDir.c_str(), m_MainTextureUnitNum);
 			NewMesh->AddTexture(MainTextue);
@@ -182,7 +204,7 @@ MeshEntry::MeshEntry()
 
 	IsHaveNormal =false;
 	IsHaveTexcoord = false;
-
+	IsSkinning = false;
 
 }
 MeshEntry::MeshEntry(GLfloat* vertices, int VertexNum,
@@ -194,10 +216,10 @@ MeshEntry::MeshEntry(GLfloat* vertices, int VertexNum,
 	ObjectLoad(vertices, VertexNum,indices, IndicesNum, normals, texcoords, texcoordsNum);
 }
 
-MeshEntry::MeshEntry(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh) : MeshEntry()
+MeshEntry::MeshEntry(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh , bool IsSkinned) : MeshEntry()
 {
 
-	ObjectLoad(pAssimpScene, pAssimpMesh);
+	ObjectLoad(pAssimpScene, pAssimpMesh , IsSkinned);
 
 }
 
@@ -239,7 +261,7 @@ GLfloat* MeshEntry::NormalGenerate(GLfloat* vertices, GLuint* indices)
 #undef z
 }
 
-void MeshEntry::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh)
+void MeshEntry::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh, bool IsSkinned )
 {
 	if (pAssimpScene == nullptr || pAssimpMesh == nullptr)
 	{
@@ -276,8 +298,8 @@ void MeshEntry::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMes
 		glGenBuffers(1, &vbo_position);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*VerticesCount*3, (GLfloat*)&pAssimpMesh->mVertices[0], GL_STATIC_DRAW);
-		glEnableVertexAttribArray(attrib_Pos);
-		glVertexAttribPointer(attrib_Pos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+		glEnableVertexAttribArray(POSITION_LOCATION);
+		glVertexAttribPointer(POSITION_LOCATION, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 	}
 	if (pAssimpMesh->HasNormals())
 	{
@@ -285,8 +307,8 @@ void MeshEntry::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMes
 		glGenBuffers(1, &vbo_normal);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_normal);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*VerticesCount*3, (GLfloat*)&pAssimpMesh->mNormals[0], GL_STATIC_DRAW);
-		glEnableVertexAttribArray(attrib_Normal);
-		glVertexAttribPointer(attrib_Normal, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+		glEnableVertexAttribArray(NORMAL_LOCATION);
+		glVertexAttribPointer(NORMAL_LOCATION, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	}
 	
@@ -348,8 +370,8 @@ void MeshEntry::ObjectLoad(GLfloat* vertices, int VertexNum,
 	//포지션
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*VertexNum, vertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(attrib_Pos);
-	glVertexAttribPointer(attrib_Pos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+	glEnableVertexAttribArray(POSITION_LOCATION);
+	glVertexAttribPointer(POSITION_LOCATION, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 	
 	//노말
 	if (normals != nullptr)
@@ -358,8 +380,8 @@ void MeshEntry::ObjectLoad(GLfloat* vertices, int VertexNum,
 		glGenBuffers(1, &vbo_normal);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_normal);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*VertexNum, normals, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(attrib_Normal);
-		glVertexAttribPointer(attrib_Normal, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+		glEnableVertexAttribArray(NORMAL_LOCATION);
+		glVertexAttribPointer(NORMAL_LOCATION, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 	}
 	
 	if (texcoords != nullptr)
@@ -393,8 +415,8 @@ void MeshEntry::AddTexcoordAttibute(void* texcoords, int TexcoordNum)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_texcoord[TexCoordCnt]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*TexcoordNum, texcoords, GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(attrib_Texcoord + TexCoordCnt);
-	glVertexAttribPointer(attrib_Texcoord + TexCoordCnt, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+	glEnableVertexAttribArray(TEX_COORD_LOCATION + TexCoordCnt);
+	glVertexAttribPointer(TEX_COORD_LOCATION + TexCoordCnt, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	TexCoordCnt++;
 	
@@ -418,21 +440,26 @@ void MeshEntry::Render()
 {
 	
 	glBindVertexArray(vao);
-	glEnableVertexAttribArray(attrib_Pos);
-	if(IsHaveNormal) glEnableVertexAttribArray(attrib_Normal);
+	glEnableVertexAttribArray(POSITION_LOCATION);
+	if(IsHaveNormal) glEnableVertexAttribArray(NORMAL_LOCATION);
 	
 	//샘플러가 있다면 적용
 	
 	
 	//하드코딩 일단 2개쓰므로
-	glEnableVertexAttribArray(attrib_Texcoord );
-	glEnableVertexAttribArray(attrib_Texcoord+1);
+	glEnableVertexAttribArray(TEX_COORD_LOCATION);
+	glEnableVertexAttribArray(TEX_COORD_LOCATION +1);
 
 	for (int i = 0; i < pTextureList.size(); i++)
 	{
 		pTextureList[i]->ApplyTexture();
 	}
 
+	if (IsSkinning)
+	{
+		glEnableVertexAttribArray(BONE_ID_LOCATION);
+		glEnableVertexAttribArray(BONE_WEIGHT_LOCATION);
+	}
 
 	//if (ubo > 0) glBindBuffer(GL_UNIFORM_BUFFER, ubo);
 
@@ -451,8 +478,9 @@ void MeshEntry::RenderInstance(int InstanceObjCount)
 	
 	
 	glBindVertexArray(vao);
-	glEnableVertexAttribArray(attrib_Pos);
-	if (IsHaveNormal) glEnableVertexAttribArray(attrib_Normal);
+	glEnableVertexAttribArray(POSITION_LOCATION);
+	if (IsHaveNormal) glEnableVertexAttribArray(NORMAL_LOCATION);
+	
 
 	//샘플러가 있다면 적용
 	for (int i = 0; i < TexCoordCnt; i++)
@@ -467,16 +495,41 @@ void MeshEntry::RenderInstance(int InstanceObjCount)
 		pTextureList[i]->ApplyTexture();
 	}
 	
-	GLuint StartIndex= 0;
-	//if (ubo > 0) glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-	glDrawElementsInstancedBaseVertex(GL_TRIANGLES,
-										PrimCount,
-										GL_UNSIGNED_INT,
-										(void*) (StartIndex),
-										InstanceObjCount,
-										0
-										);
+	GLuint StartIndex = 0;
+
+	if (IsSkinning)
+	{
+		//StartIndex += m_BaseIndex;
+		glEnableVertexAttribArray(BONE_ID_LOCATION);
+		glEnableVertexAttribArray(BONE_WEIGHT_LOCATION);
+
 	
+		glDrawElementsInstancedBaseVertex(GL_TRIANGLES,
+			PrimCount,
+			GL_UNSIGNED_INT,
+			(void*)(sizeof(GLuint) *0),
+			//(void*)(sizeof(GLuint) *0),
+
+			InstanceObjCount,
+			0
+		);
+		
+	}
+	else
+	{
+
+
+		glDrawElementsInstancedBaseVertex(GL_TRIANGLES,
+			PrimCount,
+			GL_UNSIGNED_INT,
+			(void*)(StartIndex),
+			InstanceObjCount,
+			0
+		);
+
+	}
+	//if (ubo > 0) glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+	glBindVertexArray(0);
 }
 
 
@@ -504,9 +557,9 @@ void MeshEntry::MakeInstancingBuffer(int iternum)
 		glBindBuffer(GL_ARRAY_BUFFER, instance_vbo[InstanceBufferCount]);
 		for (int i = 0;i < 4; i++)
 		{
-			glEnableVertexAttribArray(attrib_MVPMat + i + 4 * InstanceBufferCount);
-			glVertexAttribPointer(attrib_MVPMat + i + 4 * InstanceBufferCount, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 16, (const GLvoid*)(sizeof(GLfloat)*i * 4));
-			glVertexAttribDivisor(attrib_MVPMat + i + 4 * InstanceBufferCount, 1);
+			glEnableVertexAttribArray(INSTANCE_LOCATION + i + 4 * InstanceBufferCount);
+			glVertexAttribPointer(INSTANCE_LOCATION + i + 4 * InstanceBufferCount, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 16, (const GLvoid*)(sizeof(GLfloat)*i * 4));
+			glVertexAttribDivisor(INSTANCE_LOCATION + i + 4 * InstanceBufferCount, 1);
 		}
 		InstanceBufferCount++;
 	}
@@ -517,4 +570,23 @@ void MeshEntry::SetInstanceBufferData(glm::mat4 *pData, int Index)
 	if (pData == nullptr) return;
 
 	InstanceBufferData[Index] = pData;
+}
+
+void MeshEntry::AddBoneData(std::vector<VertexBoneData>& Bones)
+{
+	
+	IsSkinning = true;
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &Bonebo);
+	glBindBuffer(GL_ARRAY_BUFFER , Bonebo);
+	glBufferData(GL_ARRAY_BUFFER , sizeof(Bones[0])*Bones.size() , &Bones[0] , GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(BONE_ID_LOCATION);
+	glVertexAttribIPointer(BONE_ID_LOCATION, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+
+	glEnableVertexAttribArray(BONE_WEIGHT_LOCATION);
+	glVertexAttribPointer(BONE_WEIGHT_LOCATION, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+
+	    glBindVertexArray(0);
 }

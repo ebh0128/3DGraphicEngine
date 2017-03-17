@@ -16,7 +16,7 @@ void main()
 {
 	ViewPosOut = oViewPos;
 	if(IsTextured == 1) DiffuseOut = texture(TextureMain , oTexcoord).xyz;
-	else DiffuseOut = vec3(1,1,1);
+	else DiffuseOut = vec3(0.6,0.6,0.6);
 	NormalOut = normalize(oNormal);
 	//TexCoordOut = vec3(oTexcoord , 0.0);
 	TexCoordOut = vec3(gl_FragCoord.zzz);

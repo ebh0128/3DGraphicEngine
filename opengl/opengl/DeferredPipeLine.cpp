@@ -10,6 +10,7 @@
 #include "PatchedGround.h"
 #include "AssimpModelNode.h"
 #include "LightSystem.h"
+#include "SkinnedObject.h"
 
 
 
@@ -33,6 +34,19 @@ DeferredPipeline::DeferredPipeline(SceneGL* pScene)
 
 	m_pShadowBuffer = new IOBuffer();
 	m_pShadowBuffer->Init(1024, 1024, true, GL_NONE);
+	
+	m_pBloomBuffer = new IOBuffer();
+	m_pBloomBuffer->Init(W, H, false, GL_RGBA16F);
+
+	m_pPingPongBuffer[0] = new IOBuffer();
+	m_pPingPongBuffer[0]->Init(W, H, false, GL_RGBA16F);
+
+	m_pPingPongBuffer[1] = new IOBuffer();
+	m_pPingPongBuffer[1]->Init(W, H, false, GL_RGBA16F);
+
+
+	m_pGausianBlurShader = new MyShader("./Shader/Gausian_Blur.vert", "./Shader/Gausian_Blur.frag");
+	m_pBloomSourceCreateShader = new MyShader("./Shader/Bloom_Source_Create.vert","./Shader/Bloom_Source_Create.frag");
 }
 
 void DeferredPipeline::MakePipeLine()
@@ -42,6 +56,8 @@ void DeferredPipeline::MakePipeLine()
 
 	SortedPipeLineObject[GEO_GROUND_PASS] = m_pShaderManager->FindPassShader("/Shader/Ground_Deferred_GeoPass");
 	SortedPipeLineObject[GEO_OBJECT_PASS] = m_pShaderManager->FindPassShader("/Shader/Deferred_GeoPass");
+	SortedPipeLineObject[GEO_SKINNING_PASS] = m_pShaderManager->FindPassShader("/Shader/Deferred_Skinning_GeoPass");
+
 
 	SortedPipeLineObject[SSAO_PASS] = m_pShaderManager->FindPassShader("/Shader/SSAO");
 	SortedPipeLineObject[BLUR_PASS] = m_pShaderManager->FindPassShader("/Shader/Blur");
@@ -114,12 +130,15 @@ void DeferredPipeline::DeferredRender()
 	RenderForwardObjPass();
 
 	glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 
+	RenderBloomPass();
 	//현재 출력 버퍼 HDR임
 	//결과 출력
 	RenderFinalPass();
 
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
 
 }
 
@@ -175,7 +194,8 @@ void DeferredPipeline::RenderGeoPass()
 	//오브젝트 Geo패스
 	PassRender(SortedPipeLineObject[GEO_OBJECT_PASS], &DeferredPipeline::GeoObjectInit);
 
-	
+	//PassRender(SortedPipeLineObject[GEO_SKINNING_PASS], &DeferredPipeline::GeoSkinningInit);
+
 //	Root->RenderGeoPass();
 
 	glDepthMask(GL_FALSE);
@@ -306,6 +326,49 @@ void DeferredPipeline::RenderForwardObjPass()
 	PassRender(SortedPipeLineObject[FORWARD_POINT_PASS], &DeferredPipeline::ForwardPointInit);
 }
 
+void DeferredPipeline::RenderBloomPass()
+{
+	Object* Quad = SortedPipeLineObject[FORWARD_SKY_PASS]->GetDrawObject(0);
+
+	//4번에 묶임
+	m_pGbuffer->BindForBloomPass();
+	m_pBloomBuffer->BindForWriting();
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	//밝은부분 추출 완료
+	m_pBloomSourceCreateShader->ApplyShader();
+	BloomCopyInit(m_pBloomSourceCreateShader);
+
+	Quad->RenderByPipeLine();
+
+	GausianBlur(Quad);
+
+
+}
+void DeferredPipeline::GausianBlur(Object* Quad)
+{
+	GLboolean horizontal = true, first = true;
+	GLuint amount = 10;
+	m_pGausianBlurShader->ApplyShader();	
+
+	for (GLuint i = 0; i < amount; i++)
+	{
+		//쓰기용 바인딩
+		m_pPingPongBuffer[horizontal]->BindForWriting();
+
+		m_pGausianBlurShader->SetUniform1i("horizontal", horizontal);
+		
+		//처음일때 블룸버퍼에서 값을 가져와서 씀
+		if(!first)m_pPingPongBuffer[!horizontal]->BindForReading(GL_TEXTURE5);
+		else m_pBloomBuffer->BindForReading(GL_TEXTURE5);
+		m_pGausianBlurShader->SetUniform1i("image", 5);
+
+		Quad->RenderByPipeLine();
+		horizontal = !horizontal;
+		if (first) first = false;
+	}
+
+}
 //최종결과(HDR)
 void DeferredPipeline::RenderFinalPass()
 {
@@ -313,6 +376,7 @@ void DeferredPipeline::RenderFinalPass()
 	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
 
 	m_pGbuffer->BindForFinalPass();
+	m_pPingPongBuffer[0]->BindForReading(GL_TEXTURE5);
 	//그냥 그리기
 	//glBlitFramebuffer(0, 0, W, H, 0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
@@ -401,6 +465,37 @@ void DeferredPipeline::GeoObjectInit(MyShader* sha, Object* Obj)
 	ThisShader->SetUniform1i("IsTextured", pAssimp->GetIsTextured() ? 1 : 0);
 	ThisShader->SetUniform1i("TextureMain", pAssimp->GetMainTexUint());
 }
+
+void DeferredPipeline::GeoSkinningInit(MyShader* sha, Object* Obj)
+{
+	MyShader* ThisShader;
+	if (sha == nullptr) return;
+	else ThisShader = sha;
+
+	glm::mat4 V = m_pScene->GetVMatrix();
+	glm::mat4 VP = m_pScene->GetVPMatrix();
+	glm::mat4 M;
+
+	SkinnedObject* pSkined = (SkinnedObject*)Obj;
+
+	M = pSkined->GetModelMat();
+
+	glm::mat4 MV = V*M;
+	glm::mat4 MVP = VP*M;
+	ThisShader->SetUniformMatrix4fv("MV", glm::value_ptr(MV));
+	ThisShader->SetUniformMatrix4fv("MVP", glm::value_ptr(MVP));
+	ThisShader->SetUniformMatrix4fv("V", glm::value_ptr(V));
+	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
+	ThisShader->SetUniformMatrix4fv("VP", glm::value_ptr(VP));
+	ThisShader->SetUniform1i("IsTextured",  1);
+	ThisShader->SetUniform1i("TextureMain", pSkined->GetMainTextureUnit());
+
+	std::vector<glm::mat4> BoneMatrixVector;
+	pSkined->GetBoneMatrix(BoneMatrixVector);
+	GLfloat* PointerMatrixArray = glm::value_ptr(*(BoneMatrixVector.data()));
+	ThisShader->SetUniformMatrix4fv("gBones", PointerMatrixArray, BoneMatrixVector.size());
+}
+
 void DeferredPipeline::SSAOInit(MyShader* sha, Object* Obj)
 {
 	MyShader* ThisShader;
@@ -609,6 +704,18 @@ void DeferredPipeline::HDRInit(MyShader* sha, Object* Obj)
 	else ThisShader = sha;
 
 	ThisShader->SetUniform1i("gFinalMap", 4);
-	ThisShader->SetUniform1f("exposure", 0.7);
+	ThisShader->SetUniform1i("gBloomMap", 5);
+	ThisShader->SetUniform1f("exposure", 1.0);
 
 }
+
+void DeferredPipeline::BloomCopyInit(MyShader* sha)
+{
+	MyShader* ThisShader;
+	if (sha == nullptr) return;
+	else ThisShader = sha;
+
+	ThisShader->SetUniform1i("gColorMap", 4);
+
+}
+

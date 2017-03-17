@@ -6,7 +6,7 @@ class ObjectInstance;
 class LightInstance : public ObjectInstance
 {
 protected:
-	glm::vec3 Diffuse;
+	glm::vec4 Diffuse;
 	glm::vec3 Ambient;
 	glm::vec3 Specular;
 
@@ -32,7 +32,7 @@ public:
 
 	void Update(float dtime);
 	
-	void SetDiff(glm::vec3 Dif) { Diffuse = Dif; }
+	void SetDiff(glm::vec4 Dif) { Diffuse = Dif; }
 	void SetAmbi(glm::vec3 Amb) { Ambient = Amb; }
 	void SetSpec(glm::vec3 Spec) { Specular = Spec; }
 

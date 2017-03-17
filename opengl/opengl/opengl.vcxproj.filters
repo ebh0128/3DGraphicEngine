@@ -150,6 +150,18 @@
     <ClCompile Include="DeferredPipeLine.cpp">
       <Filter>소스 파일\PipeLine</Filter>
     </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedObject.cpp">
+      <Filter>소스 파일\Object\AssmipObj</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinningModel.cpp">
+      <Filter>소스 파일\OpenGLCore</Filter>
+    </ClCompile>
+    <ClCompile Include="BloomBuffer.cpp">
+      <Filter>소스 파일\OpenGLCore</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonHeader.h">
@@ -227,6 +239,18 @@
     <ClInclude Include="DeferredPipeline.h">
       <Filter>헤더 파일\PileLine</Filter>
     </ClInclude>
+    <ClInclude Include="SkinningModel.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedObject.h">
+      <Filter>헤더 파일\Object\AssimpObj</Filter>
+    </ClInclude>
+    <ClInclude Include="BloomBuffer.h">
+      <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Blur.frag">
@@ -281,6 +305,9 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Shader\SSAO.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Deferred_Skinning_GeoPass.vert">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

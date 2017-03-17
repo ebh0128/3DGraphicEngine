@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BloomBuffer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DeferredPipeLine.cpp" />
     <ClCompile Include="DirLight.cpp" />
@@ -39,13 +40,17 @@
     <ClCompile Include="ppm.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SkinnedObject.cpp" />
+    <ClCompile Include="SkinningModel.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="AssimpModelNode.cpp" />
+    <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BloomBuffer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonHeader.h" />
     <ClInclude Include="DeferredPipeline.h" />
@@ -66,11 +71,14 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="myShader.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="SkinnedObject.h" />
+    <ClInclude Include="SkinningModel.h" />
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="AssimpModelNode.h" />
+    <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Blur.frag" />
@@ -81,6 +89,7 @@
     <None Include="Shader\Deferred_GeoPass.vert" />
     <None Include="Shader\Deferred_PointLight.frag" />
     <None Include="Shader\Deferred_PointLight.vert" />
+    <None Include="Shader\Deferred_Skinning_GeoPass.vert" />
     <None Include="Shader\Deferred_SkyBox.frag" />
     <None Include="Shader\Deferred_SkyBox.vert" />
     <None Include="Shader\DepthCopy.frag" />
