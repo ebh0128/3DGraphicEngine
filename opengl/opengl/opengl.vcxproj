@@ -48,6 +48,7 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="AssimpModelNode.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BloomBuffer.h" />
@@ -79,6 +80,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="AssimpModelNode.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="Water.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Blur.frag" />

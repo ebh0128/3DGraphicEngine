@@ -41,19 +41,7 @@ private:
 	int m_TileT;
 
 	GLfloat VertexOffset;
-	typedef struct Vector
-	{
-		GLfloat x; GLfloat y; GLfloat z;
-	}Vec;
-	typedef struct IndexVector
-	{
-		GLuint A; GLuint B; GLuint C;
-	}InVec;
 
-	typedef struct TexCoord
-	{
-		GLfloat x; GLfloat y; 
-	}Tex;
 	GLuint MainTexUnit;
 	GLuint SnowTexUnit;
 	GLuint StoneTexUnit;

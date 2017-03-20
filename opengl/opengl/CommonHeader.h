@@ -67,6 +67,21 @@ typedef struct LightAttnuation
 	float exp;
 }LitAttnu;
 
+typedef struct Vector
+{
+	GLfloat x; GLfloat y; GLfloat z;
+}Vec;
+typedef struct IndexVector
+{
+	GLuint A; GLuint B; GLuint C;
+}InVec;
+
+typedef struct TexCoord
+{
+	GLfloat x; GLfloat y;
+}Tex;
+
+
 #include "Util.h"
 #include "MyShader.h"
 #include "Texture.h"

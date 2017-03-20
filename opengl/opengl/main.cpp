@@ -2,10 +2,12 @@
 ///////////////////////////////////////////////////////////////////////
 #include "CommonHeader.h"
 
+
 #include "Camera.h"
 #include "Timer.h"
 
 #include "PatchedGround.h"
+
  
 #include "Scene.h"
 #include "DeferredPipeLine.h"
@@ -21,6 +23,7 @@
 #include "LightSystem.h"
 #include "DirLight.h"
 #include "SkinnedObject.h"
+#include "Water.h"
 
 //60프레임 에서의 1프레임당 밀리초 16
 #define TIME_PER_ONE_FRAME 10
@@ -66,6 +69,7 @@ Renderer* SceneRenderer;
 LightSystem *LightSys;
 DirLight* MainDirLight;
 DeferredPipeline* Pipe;
+Water* pWater;
 
 
 void init(void)
@@ -219,14 +223,15 @@ void init(void)
 
 		ModelTest->AddInstance(NewInstance);
 	}
-	/*
-	SkinnedObject* pSkin = new SkinnedObject(GoodGround, Scene, "./Model", "/boblampclean.md5mesh");
-	ObjectInstance* pNewSkinIns = new ObjectInstance(pSkin, GroundInstance);
-	pNewSkinIns->SetPos(glm::vec3(0, 30, 0));
-	//NewInstance->SetRot(glm::vec3(0, 0, 0));
-	pNewSkinIns->SetScale(glm::vec3(1, 1, 1));
-	pSkin->AddInstance(pNewSkinIns);
-	*/
+	
+	pWater = new Water(GoodGround, Scene, 12);
+	pWater->Create(2, 2, 64, 4, 4);
+	
+	ObjectInstance* WaterInstance = new ObjectInstance(pWater, GroundInstance);
+	WaterInstance->SetPos(glm::vec3(0, 30, 0));
+	WaterInstance->SetScale(glm::vec3(1, 1, 1));
+	pWater->AddInstance(WaterInstance);
+	
 	SceneRenderer = new Renderer();
 	Pipe = new DeferredPipeline(Scene);
 	
@@ -246,8 +251,8 @@ void display(void)
 	//Scene Draw
 	//Scene->Render();
 	
-//	SceneRenderer->Render(Scene);
-	Pipe->DeferredRender();
+	SceneRenderer->Render(Scene);
+//	Pipe->DeferredRender();
 	
 	
 	glutSwapBuffers();

@@ -5,14 +5,7 @@
 //텍스쳐 코드 변환을 통해 구현
 class SkyBox : public Object
 {
-	typedef struct Vector
-	{
-		GLfloat x; GLfloat y; GLfloat z;
-	}Vec;
-	typedef struct IndexVector
-	{
-		GLuint A; GLuint B; GLuint C;
-	}InVec;
+	
 	
 	glm::vec4 Diffuse;
 public:

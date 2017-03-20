@@ -162,6 +162,9 @@
     <ClCompile Include="BloomBuffer.cpp">
       <Filter>소스 파일\OpenGLCore</Filter>
     </ClCompile>
+    <ClCompile Include="Water.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonHeader.h">
@@ -250,6 +253,9 @@
     </ClInclude>
     <ClInclude Include="BloomBuffer.h">
       <Filter>헤더 파일\OpenGLCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Water.h">
+      <Filter>헤더 파일\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
