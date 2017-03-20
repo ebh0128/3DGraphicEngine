@@ -295,7 +295,7 @@ std::string ShaderManager::CreateShader(Object* pObj ,const char* file_vert, con
 	}
 	//없으면 생성후 등록
 	//MyShader* NewShader = new MyShader(file_vert, file_frag , file_tese, file_tesc, file_geom);
-	MyShader* NewShader = new MyShader(file_vert, file_frag, file_tese, file_tesc, file_geom);
+	MyShader* NewShader = new MyShader(file_vert, file_frag, file_tesc,  file_tese, file_geom);
 	NewShader->SetNameString(NewName);
 	NewShaderPass = new PassShaderObject(NewShader);
 	m_ShaderObjectList.push_back(NewShaderPass);

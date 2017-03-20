@@ -181,7 +181,13 @@ void Model::SetInstanceBufferData(glm::mat4 *pData, int Index)
 	}
 }
 
-
+void Model::SetPrimitiveKind(GLuint PrimKind)
+{
+	for (int i = 0; i < m_MeshList.size(); i++)
+	{
+		m_MeshList[i]->SetPrimitiveKind(PrimKind);
+	}
+}
 
 
 
@@ -202,6 +208,7 @@ MeshEntry::MeshEntry()
 	VerticesCount = 0;
 
 
+	PrimitiveKind = GL_TRIANGLES;
 	IsHaveNormal =false;
 	IsHaveTexcoord = false;
 	IsSkinning = false;
@@ -448,7 +455,7 @@ void MeshEntry::Render()
 	
 	//하드코딩 일단 2개쓰므로
 	glEnableVertexAttribArray(TEX_COORD_LOCATION);
-	glEnableVertexAttribArray(TEX_COORD_LOCATION +1);
+	//glEnableVertexAttribArray(TEX_COORD_LOCATION +1);
 
 	for (int i = 0; i < pTextureList.size(); i++)
 	{
@@ -463,7 +470,7 @@ void MeshEntry::Render()
 
 	//if (ubo > 0) glBindBuffer(GL_UNIFORM_BUFFER, ubo);
 
-	glDrawElements(GL_TRIANGLES, PrimCount, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+	glDrawElements(PrimitiveKind, PrimCount, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 }
 void MeshEntry::RenderInstance(int InstanceObjCount)
 {
@@ -519,7 +526,7 @@ void MeshEntry::RenderInstance(int InstanceObjCount)
 	{
 
 
-		glDrawElementsInstancedBaseVertex(GL_TRIANGLES,
+		glDrawElementsInstancedBaseVertex(PrimitiveKind,
 			PrimCount,
 			GL_UNSIGNED_INT,
 			(void*)(StartIndex),

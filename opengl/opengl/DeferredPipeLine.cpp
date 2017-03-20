@@ -112,7 +112,6 @@ void DeferredPipeline::DeferredRender()
 	m_pGbuffer->BindForGeomPass();
 
 	/////////스탠실 만들기
-
 	glEnable(GL_STENCIL_TEST);
 	RenderStencilPass();
 
@@ -414,6 +413,8 @@ void DeferredPipeline::ShadowObjectInit(MyShader* sha, Object* Obj)
 	ThisShader->SetUniformMatrix4fv("M", glm::value_ptr(M));
 	ThisShader->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
 
+	ThisShader->SetUniform1f("gTessLevel", VERTICES_OPTIMIZATION_NUM);
+
 }
 void DeferredPipeline::GeoGroundInit(MyShader* sha, Object* Obj)
 {
@@ -439,6 +440,12 @@ void DeferredPipeline::GeoGroundInit(MyShader* sha, Object* Obj)
 	ThisShader->SetUniform1i("TextureSnow", pGround->GetSnowTexUnit());
 	ThisShader->SetUniform1i("TextureStone", pGround->GetStoneTexUnit());
 	ThisShader->SetUniform1i("SamplerNoise", pGround->GetNoiseTexUnit());
+
+	ThisShader->SetUniform1f("TileS", pGround->GetTileS());
+	ThisShader->SetUniform1f("TileT", pGround->GetTileT());
+
+	ThisShader->SetUniform1f("gTessLevel", pGround->GetTessLevel());
+	ThisShader->SetUniform1f("gDispFactor", pGround->GetMaxHeight());
 
 }
 void DeferredPipeline::GeoObjectInit(MyShader* sha, Object* Obj)

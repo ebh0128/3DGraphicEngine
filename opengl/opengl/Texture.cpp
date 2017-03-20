@@ -82,7 +82,7 @@ void Texture::CreateTextureByData(GLfloat* Data, int Width, int Height, GLuint C
 
 	TextureChannel = Channel;
 
-	//PrinttoPPM(Data, Width, Height);
+	PrinttoPPM(Data, Width, Height);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 3);
 	glGenTextures(1, &TexID);
 

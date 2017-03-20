@@ -69,6 +69,7 @@ public:
 	void SetInstanceBufferData(glm::mat4 *pData, int Index);
 
 	//GLuint GetInstanceCount() { return InstanceBufferCount; }
+	void SetPrimitiveKind(GLuint PrimKind);
 
 
 };
@@ -133,6 +134,7 @@ public:
 	const GLuint attrib_MVPMat = 8;
 
 	bool IsSkinning;
+	GLuint PrimitiveKind;
 public:
 
 	MeshEntry();
@@ -173,6 +175,8 @@ public:
 	int GetBaseVertex() { return m_BaseVertex; }
 	void SetBaseIndex(int Base) { m_BaseIndex = Base; }
 	int GetBaseIndex() { return m_BaseIndex; }
+
+	void SetPrimitiveKind(GLuint PrimKind) { PrimitiveKind = PrimKind; }
 
 };
 

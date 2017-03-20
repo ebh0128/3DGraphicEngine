@@ -26,17 +26,21 @@ PatchedGround::PatchedGround(Object* Parent, SceneGL *Scene, int seed, GLfloat M
 
 	//pShader = new MyShader();
 	//pShader->build_program_from_files("BasicShader.vert", "BasicShader.frag");
-	ForwardShaderName = m_pShaderManager->CreateShader(this,"BasicShader.vert", "BasicShader.frag");
-//	pShader->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
+//	ForwardShaderName = m_pShaderManager->CreateShader(this, "BasicShader.vert", "BasicShader.frag");
 
-	GeoShaderName =	m_pShaderManager->CreateShader(this, "./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
+	ForwardShaderName = m_pShaderManager->CreateShader(this,"BasicShader.vert","BasicShader.frag","BasicShader.tesc","BasicShader.tese", "BasicShader.geom");
+
+
+	GeoShaderName =	m_pShaderManager->CreateShader(this, "./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag", "./Shader/Ground_Deferred_GeoPass.tesc",
+		"./Shader/Ground_Deferred_GeoPass.tese", "./Shader/Ground_Deferred_GeoPass.geom");
 	
 	//pDefGeoPass = new MyShader();
 	//pDefGeoPass->build_program_from_files("./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag");
 	//pDefLitPass->build_program_from_files("BasicShader.vert", "BasicShader.frag");
 
 	//m_pShaderShadow = new MyShader("./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
-	ShadowShaderName = m_pShaderManager->CreateShader(this, "./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag");
+	ShadowShaderName = m_pShaderManager->CreateShader(this, "./Shader/Shadow_Ground.vert", "./Shader/Shadow_Ground.frag", 
+		"./Shader/Shadow_Ground.tesc", "./Shader/Shadow_Ground.tese", "./Shader/Shadow_Ground.geom");
 
 }
 
@@ -48,6 +52,10 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	TexCoord*		pTexcoords;
 	TexCoord*		pTexcoordForNoiseMap;
 
+	m_MaxTessLevel = 0;
+	glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, &m_MaxTessLevel);
+	m_MaxTessLevel = 1;
+
 
 	VertexOffset = Offset;
 	PatchCountX = Xcnt;
@@ -57,6 +65,9 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	VertexCountZ = Zcnt+1;
 	
 	VertexCount = VertexCountX * VertexCountZ;
+
+	m_TileS = TileS;
+	m_TileT = TileT;
 
 	//버텍스 개수 * 3만큼 할당
 	pVertice = new Vec[VertexCount];
@@ -89,17 +100,13 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 		pVertice[i].z = zStart + Offset*(i / VertexCountX);
 
 		
-		pVertice[i].y = GetHeightByNoise(pVertice[i].x, pVertice[i].z);
+		pVertice[i].y = 0;//GetHeightByNoise(pVertice[i].x, pVertice[i].z);
 		
 		pNoiseData[i] = pow(GetNoise(pVertice[i].x, pVertice[i].z),3);
-		//printf
-		//Texcoord.s
-		pTexcoords[i].x = (float)TileS / Xcnt * (i % VertexCountX);
-		pTexcoordForNoiseMap[i].x = (float)1 / Xcnt * (i % VertexCountX);
-		//Texcoord.t
-		pTexcoords[i].y = (float)TileT / Zcnt * (i / VertexCountX);
-		pTexcoordForNoiseMap[i].y = (float)1 / Zcnt * (i / VertexCountX);
-
+	
+		pTexcoords[i].x = (float)1 / Xcnt * (i % VertexCountX);
+		pTexcoords[i].y = (float)1 / Zcnt * (i / VertexCountX);
+	
 	}
 
 	TriangleCount = PatchCountX * PatchCountX * 2;
@@ -120,65 +127,15 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 			j++;
 			continue;
 		}
-		//z가 짝수 라인일때
-		if (zindex % 2 == 0)
-		{
-			if (xindex % 2 == 1)
-			{
-				pIndices[facecnt].A = j;
-				pIndices[facecnt].B = j + VertexCountX;
-				pIndices[facecnt].C = j + VertexCountX +1;
-				facecnt++;
+		pIndices[facecnt].A = j;
+		pIndices[facecnt].B = j + VertexCountX;
+		pIndices[facecnt].C = j + 1;
+		facecnt++;
 
-				pIndices[facecnt].A = j+1;
-				pIndices[facecnt].B = j;
-				pIndices[facecnt].C = j +VertexCountX + 1;
-				facecnt++;
-
-			}
-			else
-			{
-				pIndices[facecnt].A = j;
-				pIndices[facecnt].B = j + VertexCountX;
-				pIndices[facecnt].C = j + 1;
-				facecnt++;
-
-				pIndices[facecnt].A = j + VertexCountX;
-				pIndices[facecnt].B = j + VertexCountX +1;
-				pIndices[facecnt].C = j + 1;
-				facecnt++;
-			}
-		}
-		//z가 홀수 라인일때
-		else
-		{ 
-			if (xindex % 2 == 1)
-			{
-				pIndices[facecnt].A = j;
-				pIndices[facecnt].B = j + VertexCountX;
-				pIndices[facecnt].C = j + 1;
-				facecnt++;
-
-				pIndices[facecnt].A = j + 1;
-				pIndices[facecnt].B = j + VertexCountX;
-				pIndices[facecnt].C = j + VertexCountX + 1;
-				facecnt++;
-
-			}
-			else
-			{
-				pIndices[facecnt].A = j;
-				pIndices[facecnt].B = (j + VertexCountX);
-				pIndices[facecnt].C = (j + VertexCountX + 1);
-				facecnt++;
-
-				pIndices[facecnt].A = j;
-				pIndices[facecnt].B = (j + VertexCountX + 1);
-				pIndices[facecnt].C = (j + 1);
-				facecnt++;
-
-			}
-		}
+		pIndices[facecnt].A = j + VertexCountX;
+		pIndices[facecnt].B = j + VertexCountX + 1;
+		pIndices[facecnt].C = j + 1;
+		facecnt++;
 
 		xindex++;
 		j++;
@@ -193,7 +150,7 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 
 	MeshEntry * GroundMesh = new MeshEntry((GLfloat*)pVertice, VertexCount*3, (GLuint*)pIndices, TriangleCount*3, (GLfloat*)pNormal,
 									(GLfloat*)pTexcoords, VertexCount*2);
-	GroundMesh->AddTexcoordAttibute((GLfloat*)pTexcoordForNoiseMap , VertexCount * 2);
+	//GroundMesh->AddTexcoordAttibute((GLfloat*)pTexcoordForNoiseMap , VertexCount * 2);
 
 	Texture* MainTex = new Texture("./Texture/Ground.jpg",MainTexUnit);
 	GroundMesh->AddTexture(MainTex);
@@ -215,6 +172,9 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	m_pModel->AddMesh(GroundMesh);
 	m_pModel->MakeInstancingBuffer();
 
+	m_pModel->SetPrimitiveKind(GL_PATCHES);
+
+
 	delete[] pVertice;
 	delete[] pIndices;
 	delete[] pNormal;
@@ -222,6 +182,167 @@ void PatchedGround::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS
 	delete[] pTexcoordForNoiseMap;
 	delete[] pNoiseData;
 }
+void PatchedGround::CreateForTess(GLuint XPatchcnt, GLuint ZPatchcnt, GLfloat PreTessOffset, GLint TileS, GLint TileT)
+{
+	m_MaxTessLevel = 0;
+	glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, &m_MaxTessLevel);
+	m_MaxTessLevel = VERTICES_OPTIMIZATION_NUM;
+
+	Vec*			pVertice;
+	Vec*			pNormal;
+	IndexVector*	pIndices;
+	TexCoord*		pTexcoords;
+	TexCoord*		pTexcoordForNoiseMap;
+
+
+	// 버텍스 최적화
+	// 개수가 줄어든만큼 간격은 늘려서 크기 유지
+	VertexOffset = PreTessOffset * VERTICES_OPTIMIZATION_NUM;
+	PatchCountX = XPatchcnt / VERTICES_OPTIMIZATION_NUM;
+	PatchCountZ = ZPatchcnt / VERTICES_OPTIMIZATION_NUM;
+
+	VertexCountX = PatchCountX + 1;
+	VertexCountZ = PatchCountZ + 1;
+
+	VertexCount = VertexCountX * VertexCountZ;
+	
+	// 원했던 패치수의 2배만큼 잡음
+	int NoiseTextureX = XPatchcnt* NOISE_SCALE;
+	int NoiseTextureZ = ZPatchcnt * NOISE_SCALE;
+
+	float* pNoiseData = new float[NoiseTextureX*NoiseTextureZ];
+
+	float NoiseOffset = PreTessOffset / NOISE_SCALE *SLOPE_CHANGE;
+	float NoisexStart = -NoiseOffset*NoiseTextureX / 2;
+	float NoisezStart = -NoiseOffset*NoiseTextureZ / 2;
+
+	//노이즈 텍스쳐
+	
+	for (int i = 0; i < NoiseTextureX*NoiseTextureZ; i++)
+	{
+		float noiseX = NoisexStart + NoiseOffset * (i % NoiseTextureX);
+		float noiseZ = NoisezStart + NoiseOffset*(i / NoiseTextureZ);
+
+		pNoiseData[i] = pow(GetNoise(noiseX, noiseZ), 3);
+	}
+	
+	m_TileS = TileS;
+	m_TileT = TileT;
+
+	//버텍스 개수 * 3만큼 할당
+	pVertice = new Vec[VertexCount];
+	pNormal = new Vec[VertexCount];
+
+	pTexcoords = new TexCoord[VertexCount];
+	pTexcoordForNoiseMap = new TexCoord[VertexCount];
+
+	//위쪽부터 만들면서 내려옴
+	float xStart = -VertexOffset*PatchCountX / 2;
+	float zStart = -VertexOffset*PatchCountZ / 2;
+
+	
+	for (int i = 0; i < VertexCount; i++)
+	{
+		//노말은 나중에 재계산 예정
+		//      nx                             ny                            nz
+		pNormal[i].x = 0.f; pNormal[i].y = 1.f; pNormal[i].z = 0.f;
+
+		if (i == 65)
+		{
+			int a = 100;
+		}
+		//Vertex.x
+		pVertice[i].x = xStart + VertexOffset * (i % VertexCountX);
+
+		//Vertex.z
+		pVertice[i].z = zStart + VertexOffset*(i / VertexCountX);
+
+		pVertice[i].y = GetHeightByNoise(pVertice[i].x, pVertice[i].z);
+
+
+		pTexcoords[i].x = (float)1 / PatchCountX * (i % VertexCountX);
+		pTexcoords[i].y = (float)1 / PatchCountZ * (i / VertexCountX);
+
+	}
+
+	TriangleCount = PatchCountX * PatchCountX * 2;
+	pIndices = new InVec[TriangleCount];
+
+	int xindex = 0;
+	int zindex = 0;
+	int j = 0;
+	int facecnt = 0;
+
+	//맨 마지막줄은 버텍스가 생성 되지 않아야됨
+	while (j < VertexCountX * (VertexCountZ - 1))
+	{
+		if (xindex == PatchCountX)
+		{
+			xindex = 0;
+			zindex++;
+			j++;
+			continue;
+		}
+	
+		pIndices[facecnt].A = j;
+		pIndices[facecnt].B = j + VertexCountX;
+		pIndices[facecnt].C = j + 1;
+		facecnt++;
+
+		pIndices[facecnt].A = j + VertexCountX;
+		pIndices[facecnt].B = j + VertexCountX + 1;
+		pIndices[facecnt].C = j + 1;
+		facecnt++;
+
+		xindex++;
+		j++;
+	}
+
+	MainTexUnit = 11;
+	SnowTexUnit = 12;
+	StoneTexUnit = 13;
+	NoiseTexUnit = 14;
+	
+
+	NormalReCompute(pVertice, pIndices, pNormal);
+
+	MeshEntry * GroundMesh = new MeshEntry((GLfloat*)pVertice, VertexCount * 3, (GLuint*)pIndices, TriangleCount * 3, (GLfloat*)pNormal,
+		(GLfloat*)pTexcoords, VertexCount * 2);
+	//GroundMesh->AddTexcoordAttibute((GLfloat*)pTexcoordForNoiseMap, VertexCount * 2);
+
+	Texture* MainTex = new Texture("./Texture/Ground.jpg", MainTexUnit);
+	GroundMesh->AddTexture(MainTex);
+	Texture* SnowTex = new Texture("./Texture/Snow.jpg", SnowTexUnit);
+	GroundMesh->AddTexture(SnowTex);
+	Texture* StoneTex = new Texture("./Texture/Stone.jpg", StoneTexUnit);
+	GroundMesh->AddTexture(StoneTex);
+	Texture* NoiseTex = new Texture();
+	NoiseTex->CreateTextureByData(pNoiseData, NoiseTextureX, NoiseTextureZ, NoiseTexUnit);
+	GroundMesh->AddTexture(NoiseTex);
+
+	//GroundMesh->MakeInstancingBuffer();
+
+	//최대 빛 수치만큼 UBO 사이즈 잡아놓기 (빛 정보-> float 16개 + int 1개(빛의 개수) )
+	int strSize = sizeof(PaddingLight);
+	AddUBO(nullptr, strSize*LIGHT_MAX + sizeof(GLuint), "LightInfoList", 0, m_pShaderManager->ApplyShaderByName(ForwardShaderName));
+
+	m_pModel = new Model();
+	m_pModel->AddMesh(GroundMesh);
+	m_pModel->MakeInstancingBuffer();
+
+	m_pModel->SetPrimitiveKind(GL_PATCHES);
+
+	delete[] pVertice;
+	delete[] pIndices;
+	delete[] pNormal;
+	delete[] pTexcoords;
+	delete[] pTexcoordForNoiseMap;
+	delete[] pNoiseData;
+
+
+}
+
+
 
 double PatchedGround::GetNoise(float x, float z)
 {
@@ -245,7 +366,7 @@ GLfloat PatchedGround::GetZSize()
 }
 double PatchedGround::GetHeightByNoise(float x, float z)
 {
-	return pow((GetNoise(x,z)), 3) *MaxHeight;
+	return pow((GetNoise(x*SLOPE_CHANGE,z*SLOPE_CHANGE)), 3) *MaxHeight;
 	
 }
 
@@ -315,11 +436,23 @@ GLfloat PatchedGround::GetMaxHeight()
 }
 void PatchedGround::Render()
 {
+	
+
+	Object::Render();
+}
+void PatchedGround::ShaderParamInit(MyShader* ManagedShader)
+{
+
 	MyShader* ThisShader = m_pShaderManager->ApplyShaderByName(ForwardShaderName);
 	ThisShader->SetUniform1i("TextureGround", MainTexUnit);
 	ThisShader->SetUniform1i("TextureSnow", SnowTexUnit);
 	ThisShader->SetUniform1i("TextureStone", StoneTexUnit);
 	ThisShader->SetUniform1i("SamplerNoise", NoiseTexUnit);
 
-	Object::Render();
+	ThisShader->SetUniform1f("TileS",m_TileS);
+	ThisShader->SetUniform1f("TileT" , m_TileT);
+	ThisShader->SetUniform1f("gTessLevel", m_MaxTessLevel);
+	ThisShader->SetUniform1f("gDispFactor", MaxHeight);
+	
+	Object::ShaderParamInit(ThisShader);
 }

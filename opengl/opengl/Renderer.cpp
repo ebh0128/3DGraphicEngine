@@ -26,7 +26,7 @@ Renderer::Renderer()
 	m_BlurBuffer->Init(W, H, false, GL_R32F);
 
 	m_Mode = FORWARD;
-	m_Mode = DEFERRED;
+//	m_Mode = DEFERRED;
 }
 void Renderer::Render(SceneGL* Scene)
 {

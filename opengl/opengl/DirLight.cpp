@@ -56,7 +56,7 @@ DirLight::DirLight(Object* parent, SceneGL* Scene) :Object(parent, Scene)
 	HDRShaderName = m_pShaderManager->CreateShader(this, "./Shader/HDR.vert", "./Shader/HDR.frag");
 	
 	
-	LightOrtho = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, 0.1f, 1000.f);
+	LightOrtho = glm::ortho(-350.0f, 350.0f, -350.0f, 350.0f, 0.1f, 1000.f);
 		LightView = glm::lookAt(
 		glm::vec3(-150, 225, 225)
 		, glm::vec3(0, 0, 0)
@@ -115,7 +115,7 @@ void  DirLight::SetSpec(glm::vec3 dif)
 }
 void DirLight::Update(GLfloat dtime)
 {
-	glm::vec4 ScaleLightPos = vPos * -15.f;
+	glm::vec4 ScaleLightPos = vPos * -30.f;
 	LightView = glm::lookAt(
 		 glm::vec3(ScaleLightPos.x , ScaleLightPos.y , ScaleLightPos.z) 
 		,glm::vec3(0,0,0)

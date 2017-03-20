@@ -8,8 +8,10 @@ layout(location = 8) in mat4 World;
 uniform mat4 M;
 uniform mat4 lightSpaceMat;
 
+out vec3 WorldPos_CS_in;
+
 void main()
 {
-	gl_Position = lightSpaceMat*World *M * Position;
+	WorldPos_CS_in = (World *M * Position).xyz;
 	
 }

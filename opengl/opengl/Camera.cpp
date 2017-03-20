@@ -110,7 +110,7 @@ glm::mat4 Camera::GetViewMat()
 glm::mat4 Camera::GetPerspectiveLense()
 {
 	return glm::perspective(fovy, ratio, fnear, ffar);
-	//return glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f , fnear ,ffar);
+	//return glm::ortho(-350.0f, 350.0f, -350.0f, 350.0f , fnear ,ffar);
 }
 
 void Camera::SetPerspectiveLense(GLfloat _fovy, GLfloat _ratio, GLfloat _near, GLfloat _far)

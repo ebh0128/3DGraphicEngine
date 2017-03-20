@@ -55,7 +55,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 		for(int y = -1 ; y <= 1 ; ++y)
 		{
 			float pcfDepth = texture(ShadowMap, projCoords.xy + vec2(x , y) * texelSize).r;
-			shadow += currentDepth -0.005 > pcfDepth ? 1.0 : 0.0;
+			shadow += currentDepth -0.009 > pcfDepth ? 1.0 : 0.0;
 		}
 	}
 	
@@ -102,7 +102,7 @@ vec4 CalcLight(LightInfo Lit,
 	float shadow = ShadowCalculation( lightSpaceMat * InverseV * vec4(ViewPos,1) );
 	
 	return (AmbientCol + (1-shadow)*(DiffuseColor + SpecularColor));
-//	return AmbientCol;
+	//return (1-shadow)*(DiffuseColor + SpecularColor);
 }
 
 vec4 CalcDirLight(LightInfo Lit,

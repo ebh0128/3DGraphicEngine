@@ -78,13 +78,15 @@ void init(void)
 	Scene = new SceneGL();
 	//墨皋扼 积己
 	MyCamera = new Camera(glm::vec3(0, 128, 128), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-//	MyCamera = new Camera(glm::vec3(-150, 225, 225), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	//MyCamera = new Camera(glm::vec3(-150, 225, 225), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	//顶 积己
 	
 	GoodGround = new PatchedGround(nullptr, Scene, 102, 64.f);
 	//GoodGround->Create(256, 256, 0.5f, 10, 10);
-	GoodGround->Create(512, 512, 0.5f, 10, 10);
+	//GoodGround->Create(512, 512, 0.5f, 10, 10);
+
+	GoodGround->CreateForTess(512, 512, 0.8f, 10, 10);
 
 	//GroundObject = new Object(GoodGround,nullptr,Scene);
 	
@@ -119,7 +121,7 @@ void init(void)
 	
 	//Dir何磐
 	MainDirLight = new DirLight(nullptr, Scene);
-	MainDirLight->SetPos(glm::vec4(10, -15, -15 ,1));
+	MainDirLight->SetPos(glm::vec4(4, -6, -3 ,1));
 	//灌篮 历翅
 	MainDirLight->SetDiffuse(glm::vec3(0.7, 0.4, 0.5));
 	
@@ -244,7 +246,7 @@ void display(void)
 	//Scene Draw
 	//Scene->Render();
 	
-	//SceneRenderer->Render(Scene);
+//	SceneRenderer->Render(Scene);
 	Pipe->DeferredRender();
 	
 	

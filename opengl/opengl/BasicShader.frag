@@ -1,11 +1,9 @@
 #version 430 core
 out vec4 fColor;
 
-in vec4 vPosEye;
-in vec4 vNormal;
-in vec2 vTexCoord;
-in vec2 vTexCoordNoise;
-in vec4 vPosWorld;
+in vec3 WorldPos_FS_in;
+in vec2 TexCoord_FS_in;
+in	vec3 Normal_FS_in;
 
 uniform mat4 MV;
 uniform mat4 V;
@@ -15,6 +13,9 @@ uniform sampler2D TextureGround;
 uniform sampler2D TextureSnow;
 uniform sampler2D TextureStone;
 uniform sampler2D SamplerNoise;
+
+uniform float TileS;
+uniform float TileT;
 
 struct sMaterial
 {
@@ -119,34 +120,30 @@ void main()
 	//Point
 	for(int i = 0 ; i < Count ; i++)
 	{
-		LightColor += CalcPointLight(List[i] ,vPosWorld.xyz , vNormal.xyz);
+		LightColor += CalcPointLight(List[i] ,WorldPos_FS_in , Normal_FS_in);
 	}
 	//Dir Light
-	LightColor += CalcDirLight(gDirLight , vPosWorld.xyz , vNormal.xyz);
+	LightColor += CalcDirLight(gDirLight , WorldPos_FS_in , Normal_FS_in);
 	
 	// Apply Texture by Noise
-	float noisecol = texture(SamplerNoise, vTexCoordNoise).r;
+	float noisecol = texture(SamplerNoise, TexCoord_FS_in).r;
 	noisecol = clamp(noisecol , 0 , 1);
 	
-	
+	vec2 NewTexCoord = vec2(TexCoord_FS_in.x * TileS, TexCoord_FS_in.y * TileT);
 	vec4 TexCol;
-	vec4 SnowCol = texture(TextureSnow , vTexCoord);
-	vec4 StoneCol = texture(TextureStone , vTexCoord);
-	vec4 GroundCol = texture(TextureGround , vTexCoord);
+	vec4 SnowCol = texture(TextureSnow , NewTexCoord);
+	vec4 StoneCol = texture(TextureStone , NewTexCoord);
+	vec4 GroundCol = texture(TextureGround , NewTexCoord);
 	vec4 HightCol = noisecol * SnowCol + (1-noisecol)* StoneCol;
 	vec4 LowCol = (1-noisecol)*GroundCol + noisecol*StoneCol;
 	TexCol = noisecol*HightCol + (1-noisecol)* LowCol ;
 	
 	
 	fColor = LightColor * TexCol;
+	//fColor = LightColor;
+	
+	//fColor = vec4(vTexCoord.xy , 0 ,1);	
 
-	
-	//fColor = List[0].LDiff;
-	//fColor = GetSpotLightColor();
-	//fColor =  List[1].LPos/10 ;
-	//fColor =  n ;
-	
-	//fColor = TexCol ;
 	
 	
 }
