@@ -3,8 +3,8 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "Water.h"
-
-
+#include "LightSystem.h"
+#include "DirLight.h"
 
 Water::Water()
 {
@@ -178,6 +178,7 @@ void Water::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS, GLint 
 
 }
 
+
 void Water::ShaderParamInit(MyShader* ManagedShader)
 {
 
@@ -194,6 +195,12 @@ void Water::ShaderParamInit(MyShader* ManagedShader)
 	ThisShader->SetUniform1f("gDeltaT", m_DeltaTexCoordT);
 	ThisShader->SetUniform1f("gDispFactor", m_MaxHeight);
 
+	ThisShader->SetUniform1i("ShadowMap", 8);
+
+	glm::mat4 LightSpaceMat = pScene->GetDirectionalLight()->GetLightVPMat();
+
+	ThisShader->SetUniformMatrix4fv("lightSpaceMat", glm::value_ptr(LightSpaceMat));
+
 	Object::ShaderParamInit(ThisShader);
 }
 void Water::Render()
@@ -206,6 +213,6 @@ void Water::Update(GLfloat dtime)
 	m_RotAngle += 3.141592*0.2*dtime;//glm::radians(15 * dtime);
 	m_DeltaTexCoordS = 0;
 	
-	m_DeltaTexCoordT += 0.05*dtime;
+	m_DeltaTexCoordT += 0.1*dtime;
 	
 }

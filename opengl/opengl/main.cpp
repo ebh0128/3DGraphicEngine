@@ -223,15 +223,15 @@ void init(void)
 
 		ModelTest->AddInstance(NewInstance);
 	}
-	
-	pWater = new Water(GoodGround, Scene, 24);
+	/*
+	pWater = new Water(GoodGround, Scene, 16);
 	pWater->Create(4, 4, 64, 1, 1);
 	
 	ObjectInstance* WaterInstance = new ObjectInstance(pWater, GroundInstance);
 	WaterInstance->SetPos(glm::vec3(0, 30, 0));
 	WaterInstance->SetScale(glm::vec3(1, 1, 1));
 	pWater->AddInstance(WaterInstance);
-	
+	*/
 	SceneRenderer = new Renderer();
 	Pipe = new DeferredPipeline(Scene);
 	
@@ -251,8 +251,8 @@ void display(void)
 	//Scene Draw
 	//Scene->Render();
 	
-	SceneRenderer->Render(Scene);
-//	Pipe->DeferredRender();
+//	SceneRenderer->Render(Scene);
+	Pipe->DeferredRender();
 	
 	
 	glutSwapBuffers();

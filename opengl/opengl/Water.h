@@ -12,6 +12,7 @@ public:
 	void Update(GLfloat dtime);
 	void ShaderParamInit(MyShader* ManagedShader);
 
+
 protected:
 	int m_VertexCount;
 	

@@ -3,7 +3,6 @@ layout(location = 0) in vec4 aPosition;
 layout(location = 1) in vec4 aNormal;
 layout(location = 2) in vec2 texcoord;
 layout(location = 6) in vec4 Tangent;
-
 layout(location = 8) in mat4 World;
 
 uniform mat4 M;
@@ -16,10 +15,14 @@ out vec2 TexCoord_CS_in;
 out vec3 Normal_CS_in;
 out vec3 Tangent_CS_in;
 
+// 바로 프레그먼트로 감
+
+
 void main()
 {
 	WorldPos_CS_in = (World * M*aPosition).xyz;
 	Normal_CS_in = normalize(World*M*vec4(aNormal.xyz,0)).xyz;
 	TexCoord_CS_in = texcoord;
 	Tangent_CS_in = normalize(World*M*vec4(Tangent.xyz,0)).xyz;
+	
 }

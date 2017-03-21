@@ -60,15 +60,16 @@ public:
 	std::vector<glm::mat4> LightAttributeList;
 	void AddInstanceCallBack();
 
-	
 	void Update(GLfloat dtime);
 	
 	void Render();
 	void ShaderParamInit(MyShader* ManagedShader = nullptr);
 
 	//ºû
-	
 	virtual void InstanceDataSetting();
+
+	glm::mat4* GetLightInstanceData();
+	glm::mat4* GetLightInstanceDataWithMW();
 
 	void ScaleLightforDeferred();
 };

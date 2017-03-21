@@ -275,3 +275,8 @@ void Object::SetPosition(float x, float y, float z)
 {
 	vPos.x = x; vPos.y = y; vPos.z = z;
 }
+
+ObjectInstance*   Object::GetInstance(int Index)
+{
+	return InstanceList[Index];
+}

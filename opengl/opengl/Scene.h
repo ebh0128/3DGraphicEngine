@@ -107,7 +107,10 @@ public:
 	void SetLightSystem(LightSystem* lsys) { m_pPointLightSys = lsys; }
 
 	void SetDirectionalLight(DirLight* pLight);
+	
+	Object* GetRoot() { return Root; }
 	DirLight* GetDirectionalLight();
+	LightSystem* GetLightSys();
 
 	glm::mat4 GetVPMatrix();
 	glm::mat4 GetVMatrix();

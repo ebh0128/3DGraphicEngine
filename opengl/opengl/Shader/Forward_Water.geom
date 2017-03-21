@@ -14,6 +14,7 @@ out vec3 WorldPos_FS_in;
 out vec2 TexCoord_FS_in;
 out vec2 New_TexCoord_FS_in;
 out vec3 Normal_FS_in;
+out vec3 Tangent_FS_in;
 
 uniform mat4 VP;
 
@@ -28,6 +29,7 @@ void main()
 	TexCoord_FS_in = TexCoord_GS_in[0];
 	New_TexCoord_FS_in = New_TexCoord_GS_in[0];
 	Normal_FS_in = Normal_GS_in[0];
+	Tangent_FS_in = Tangent_GS_in[0];
 	EmitVertex();
 	
 	gl_Position = VP*gl_in[1]. gl_Position;
@@ -35,6 +37,7 @@ void main()
 	TexCoord_FS_in = TexCoord_GS_in[1];
 	New_TexCoord_FS_in = New_TexCoord_GS_in[1];
 	Normal_FS_in = Normal_GS_in[1];
+	Tangent_FS_in = Tangent_GS_in[1];
 	EmitVertex();
 	
 	gl_Position = VP*gl_in[2].gl_Position;
@@ -42,6 +45,7 @@ void main()
 	TexCoord_FS_in = TexCoord_GS_in[2];
 	New_TexCoord_FS_in = New_TexCoord_GS_in[2];
 	Normal_FS_in = Normal_GS_in[2];
+	Tangent_FS_in = Tangent_GS_in[2];
 	EmitVertex();
 	
 	EndPrimitive();

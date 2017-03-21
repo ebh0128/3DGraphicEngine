@@ -95,7 +95,7 @@ void LightSystem::AddInstanceCallBack()
 	LightAttributeList.push_back(glm::mat4());
 }
 
-void LightSystem::InstanceDataSetting()
+glm::mat4* LightSystem::GetLightInstanceData()
 {
 	int InstanceCount = GetInstanceNum();
 
@@ -105,7 +105,7 @@ void LightSystem::InstanceDataSetting()
 	{
 		LightInstance* LightIns = (LightInstance*)InstanceList[i];
 
-		glm::vec4 LightPos = glm::vec4(LightIns->GetPos() , 1);
+		glm::vec4 LightPos = glm::vec4(LightIns->GetPos(), 1);
 		glm::vec4 LightDif = glm::vec4(LightIns->GetDif(), 1);
 		glm::vec4 LightAmb = glm::vec4(LightIns->GetAmbi(), 1);
 		LightAttnuation LitAtn = LightIns->GetAttnuation();
@@ -116,6 +116,59 @@ void LightSystem::InstanceDataSetting()
 		LightAttributeList[i][2] = LightAmb;
 		LightAttributeList[i][3] = vLightatn;
 	}
+
+	return LightAttributeList.data();
+}
+glm::mat4* LightSystem::GetLightInstanceDataWithMW()
+{
+	for (int i = 0; i<LightAttributeList.size(); i++)
+	{
+		LightInstance* LightIns = (LightInstance*)InstanceList[i];
+
+		glm::vec4 LightPos = vPos;               //glm::vec4(LightIns->GetPos(), 1);
+		//                  W             *      M
+		glm::mat4 WM = LightIns->GetMat() * this->GetModelMat();
+		LightPos = WM * LightPos;
+		
+		glm::vec4 LightDif = glm::vec4(LightIns->GetDif(), 1);
+		glm::vec4 LightAmb = glm::vec4(LightIns->GetAmbi(), 1);
+		LightAttnuation LitAtn = LightIns->GetAttnuation();
+		glm::vec4 vLightatn = glm::vec4(LitAtn.Constant, LitAtn.Linear, LitAtn.exp, 1);
+
+		LightAttributeList[i][0] = LightPos;
+		LightAttributeList[i][1] = LightDif;
+		LightAttributeList[i][2] = LightAmb;
+		LightAttributeList[i][3] = vLightatn;
+	}
+
+	return LightAttributeList.data();
+
+}
+
+
+void LightSystem::InstanceDataSetting()
+{
+	
+	int InstanceCount = GetInstanceNum();
+
+	//빛 정보 넘겨주기
+	//행렬로
+	for (int i = 0; i<LightAttributeList.size(); i++)
+	{
+		LightInstance* LightIns = (LightInstance*)InstanceList[i];
+
+		glm::vec4 LightPos = glm::vec4(LightIns->GetPos(), 1);
+		glm::vec4 LightDif = glm::vec4(LightIns->GetDif(), 1);
+		glm::vec4 LightAmb = glm::vec4(LightIns->GetAmbi(), 1);
+		LightAttnuation LitAtn = LightIns->GetAttnuation();
+		glm::vec4 vLightatn = glm::vec4(LitAtn.Constant, LitAtn.Linear, LitAtn.exp, 1);
+
+		LightAttributeList[i][0] = LightPos;
+		LightAttributeList[i][1] = LightDif;
+		LightAttributeList[i][2] = LightAmb;
+		LightAttributeList[i][3] = vLightatn;
+	}
+
 
 	m_pModel->SetInstanceBufferData(LightAttributeList.data(), 1);
 	Object::InstanceDataSetting();

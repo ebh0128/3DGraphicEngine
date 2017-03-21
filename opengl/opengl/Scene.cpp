@@ -109,7 +109,14 @@ LightList* SceneGL::GetLightSrouceArray()
 		//memcpy(ShaderLightInfoList.Lights[i].Diffuse, glm::value_ptr(pLightList[i]->Diffuse), 3 * sizeof(GLfloat));
 		//memcpy(ShaderLightInfoList.Lights[i].Ambient, glm::value_ptr(pLightList[i]->Ambient), 3 * sizeof(GLfloat));
 		//memcpy(ShaderLightInfoList.Lights[i].Specular, glm::value_ptr(pLightList[i]->Specular), 3 * sizeof(GLfloat));
-		glm::vec3 SourcePos = pLightBuffer[i]->GetPos();
+	
+		glm::vec4 LightSysPos = m_pPointLightSys->GetPos();
+		glm::mat4 LightModelMat = m_pPointLightSys->GetModelMat();
+		glm::mat4 LightWorldMat = pLightBuffer[i]->GetMat();
+		
+		LightSysPos = LightWorldMat *LightModelMat *LightSysPos;
+
+		glm::vec3 SourcePos = glm::vec3(LightSysPos);
 
 		//만약 부모가 있다면 변환해서 줘야됨
 	//	glm::mat4 LightTransform = InstanceL->GetMatWithoutScale();
@@ -180,6 +187,11 @@ void SceneGL::SetDirectionalLight(DirLight* pLight)
 DirLight* SceneGL::GetDirectionalLight()
 {
 	return m_pDirLight;
+}
+
+LightSystem* SceneGL::GetLightSys()
+{
+	return m_pPointLightSys;
 }
 
 Camera* SceneGL::CreateCamera(glm::vec3 Pos, glm::vec3 Lookat, glm::vec3 Up)

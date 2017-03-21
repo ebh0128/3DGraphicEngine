@@ -50,6 +50,8 @@ protected:
 	MyShader* m_pGausianBlurShader;
 	void SortShaderObject();
 
+	Object* m_pWater;
+
 public:
 	DeferredPipeline(SceneGL* pScene);
 

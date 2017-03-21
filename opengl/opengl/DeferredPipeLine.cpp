@@ -11,6 +11,7 @@
 #include "AssimpModelNode.h"
 #include "LightSystem.h"
 #include "SkinnedObject.h"
+#include "Water.h"
 
 
 
@@ -43,6 +44,15 @@ DeferredPipeline::DeferredPipeline(SceneGL* pScene)
 
 	m_pPingPongBuffer[1] = new IOBuffer();
 	m_pPingPongBuffer[1]->Init(W, H, false, GL_RGBA16F);
+
+
+	m_pWater = new Water(m_pScene->GetRoot(), m_pScene, 16);
+	((Water*)m_pWater)->Create(4, 4, 128, 1, 1);
+
+	ObjectInstance* WaterInstance = new ObjectInstance(m_pWater, m_pScene->GetRoot()->GetInstance(0));
+	WaterInstance->SetPos(glm::vec3(0, 20, 0));
+	WaterInstance->SetScale(glm::vec3(1, 1, 1));
+	m_pWater->AddInstance(WaterInstance);
 
 
 	m_pGausianBlurShader = new MyShader("./Shader/Gausian_Blur.vert", "./Shader/Gausian_Blur.frag");
@@ -323,6 +333,17 @@ void DeferredPipeline::RenderForwardObjPass()
 	PassRender(SortedPipeLineObject[FORWARD_SKY_PASS], &DeferredPipeline::ForwardSkyInit);
 	//포인트 라이트
 	PassRender(SortedPipeLineObject[FORWARD_POINT_PASS], &DeferredPipeline::ForwardPointInit);
+
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	m_pShadowBuffer->BindForReading(GL_TEXTURE8);
+	m_pWater->Render();
+
+	glDisable(GL_BLEND);
+
+
 }
 
 void DeferredPipeline::RenderBloomPass()

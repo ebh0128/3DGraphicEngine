@@ -110,5 +110,7 @@ public:
 
 	GLuint GetMainTextureUnit() { return MainTextureUnit; }
 
+	ObjectInstance* GetInstance(int Index);
+
 };
 
