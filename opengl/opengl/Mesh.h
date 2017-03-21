@@ -83,6 +83,7 @@ private:
 	GLuint ebo;
 	GLuint vbo_position;
 	GLuint vbo_normal;
+	GLuint vbo_tangent;
 
 	////뼈정보 버퍼
 	GLuint Bonebo;
@@ -133,6 +134,7 @@ public:
 	//인스턴싱용 5~
 	const GLuint attrib_MVPMat = 8;
 
+	bool IsTangent;
 	bool IsSkinning;
 	GLuint PrimitiveKind;
 public:
@@ -141,7 +143,7 @@ public:
 	MeshEntry(GLfloat* vertices , int VertexNum , 
 		GLuint* indices, int indicesNum, 
 		GLfloat* normals,
-		GLfloat* texcoords = nullptr, int texcoordsNum = 0);
+		GLfloat* texcoords = nullptr, int texcoordsNum = 0 , GLfloat* Tangents = nullptr);
 	
 	MeshEntry(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh, bool IsSkinned = false);
 	~MeshEntry();
@@ -158,7 +160,7 @@ public:
 	virtual void ObjectLoad(GLfloat* vertices, int VertexNum,
 		GLuint* indices, int indicesNum,
 		GLfloat* normals,
-		GLfloat* texcoords = nullptr, int texcoordsNum = 0);
+		GLfloat* texcoords = nullptr, int texcoordsNum = 0 , GLfloat* Tangents = nullptr);
 
 	//Assimp를 이용한 메쉬 로드
 	virtual void ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh , bool IsSkinned =false);

@@ -9,6 +9,7 @@ public:
 
 	void Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS, GLint TileT);
 	void Render();
+	void Update(GLfloat dtime);
 	void ShaderParamInit(MyShader* ManagedShader);
 
 protected:
@@ -26,6 +27,9 @@ protected:
 	int m_TileS;
 	int m_TileT;
 
+	GLfloat m_DeltaTexCoordS;
+	GLfloat m_DeltaTexCoordT;
+	GLfloat m_RotAngle;
 	GLfloat m_VertexOffset;
 	GLfloat m_MaxHeight;
 

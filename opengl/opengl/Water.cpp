@@ -15,7 +15,10 @@ Water::Water(Object* Parent, SceneGL *Scene, GLfloat MaxH):Object(Parent ,Scene)
 {
 	m_VertexCount = 0;
 	m_TriangleCount = 0;
-
+	m_MaxHeight = MaxH;
+	m_DeltaTexCoordS = 0;
+	m_DeltaTexCoordT = 0;
+	m_RotAngle = 0;
 	//½¦ÀÌ´õ ÃÊ±âÈ­ ÇÊ¿ä
 	/*
 	GeoShaderName m_pShaderManager->CreateShader(this, "./Shader/Ground_Deferred_GeoPass.vert", "./Shader/Ground_Deferred_GeoPass.frag", "./Shader/Ground_Deferred_GeoPass.tesc",
@@ -35,6 +38,7 @@ Water::Water(Object* Parent, SceneGL *Scene, GLfloat MaxH):Object(Parent ,Scene)
 void Water::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS, GLint TileT)
 {
 	Vec*			pVertice;
+	Vec*			pTangent;
 	Vec*			pNormal;
 	IndexVector*	pIndices;
 	TexCoord*		pTexcoords;
@@ -108,8 +112,42 @@ void Water::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS, GLint 
 		j++;
 	}
 
+	pTangent = new Vec[m_VertexCount];
+	//ÅºÁ¨Æ® ¸¸µé±â
+	for (int i = 0; i < m_TriangleCount; i++)
+	{
+		int index0 = pIndices[i].A;
+		int index1 = pIndices[i].B;
+		int index2 = pIndices[i].C;
+
+		glm::vec3 Vert0 = glm::vec3(pVertice[index0].x, pVertice[index0].y, pVertice[index0].z);
+		glm::vec3 Vert1 = glm::vec3(pVertice[index1].x, pVertice[index1].y, pVertice[index1].z);
+		glm::vec3 Vert2 = glm::vec3(pVertice[index2].x, pVertice[index2].y, pVertice[index2].z);
+
+		glm::vec2 Tex0 = glm::vec2(pTexcoords[index0].x, pTexcoords[index0].y);
+		glm::vec2 Tex1 = glm::vec2(pTexcoords[index1].x, pTexcoords[index1].y);
+		glm::vec2 Tex2 = glm::vec2(pTexcoords[index2].x, pTexcoords[index2].y);
+
+		glm::vec3 Edge1 = Vert1 - Vert0;
+		glm::vec3 Edge2 = Vert2 - Vert0;
+		
+		float DeltaU1 = Tex1.x - Tex0.x;
+		float DeltaV1 = Tex1.y - Tex0.y;
+		float DeltaU2 = Tex2.x - Tex0.x;
+		float DeltaV2 = Tex2.y - Tex0.y;
+
+		float f = 1.0f / (DeltaU1 * DeltaV2 - DeltaU2 * DeltaV1);
+
+		pTangent[index0].x = f*(DeltaV2 * Edge1.x - DeltaV1 * Edge2.x);
+		pTangent[index0].y = f*(DeltaV2 * Edge1.y - DeltaV1 * Edge2.y);
+		pTangent[index0].z = f*(DeltaV2 * Edge1.z - DeltaV1 * Edge2.z);
+	
+		pTangent[index1] = pTangent[index2] = pTangent[index0];
+		int a = 10;
+	}
+
 	MeshEntry* WaterMesh = new MeshEntry((GLfloat*)pVertice, m_VertexCount * 3, (GLuint*)pIndices, m_TriangleCount * 3, (GLfloat*)pNormal,
-		(GLfloat*)pTexcoords, m_VertexCount * 2);
+		(GLfloat*)pTexcoords, m_VertexCount * 2 , (GLfloat*)pTangent);
 
 	m_DiffuseTexUnit = 11;
 	m_NormalTexUnit = 10;
@@ -132,6 +170,12 @@ void Water::Create(GLuint Xcnt, GLuint Zcnt, GLfloat Offset, GLint TileS, GLint 
 	m_pModel->SetPrimitiveKind(GL_PATCHES);
 
 
+	delete[] pVertice;
+	delete[] pIndices;
+	delete[] pNormal;
+	delete[] pTexcoords;
+	delete[] pTangent;
+
 }
 
 void Water::ShaderParamInit(MyShader* ManagedShader)
@@ -145,6 +189,9 @@ void Water::ShaderParamInit(MyShader* ManagedShader)
 	ThisShader->SetUniform1f("TileS", m_TileS);
 	ThisShader->SetUniform1f("TileT", m_TileT);
 	ThisShader->SetUniform1f("gTessLevel", 32.0);
+	
+	ThisShader->SetUniform1f("gDeltaS", m_DeltaTexCoordS);
+	ThisShader->SetUniform1f("gDeltaT", m_DeltaTexCoordT);
 	ThisShader->SetUniform1f("gDispFactor", m_MaxHeight);
 
 	Object::ShaderParamInit(ThisShader);
@@ -152,4 +199,13 @@ void Water::ShaderParamInit(MyShader* ManagedShader)
 void Water::Render()
 {
 	Object::Render();
+}
+void Water::Update(GLfloat dtime)
+{
+	GLfloat RotSpeed = 15;
+	m_RotAngle += 3.141592*0.2*dtime;//glm::radians(15 * dtime);
+	m_DeltaTexCoordS = 0;
+	
+	m_DeltaTexCoordT += 0.05*dtime;
+	
 }

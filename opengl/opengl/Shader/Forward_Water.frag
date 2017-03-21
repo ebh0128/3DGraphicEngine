@@ -3,7 +3,9 @@ out vec4 fColor;
 
 in vec3 WorldPos_FS_in;
 in vec2 TexCoord_FS_in;
-in	vec3 Normal_FS_in;
+in vec3 Normal_FS_in;
+in vec2 New_TexCoord_FS_in;
+
 
 uniform mat4 MV;
 uniform mat4 V;
@@ -69,13 +71,15 @@ vec4 CalcLight(LightInfo Lit,
 		if(SpecularFactor > 0.0)
 		{
 			// Hard Coding
-			SpecularFactor = pow(SpecularFactor , 1);
-			SpecularColor = Lit.LDiff * Lit.LSpec * SpecularFactor;
+			SpecularFactor = pow(SpecularFactor , 2.5);
+			SpecularColor =  Lit.LSpec * SpecularFactor;
 			SpecularColor.w = 1;
 		}
 	}
 	
 	return (AmbientCol + DiffuseColor + SpecularColor);
+//	return (SpecularColor +AmbientCol );
+
 }
 
 vec4 CalcDirLight(LightInfo Lit,
@@ -116,6 +120,9 @@ void main()
 {
 	vec4 LightColor = vec4(0.0);
 	
+	vec3 Normal = texture(TextureNormal , TexCoord_FS_in).xyz;
+	Normal = Normal + texture(TextureNormal , New_TexCoord_FS_in).xyz;
+	Normal = normalize(Normal);
 	//Point
 	for(int i = 0 ; i < Count ; i++)
 	{
@@ -124,15 +131,15 @@ void main()
 	//Dir Light
 	LightColor += CalcDirLight(gDirLight , WorldPos_FS_in , Normal_FS_in);
 	
+	vec4 DifCol = (texture(TextureDiffuse, New_TexCoord_FS_in) + texture(TextureDiffuse, New_TexCoord_FS_in) )/2;
 	
-	vec4 DifCol = texture(TextureDiffuse, TexCoord_FS_in);
 	vec4 NormalCol = texture(TextureNormal, TexCoord_FS_in);
 	vec4 DisplaceCol = vec4(texture(TextureDisplacement, TexCoord_FS_in).r);
 
-	fColor = DisplaceCol;
-	fColor = LightColor ;
+	fColor = LightColor* DifCol;
+	//fColor = LightColor ;
 	
-	//fColor = vec4(vTexCoord.xy , 0 ,1);	
+	//fColor = vec4(Normal_FS_in.xyz ,1);	
 
 	
 	

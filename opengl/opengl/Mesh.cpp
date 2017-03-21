@@ -212,15 +212,16 @@ MeshEntry::MeshEntry()
 	IsHaveNormal =false;
 	IsHaveTexcoord = false;
 	IsSkinning = false;
+	IsTangent = false;
 
 }
 MeshEntry::MeshEntry(GLfloat* vertices, int VertexNum,
 	GLuint* indices, int IndicesNum,
 	GLfloat* normals,
-	GLfloat* texcoords, int texcoordsNum) : MeshEntry()
+	GLfloat* texcoords, int texcoordsNum ,  GLfloat* Tangents ) : MeshEntry()
 {
 
-	ObjectLoad(vertices, VertexNum,indices, IndicesNum, normals, texcoords, texcoordsNum);
+	ObjectLoad(vertices, VertexNum,indices, IndicesNum, normals, texcoords, texcoordsNum , Tangents);
 }
 
 MeshEntry::MeshEntry(const aiScene* pAssimpScene, const aiMesh* pAssimpMesh , bool IsSkinned) : MeshEntry()
@@ -365,9 +366,9 @@ void MeshEntry::ObjectLoad(const aiScene* pAssimpScene, const aiMesh* pAssimpMes
 }
 
 void MeshEntry::ObjectLoad(GLfloat* vertices, int VertexNum,
-					GLuint* indices, int IndicesNum,
-					GLfloat* normals,
-					GLfloat* texcoords, int texcoordsNum)
+	GLuint* indices, int IndicesNum,
+	GLfloat* normals,
+	GLfloat* texcoords, int texcoordsNum, GLfloat* Tangents)
 {
 
 	glGenVertexArrays(1, &vao);
@@ -405,6 +406,17 @@ void MeshEntry::ObjectLoad(GLfloat* vertices, int VertexNum,
 	PrimCount = IndicesNum;
 	//초기화
 
+	if (Tangents != nullptr)
+	{
+		IsTangent = true;
+		glGenBuffers(1, &vbo_tangent);
+		//포지션
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_tangent);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*VertexNum, Tangents, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(TANGENT_LOCATION);
+		glVertexAttribPointer(TANGENT_LOCATION, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	}
 
 
 	glBindVertexArray(0);
@@ -462,6 +474,8 @@ void MeshEntry::Render()
 		pTextureList[i]->ApplyTexture();
 	}
 
+	if(IsTangent) glEnableVertexAttribArray(TANGENT_LOCATION);
+
 	if (IsSkinning)
 	{
 		glEnableVertexAttribArray(BONE_ID_LOCATION);
@@ -487,7 +501,7 @@ void MeshEntry::RenderInstance(int InstanceObjCount)
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(POSITION_LOCATION);
 	if (IsHaveNormal) glEnableVertexAttribArray(NORMAL_LOCATION);
-	
+	if (IsTangent) glEnableVertexAttribArray(TANGENT_LOCATION);
 
 	//샘플러가 있다면 적용
 	for (int i = 0; i < TexCoordCnt; i++)

@@ -158,8 +158,8 @@ void Object::ShaderParamInit(MyShader* ManagedShader)
 	ThisShader->SetUniform4fv("gDirLight.LAmbi", glm::value_ptr(paramAmbi));
 	ThisShader->SetUniform4fv("gDirLight.LSpec", glm::value_ptr(paramSpec));
 
-	glm::vec4 CameraPos = pScene->GetCurrentCamPos();
-	ThisShader->SetUniform4fv("gEyeWorldPos", glm::value_ptr(CameraPos));
+	glm::vec3 CameraPos = glm::vec3(pScene->GetCurrentCamPos());
+	ThisShader->SetUniform3fv("gEyeWorldPos", glm::value_ptr(CameraPos));
 
 
 	//if (mParent == nullptr) M = TransformMat;

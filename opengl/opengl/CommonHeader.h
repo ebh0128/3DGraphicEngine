@@ -49,7 +49,10 @@
 #define TEX_COORD2_LOCATION		3
 #define BONE_ID_LOCATION		4
 #define BONE_WEIGHT_LOCATION	5
+#define TANGENT_LOCATION		6
 #define INSTANCE_LOCATION		8
+
+
 
 
 typedef struct TransformationSet

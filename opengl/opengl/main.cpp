@@ -224,8 +224,8 @@ void init(void)
 		ModelTest->AddInstance(NewInstance);
 	}
 	
-	pWater = new Water(GoodGround, Scene, 12);
-	pWater->Create(2, 2, 64, 4, 4);
+	pWater = new Water(GoodGround, Scene, 24);
+	pWater->Create(4, 4, 64, 1, 1);
 	
 	ObjectInstance* WaterInstance = new ObjectInstance(pWater, GroundInstance);
 	WaterInstance->SetPos(glm::vec3(0, 30, 0));
