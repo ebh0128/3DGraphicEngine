@@ -102,7 +102,7 @@ vec4 CalcLight(LightInfo Lit,
 	float shadow = ShadowCalculation( lightSpaceMat * InverseV * vec4(ViewPos,1) );
 	
 	return (AmbientCol + (1-shadow)*(DiffuseColor + SpecularColor));
-	//return (1-shadow)*(DiffuseColor + SpecularColor);
+	//return AmbientCol;
 }
 
 vec4 CalcDirLight(LightInfo Lit,
@@ -137,7 +137,7 @@ void main()
 	
 	
 	//fColor =  LightResult;
-	//fColor =  vec4(texture(ShadowMap , TexCoord).r);
+	//fColor =  vec4(texture(AOMap , TexCoord).r);
 	
 	
 }

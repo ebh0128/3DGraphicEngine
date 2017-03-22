@@ -232,8 +232,8 @@ void init(void)
 	WaterInstance->SetScale(glm::vec3(1, 1, 1));
 	pWater->AddInstance(WaterInstance);
 	*/
-	SceneRenderer = new Renderer();
-	Pipe = new DeferredPipeline(Scene);
+	SceneRenderer = new Renderer(Scene);
+//	Pipe = new DeferredPipeline(Scene);
 	
 	
 }
@@ -251,8 +251,8 @@ void display(void)
 	//Scene Draw
 	//Scene->Render();
 	
-//	SceneRenderer->Render(Scene);
-	Pipe->DeferredRender();
+	SceneRenderer->Render();
+//	Pipe->DeferredRender();
 	
 	
 	glutSwapBuffers();

@@ -10,10 +10,11 @@
 
  
 #include "IOBuffer.h"
+#include "DeferredPipeline.h"
 #include "Renderer.h"
 
 
-Renderer::Renderer()
+Renderer::Renderer(SceneGL* Scene)
 {
 	GLuint W = glutGet(GLUT_WINDOW_WIDTH);
 	GLuint H = glutGet(GLUT_WINDOW_HEIGHT);
@@ -25,10 +26,19 @@ Renderer::Renderer()
 	m_BlurBuffer = new IOBuffer();
 	m_BlurBuffer->Init(W, H, false, GL_R32F);
 
+	m_pScene = Scene;
+	m_pDeferredPipe = new DeferredPipeline(Scene);
+
 	m_Mode = FORWARD;
-//	m_Mode = DEFERRED;
+	m_Mode = DEFERRED;
+
 }
-void Renderer::Render(SceneGL* Scene)
+void Renderer::Render()
 {
-	if (m_Mode == FORWARD) Scene->Render();
+	if (m_Mode == FORWARD) m_pScene->Render();
+	else m_pDeferredPipe->DeferredRender();
+}
+void Renderer::SetScene(SceneGL* Scene)
+{
+	m_pScene = Scene;
 }

@@ -121,6 +121,7 @@ void DeferredPipeline::DeferredRender()
 	//SSAO패스 초기화
 	m_pGbuffer->BindForGeomPass();
 
+	
 	/////////스탠실 만들기
 	glEnable(GL_STENCIL_TEST);
 	RenderStencilPass();
@@ -395,12 +396,14 @@ void DeferredPipeline::RenderFinalPass()
 	GLsizei W = glutGet(GLUT_WINDOW_WIDTH);
 	GLsizei H = glutGet(GLUT_WINDOW_HEIGHT);
 
+	
 	m_pGbuffer->BindForFinalPass();
 	m_pPingPongBuffer[0]->BindForReading(GL_TEXTURE5);
 	//그냥 그리기
 	//glBlitFramebuffer(0, 0, W, H, 0, 0, W, H, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 	PassRender(SortedPipeLineObject[HDR_PASS], &DeferredPipeline::HDRInit);
+
 
 	//HDR + reinhard tone mapping
 	//m_pDirLight->HDRPass();

@@ -9,9 +9,14 @@ public:
 		DEFERRED
 	};
 
-	Renderer();
-	void Render(SceneGL* Scene);
+	Renderer(SceneGL* Scene);
+
+	void SetScene(SceneGL* Scene);
+	void Render();
 protected:
+	
+	DeferredPipeline* m_pDeferredPipe;
+	SceneGL* m_pScene;
 	Render_Mode m_Mode;
 	DeferredRenderBuffers* GBuffers;
 	IOBuffer* m_SSaoBuffer;
